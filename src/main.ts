@@ -1,9 +1,9 @@
-import './landing.css'
-import typescriptLogo from './assets/typescript.svg'
-import viteLogo from './assets/vite.svg'
+import "./landing.css";
+import typescriptLogo from "./assets/typescript.svg";
+import viteLogo from "./assets/vite.svg";
 
-const app = document.querySelector<HTMLDivElement>('#app')
-if (!app) throw new Error('Missing #app element')
+const app = document.querySelector<HTMLDivElement>("#app");
+if (!app) throw new Error("Missing #app element");
 
 app.innerHTML = `
   <div class="container">
@@ -326,38 +326,231 @@ app.innerHTML = `
     </div>
   </section>
 
-  <footer class="footer">
-    <div class="container">
-      <div class="row">
-        <div>
-          <strong style="color:var(--text-strong);">AI Web Builder</strong>
-          <div style="margin-top:6px;">프롬프트 기반 랜딩 페이지 생성 데모</div>
+  <footer class="site-footer" aria-label="사이트 하단 정보">
+    <div class="container site-footer__inner">
+      <div class="site-footer__quick" aria-label="빠른 링크">
+        <div class="site-footer__quick-row">
+          <span class="site-footer__quick-label">AI WEB BUILDER</span>
+          <div class="site-footer__quick-links">
+            <a href="#">회사 소개</a>
+            <a href="#">파트너십 문의</a>
+            <a href="#">보도자료</a>
+          </div>
         </div>
-        <div style="display:flex;gap:14px;align-items:center;">
-          <a href="#features">기능</a>
-          <a href="#how">작동 방식</a>
-          <a href="#pricing">요금</a>
+        <div class="site-footer__quick-row">
+          <span class="site-footer__quick-label">파트너</span>
+          <div class="site-footer__quick-links">
+            <a href="#">디자인 · 파트너 어드민</a>
+            <a href="#">판매자 어드민</a>
+            <a href="#">쇼핑몰 제작 제휴</a>
+          </div>
+        </div>
+        <div class="site-footer__quick-row">
+          <span class="site-footer__quick-label">개발자</span>
+          <div class="site-footer__quick-links">
+            <a href="#">개발자 센터</a>
+            <a href="#">워크스페이스</a>
+          </div>
+        </div>
+        <div class="site-footer__quick-row site-footer__quick-row--last">
+          <span class="site-footer__quick-label">고객센터</span>
+          <div class="site-footer__quick-links">
+            <a href="#">쇼핑몰 제작 문의</a>
+            <a href="#">뉴스</a>
+            <a href="#">가이드</a>
+            <a href="#">온라인 교육</a>
+            <a href="#">보안</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="site-footer__rule" role="presentation"></div>
+
+      <div class="site-footer__grid">
+        <nav class="footer-col" aria-label="제품">
+          <h3 class="footer-col__title">제품</h3>
+          <ul class="footer-col__list">
+            <li><a href="#">Claude</a></li>
+            <li><a href="#">Claude Code</a></li>
+            <li><a href="#">Claude Code for Enterprise</a></li>
+            <li><a href="#">협업</a></li>
+            <li><a href="#">맥스 플랜</a></li>
+            <li><a href="#">Team 요금제</a></li>
+            <li><a href="#">Enterprise 요금제</a></li>
+            <li><a href="#">앱 다운로드</a></li>
+            <li><a href="#">요금제</a></li>
+            <li><a href="#">로그인</a></li>
+          </ul>
+        </nav>
+        <nav class="footer-col" aria-label="기능">
+          <h3 class="footer-col__title">기능</h3>
+          <ul class="footer-col__list">
+            <li><a href="#">Chrome용 Claude</a></li>
+            <li><a href="#">Claude for Excel</a></li>
+            <li><a href="#">PowerPoint용 Claude</a></li>
+            <li><a href="#">Claude for Slack</a></li>
+            <li><a href="#">스킬</a></li>
+          </ul>
+        </nav>
+        <nav class="footer-col" aria-label="모델">
+          <h3 class="footer-col__title">모델</h3>
+          <ul class="footer-col__list">
+            <li><a href="#">Opus</a></li>
+            <li><a href="#">Sonnet</a></li>
+            <li><a href="#">Haiku</a></li>
+          </ul>
+        </nav>
+        <nav class="footer-col" aria-label="솔루션">
+          <h3 class="footer-col__title">솔루션</h3>
+          <ul class="footer-col__list">
+            <li><a href="#">AI 에이전트</a></li>
+            <li><a href="#">Claude Code 보안</a></li>
+            <li><a href="#">코드 현대화</a></li>
+            <li><a href="#">코딩</a></li>
+            <li><a href="#">고객 지원</a></li>
+            <li><a href="#">교육</a></li>
+            <li><a href="#">금융 서비스</a></li>
+            <li><a href="#">정부</a></li>
+            <li><a href="#">의료</a></li>
+            <li><a href="#">생명과학</a></li>
+            <li><a href="#">비영리 단체</a></li>
+          </ul>
+        </nav>
+        <nav class="footer-col" aria-label="Claude Platform">
+          <h3 class="footer-col__title">Claude Platform</h3>
+          <ul class="footer-col__list">
+            <li><a href="#">개요</a></li>
+            <li><a href="#">개발자 문서</a></li>
+            <li><a href="#">요금제</a></li>
+            <li><a href="#">마켓플레이스</a></li>
+            <li><a href="#">Amazon Bedrock</a></li>
+            <li><a href="#">Google Cloud's Vertex AI</a></li>
+            <li><a href="#">Microsoft Foundry</a></li>
+            <li><a href="#">지역 규정 준수</a></li>
+            <li><a href="#">콘솔 로그인</a></li>
+          </ul>
+        </nav>
+        <nav class="footer-col" aria-label="리소스">
+          <h3 class="footer-col__title">리소스</h3>
+          <ul class="footer-col__list">
+            <li><a href="#">블로그</a></li>
+            <li><a href="#">Claude 파트너 네트워크</a></li>
+            <li><a href="#">커넥터</a></li>
+            <li><a href="#">강의</a></li>
+            <li><a href="#">고객 사례</a></li>
+            <li><a href="#">Anthropic 엔지니어링</a></li>
+            <li><a href="#">이벤트</a></li>
+            <li><a href="#">플러그인</a></li>
+            <li><a href="#">Powered by Claude</a></li>
+            <li><a href="#">서비스 파트너</a></li>
+            <li><a href="#">커뮤니티</a></li>
+            <li><a href="#">Campus Program</a></li>
+            <li><a href="#">스타트업 프로그램</a></li>
+            <li><a href="#">튜토리얼</a></li>
+            <li><a href="#">활용 사례</a></li>
+          </ul>
+        </nav>
+        <nav class="footer-col" aria-label="회사">
+          <h3 class="footer-col__title">회사</h3>
+          <ul class="footer-col__list">
+            <li><a href="#">Anthropic</a></li>
+            <li><a href="#">채용 정보</a></li>
+            <li><a href="#">경제 전망</a></li>
+            <li><a href="#">연구</a></li>
+            <li><a href="#">Anthropic 소식</a></li>
+            <li><a href="#">책임감 있는 확장 정책</a></li>
+            <li><a href="#">보안 및 컴플라이언스</a></li>
+            <li><a href="#">투명성</a></li>
+          </ul>
+        </nav>
+        <nav class="footer-col" aria-label="도움말 및 보안">
+          <h3 class="footer-col__title">도움말 및 보안</h3>
+          <ul class="footer-col__list">
+            <li><a href="#">서비스 지역</a></li>
+            <li><a href="#">상태</a></li>
+            <li><a href="#">지원 센터</a></li>
+          </ul>
+        </nav>
+        <nav class="footer-col" aria-label="약관 및 정책">
+          <h3 class="footer-col__title">약관 및 정책</h3>
+          <ul class="footer-col__list">
+            <li><a href="#">개인정보 선택</a></li>
+            <li><a href="#">개인정보 처리방침</a></li>
+            <li><a href="#">책임감 있는 공개 정책</a></li>
+            <li><a href="#">서비스 약관: 상업용</a></li>
+            <li><a href="#">서비스 약관: 개인용</a></li>
+            <li><a href="#">이용 정책</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="site-footer__rule" role="presentation"></div>
+
+      <div class="site-footer__company">
+        <div class="site-footer__company-main">
+          <a class="site-footer__logo site-footer__logo--inline" href="#">
+            <span class="site-footer__logo-mark" aria-hidden="true"></span>
+            <span class="site-footer__logo-text">AI Web Builder</span>
+          </a>
+          <p class="site-footer__legal">
+            (주)데모스튜디오 · 대표이사 홍길동, 김철수 · 개인정보보호책임자 privacy@demo.studio · 고객센터 1588-0000 ·
+            팩스 02-0000-0000 · 서울특별시 강남구 테헤란로 000 · 사업자등록번호 000-00-00000 · 통신판매업 신고
+            제0000-서울강남-0000호
+          </p>
+          <nav class="site-footer__legal-nav" aria-label="법적 고지">
+            <a href="#">이용약관</a>
+            <a href="#" class="site-footer__legal-nav--strong">개인정보처리방침</a>
+            <a href="#">네임서버</a>
+            <a href="#">사이트맵</a>
+            <a href="#">브랜드 사이트</a>
+          </nav>
+        </div>
+        <div class="site-footer__company-aside">
+          <button type="button" class="site-footer__lang" aria-haspopup="listbox" aria-expanded="false">
+            <svg class="site-footer__lang-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+            </svg>
+            한국어
+            <span class="site-footer__lang-chevron" aria-hidden="true">▾</span>
+          </button>
+          <div class="site-footer__awards" aria-label="수상 및 인증">
+            <div class="site-footer__award" role="img" aria-label="웹어워드 수상">WEB<br />AWARD</div>
+            <div class="site-footer__award" role="img" aria-label="고객만족 우수기업">CS<br />2025</div>
+            <div class="site-footer__award" role="img" aria-label="정보보호 인증">ISMS</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="site-footer__bottom">
+        <p class="site-footer__copyright">© DEMO STUDIO Corp. All rights reserved.</p>
+        <div class="site-footer__social site-footer__social--bottom" aria-label="소셜 미디어">
+          <a href="#" aria-label="블로그"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 4h16v16H4V4zm2 2v12h12V6H6zm2 2h8v2H8V8zm0 4h8v2H8v-2zm0 4h5v2H8v-2z"/></svg></a>
+          <a href="#" aria-label="YouTube"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+          <a href="#" aria-label="Facebook"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+          <a href="#" aria-label="Instagram"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+          <a href="#" aria-label="LinkedIn"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
         </div>
       </div>
     </div>
   </footer>
-`
+`;
 
-const form = app.querySelector<HTMLFormElement>('#promptForm')
-const input = app.querySelector<HTMLInputElement>('#promptInput')
-const statusEl = app.querySelector<HTMLParagraphElement>('#status')
+const form = app.querySelector<HTMLFormElement>("#promptForm");
+const input = app.querySelector<HTMLInputElement>("#promptInput");
+const statusEl = app.querySelector<HTMLParagraphElement>("#status");
 
 if (form && input && statusEl) {
-  form.addEventListener('submit', (e) => {
-    e.preventDefault()
-    const prompt = input.value.trim()
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const prompt = input.value.trim();
 
     if (!prompt) {
-      statusEl.textContent = '프롬프트를 입력해 주세요.'
-      return
+      statusEl.textContent = "프롬프트를 입력해 주세요.";
+      return;
     }
 
-    statusEl.textContent = `“${prompt}”에 맞춰 생성 중... (데모)`
+    statusEl.textContent = `“${prompt}”에 맞춰 생성 중... (데모)`;
     // TODO: 실제 AI API 연동 로직을 이 자리에서 연결하세요.
-  })
+  });
 }
