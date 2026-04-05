@@ -11,11 +11,50 @@ function getAppRoot(): HTMLDivElement {
 
 const root = getAppRoot();
 
-const MAIN_HASH = "#/app";
+const HASH_DASHBOARD = "#/app";
+const HASH_MAIN_ALT = "#/main";
+const HASH_PROJECTS = "#/app/projects";
 
-function isMainPage(): boolean {
+function isAppRoute(): boolean {
   const h = window.location.hash;
-  return h === MAIN_HASH || h === "#/main";
+  return h === HASH_DASHBOARD || h === HASH_MAIN_ALT || h.startsWith("#/app/");
+}
+
+function getAppSubroute(): "dashboard" | "projects" {
+  return window.location.hash === HASH_PROJECTS ? "projects" : "dashboard";
+}
+
+function getAppLayoutHTML(
+  active: "dashboard" | "projects",
+  mainInnerHTML: string,
+): string {
+  const dashActive = active === "dashboard" ? " app-sidebar__link--active" : "";
+  const projActive = active === "projects" ? " app-sidebar__link--active" : "";
+  return `
+  <div class="app-shell">
+    <aside class="app-sidebar" aria-label="메인 메뉴">
+      <div class="app-sidebar__brand">
+        <span class="app-sidebar__mark" aria-hidden="true"></span>
+        <span class="app-sidebar__title">AI Web Builder</span>
+      </div>
+      <nav class="app-sidebar__nav">
+        <a class="app-sidebar__link${dashActive}" href="${HASH_DASHBOARD}">대시보드</a>
+        <a class="app-sidebar__link${projActive}" href="${HASH_PROJECTS}">프로젝트</a>
+        <a class="app-sidebar__link" href="${HASH_DASHBOARD}">템플릿</a>
+        <a class="app-sidebar__link" href="${HASH_DASHBOARD}">분석</a>
+        <a class="app-sidebar__link" href="${HASH_DASHBOARD}">설정</a>
+      </nav>
+      <div class="app-sidebar__section">
+        <p class="app-sidebar__label">워크스페이스</p>
+        <div class="app-sidebar__pill">데모 팀 · Pro</div>
+      </div>
+      <a class="app-sidebar__logout" href="#/">← 랜딩으로 나가기</a>
+    </aside>
+    <div class="app-main">
+      ${mainInnerHTML}
+    </div>
+  </div>
+`;
 }
 
 function getLandingHTML(viteLogo: string, typescriptLogo: string): string {
@@ -551,27 +590,7 @@ function getLandingHTML(viteLogo: string, typescriptLogo: string): string {
 `;
 }
 
-const MAIN_PAGE_HTML = `
-  <div class="app-shell">
-    <aside class="app-sidebar" aria-label="메인 메뉴">
-      <div class="app-sidebar__brand">
-        <span class="app-sidebar__mark" aria-hidden="true"></span>
-        <span class="app-sidebar__title">AI Web Builder</span>
-      </div>
-      <nav class="app-sidebar__nav">
-        <a class="app-sidebar__link app-sidebar__link--active" href="${MAIN_HASH}">대시보드</a>
-        <a class="app-sidebar__link" href="${MAIN_HASH}">프로젝트</a>
-        <a class="app-sidebar__link" href="${MAIN_HASH}">템플릿</a>
-        <a class="app-sidebar__link" href="${MAIN_HASH}">분석</a>
-        <a class="app-sidebar__link" href="${MAIN_HASH}">설정</a>
-      </nav>
-      <div class="app-sidebar__section">
-        <p class="app-sidebar__label">워크스페이스</p>
-        <div class="app-sidebar__pill">데모 팀 · Pro</div>
-      </div>
-      <a class="app-sidebar__logout" href="#/">← 랜딩으로 나가기</a>
-    </aside>
-    <div class="app-main">
+const DASHBOARD_INNER = `
       <div class="app-toolbar">
         <div class="app-toolbar__search-wrap">
           <span class="app-toolbar__search-icon" aria-hidden="true">⌕</span>
@@ -737,9 +756,137 @@ const MAIN_PAGE_HTML = `
           </ul>
         </div>
       </div>
-    </div>
-  </div>
 `;
+
+type DemoProjectStatus = "pre" | "deploying" | "done";
+type DemoProjectKind = "landing" | "portfolio" | "business";
+
+interface DemoProject {
+  slug: string;
+  status: DemoProjectStatus;
+  kind: DemoProjectKind;
+  subtitle: string;
+  updated: string;
+}
+
+const DEMO_PROJECTS: readonly DemoProject[] = [
+  { slug: "cafe-landing-page", status: "pre", kind: "landing", subtitle: "배포되지 않음", updated: "Mar 5 04:25" },
+  { slug: "portfolio-2024", status: "deploying", kind: "portfolio", subtitle: "프로덕션 배포 진행 중", updated: "Jun 23 14:31" },
+  { slug: "saas-intro-site", status: "done", kind: "business", subtitle: "https://intro.example.com", updated: "Apr 11 18:30" },
+  { slug: "event-spring-sale", status: "pre", kind: "landing", subtitle: "배포되지 않음", updated: "Feb 2 09:15" },
+  { slug: "designer-showcase", status: "done", kind: "portfolio", subtitle: "https://folio.example.com", updated: "Jan 19 22:08" },
+  { slug: "corp-pr-page", status: "deploying", kind: "business", subtitle: "스테이징 검증 중", updated: "Mar 28 11:42" },
+  { slug: "newsletter-signup", status: "done", kind: "landing", subtitle: "https://nl.example.com", updated: "Dec 8 16:55" },
+  { slug: "photo-studio-booking", status: "pre", kind: "portfolio", subtitle: "초안만 존재", updated: "Nov 30 07:20" },
+  { slug: "recruit-2026", status: "deploying", kind: "landing", subtitle: "DNS 전파 대기", updated: "Apr 1 13:07" },
+];
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+const STATUS_BADGE: Record<DemoProjectStatus, { className: string; label: string }> = {
+  pre: { className: "proj-badge proj-badge--status-pre", label: "배포 전" },
+  deploying: { className: "proj-badge proj-badge--status-deploying", label: "배포 중" },
+  done: { className: "proj-badge proj-badge--status-done", label: "배포 완료" },
+};
+
+const KIND_BADGE: Record<DemoProjectKind, { className: string; label: string }> = {
+  landing: { className: "proj-badge proj-badge--type-landing", label: "랜딩 페이지" },
+  portfolio: { className: "proj-badge proj-badge--type-portfolio", label: "포트폴리오 페이지" },
+  business: { className: "proj-badge proj-badge--type-business", label: "비즈니스 페이지" },
+};
+
+function renderProjectThumb(p: DemoProject, index: number): string {
+  const tone = (index % 3) + 1;
+  const url =
+    p.slug.length > 22 ? `${escapeHtml(p.slug.slice(0, 22))}…` : escapeHtml(p.slug);
+  const bar = `<div class="proj-thumb__bar"><span class="proj-thumb__dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="proj-thumb__fake-url">${url}</span></div>`;
+
+  let body = "";
+  if (p.kind === "landing") {
+    body = `<div class="proj-thumb__body proj-thumb__body--landing">
+            <div class="proj-thumb__hero"></div>
+            <div class="proj-thumb__lines">
+              <span class="proj-thumb__line proj-thumb__line--lg"></span>
+              <span class="proj-thumb__line"></span>
+              <span class="proj-thumb__line proj-thumb__line--short"></span>
+            </div>
+            <div class="proj-thumb__cta">
+              <span class="proj-thumb__pill"></span>
+              <span class="proj-thumb__pill proj-thumb__pill--ghost"></span>
+            </div>
+          </div>`;
+  } else if (p.kind === "portfolio") {
+    body = `<div class="proj-thumb__body proj-thumb__body--portfolio">
+            <div class="proj-thumb__gallery">
+              <div class="proj-thumb__shot proj-thumb__shot--hero"></div>
+              <div class="proj-thumb__shot"></div>
+              <div class="proj-thumb__shot"></div>
+              <div class="proj-thumb__shot"></div>
+            </div>
+          </div>`;
+  } else {
+    body = `<div class="proj-thumb__body proj-thumb__body--business">
+            <div class="proj-thumb__nav"></div>
+            <div class="proj-thumb__biz">
+              <div class="proj-thumb__biz-row"></div>
+              <div class="proj-thumb__biz-grid"><span></span><span></span><span></span></div>
+            </div>
+          </div>`;
+  }
+
+  return `<div class="proj-card__preview">
+          <div class="proj-thumb proj-thumb--${p.kind} proj-thumb--tone${tone}" aria-hidden="true">
+            ${bar}
+            ${body}
+          </div>
+        </div>`;
+}
+
+function renderProjectCard(p: DemoProject, index: number): string {
+  const st = STATUS_BADGE[p.status];
+  const kd = KIND_BADGE[p.kind];
+  const slug = escapeHtml(p.slug);
+  const sub = escapeHtml(p.subtitle);
+  const time = escapeHtml(p.updated);
+  const thumb = renderProjectThumb(p, index);
+  return `
+        <article class="proj-card">
+          ${thumb}
+          <div class="proj-card__body">
+            <div class="proj-card__badges">
+              <span class="${st.className}">${st.label}</span>
+              <span class="${kd.className}">${kd.label}</span>
+            </div>
+            <h2 class="proj-card__title">${slug}</h2>
+            <p class="proj-card__desc">${sub}</p>
+          </div>
+          <footer class="proj-card__foot">
+            <span class="proj-card__time">${time}</span>
+          </footer>
+        </article>`;
+}
+
+function getProjectsInnerHTML(): string {
+  const cards = DEMO_PROJECTS.map((p, i) => renderProjectCard(p, i)).join("");
+  return `
+      <header class="app-header app-header--row proj-page-head">
+        <div>
+          <h1 class="app-header__title">프로젝트</h1>
+          <p class="app-header__sub">워크스페이스의 프로젝트를 한눈에 확인하세요.</p>
+        </div>
+        <button type="button" class="app-btn app-btn--primary">+ 새 프로젝트</button>
+      </header>
+
+      <div class="proj-grid">
+        ${cards}
+      </div>`;
+}
 
 function mountLanding(): void {
   document.body.classList.remove("app-view");
@@ -747,7 +894,7 @@ function mountLanding(): void {
   document.title = "AI Web Builder";
 
   document.getElementById("btnLogin")?.addEventListener("click", () => {
-    window.location.hash = MAIN_HASH;
+    window.location.hash = HASH_DASHBOARD;
   });
 
   const form = root.querySelector<HTMLFormElement>("#promptForm");
@@ -769,15 +916,18 @@ function mountLanding(): void {
   }
 }
 
-function mountMain(): void {
+function mountApp(): void {
   document.body.classList.add("app-view");
-  root.innerHTML = MAIN_PAGE_HTML;
-  document.title = "메인 — AI Web Builder";
+  const sub = getAppSubroute();
+  const inner = sub === "projects" ? getProjectsInnerHTML() : DASHBOARD_INNER;
+  root.innerHTML = getAppLayoutHTML(sub, inner);
+  document.title =
+    sub === "projects" ? "프로젝트 — AI Web Builder" : "대시보드 — AI Web Builder";
 }
 
 function renderRoute(): void {
-  if (isMainPage()) {
-    mountMain();
+  if (isAppRoute()) {
+    mountApp();
   } else {
     mountLanding();
   }
