@@ -201,6 +201,10 @@ body::before {
   box-shadow: 0 14px 35px rgba(192, 132, 252, 0.16);
 }
 
+.btn-github {
+  min-width: 120px;
+}
+
 .hero {
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;

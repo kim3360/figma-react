@@ -76,8 +76,10 @@ function getLandingHTML(viteLogo: string, typescriptLogo: string): string {
       </nav>
 
       <div class="actions">
-        <button class="btn btn-ghost" type="button" id="btnLogin">로그인</button>
-        <button class="btn btn-primary" type="button">무료 시작</button>
+        <button class="btn btn-ghost" type="button">도입 문의</button>
+        <button class="btn btn-primary btn-github" type="button" id="btnLogin">
+          GitHub 로그인
+        </button>
       </div>
     </header>
 
