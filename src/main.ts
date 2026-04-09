@@ -35,7 +35,7 @@ function getAppLayoutHTML(
     <aside class="app-sidebar" aria-label="메인 메뉴">
       <div class="app-sidebar__brand">
         <span class="app-sidebar__mark" aria-hidden="true"></span>
-        <span class="app-sidebar__title">AI Web Builder</span>
+        <span class="app-sidebar__title">Devely</span>
       </div>
       <nav class="app-sidebar__nav">
         <a class="app-sidebar__link${dashActive}" href="${HASH_DASHBOARD}">대시보드</a>
@@ -64,8 +64,7 @@ function getLandingHTML(viteLogo: string, typescriptLogo: string): string {
       <div class="brand" aria-label="Brand">
         <div class="brand-mark" aria-hidden="true"></div>
         <div class="brand-title">
-          <strong>AI Web Builder</strong>
-          <span>프롬프트로 랜딩을 생성</span>
+          <strong>Devely</strong>
         </div>
       </div>
 
@@ -381,158 +380,55 @@ function getLandingHTML(viteLogo: string, typescriptLogo: string): string {
 
   <footer class="site-footer" aria-label="사이트 하단 정보">
     <div class="container site-footer__inner">
-      <div class="site-footer__quick" aria-label="빠른 링크">
-        <div class="site-footer__quick-row">
-          <span class="site-footer__quick-label">AI WEB BUILDER</span>
-          <div class="site-footer__quick-links">
-            <a href="#">회사 소개</a>
-            <a href="#">파트너십 문의</a>
-            <a href="#">보도자료</a>
-          </div>
-        </div>
-        <div class="site-footer__quick-row">
-          <span class="site-footer__quick-label">파트너</span>
-          <div class="site-footer__quick-links">
-            <a href="#">디자인 · 파트너 어드민</a>
-            <a href="#">판매자 어드민</a>
-            <a href="#">쇼핑몰 제작 제휴</a>
-          </div>
-        </div>
-        <div class="site-footer__quick-row">
-          <span class="site-footer__quick-label">개발자</span>
-          <div class="site-footer__quick-links">
-            <a href="#">개발자 센터</a>
-            <a href="#">워크스페이스</a>
-          </div>
-        </div>
-        <div class="site-footer__quick-row site-footer__quick-row--last">
-          <span class="site-footer__quick-label">고객센터</span>
-          <div class="site-footer__quick-links">
-            <a href="#">쇼핑몰 제작 문의</a>
-            <a href="#">뉴스</a>
-            <a href="#">가이드</a>
-            <a href="#">온라인 교육</a>
-            <a href="#">보안</a>
-          </div>
+      <div class="site-footer__top">
+        <a class="site-footer__logo" href="#">
+          <span class="site-footer__logo-mark" aria-hidden="true"></span>
+          <span class="site-footer__logo-text">Devely</span>
+        </a>
+        <div class="site-footer__quick-links" aria-label="빠른 링크">
+          <a href="#">회사 소개</a>
+          <a href="#">요금</a>
+          <a href="#">파트너십 문의</a>
+          <a href="#">고객센터</a>
+          <a href="#">보안</a>
         </div>
       </div>
-
-      <div class="site-footer__rule" role="presentation"></div>
 
       <div class="site-footer__grid">
         <nav class="footer-col" aria-label="제품">
           <h3 class="footer-col__title">제품</h3>
           <ul class="footer-col__list">
-            <li><a href="#">Claude</a></li>
-            <li><a href="#">Claude Code</a></li>
-            <li><a href="#">Claude Code for Enterprise</a></li>
-            <li><a href="#">협업</a></li>
-            <li><a href="#">맥스 플랜</a></li>
-            <li><a href="#">Team 요금제</a></li>
-            <li><a href="#">Enterprise 요금제</a></li>
-            <li><a href="#">앱 다운로드</a></li>
+            <li><a href="#">랜딩 생성기</a></li>
+            <li><a href="#">프로젝트 관리</a></li>
+            <li><a href="#">템플릿</a></li>
             <li><a href="#">요금제</a></li>
-            <li><a href="#">로그인</a></li>
-          </ul>
-        </nav>
-        <nav class="footer-col" aria-label="기능">
-          <h3 class="footer-col__title">기능</h3>
-          <ul class="footer-col__list">
-            <li><a href="#">Chrome용 Claude</a></li>
-            <li><a href="#">Claude for Excel</a></li>
-            <li><a href="#">PowerPoint용 Claude</a></li>
-            <li><a href="#">Claude for Slack</a></li>
-            <li><a href="#">스킬</a></li>
-          </ul>
-        </nav>
-        <nav class="footer-col" aria-label="모델">
-          <h3 class="footer-col__title">모델</h3>
-          <ul class="footer-col__list">
-            <li><a href="#">Opus</a></li>
-            <li><a href="#">Sonnet</a></li>
-            <li><a href="#">Haiku</a></li>
           </ul>
         </nav>
         <nav class="footer-col" aria-label="솔루션">
           <h3 class="footer-col__title">솔루션</h3>
           <ul class="footer-col__list">
-            <li><a href="#">AI 에이전트</a></li>
-            <li><a href="#">Claude Code 보안</a></li>
-            <li><a href="#">코드 현대화</a></li>
-            <li><a href="#">코딩</a></li>
-            <li><a href="#">고객 지원</a></li>
-            <li><a href="#">교육</a></li>
-            <li><a href="#">금융 서비스</a></li>
-            <li><a href="#">정부</a></li>
-            <li><a href="#">의료</a></li>
-            <li><a href="#">생명과학</a></li>
-            <li><a href="#">비영리 단체</a></li>
-          </ul>
-        </nav>
-        <nav class="footer-col" aria-label="Claude Platform">
-          <h3 class="footer-col__title">Claude Platform</h3>
-          <ul class="footer-col__list">
-            <li><a href="#">개요</a></li>
-            <li><a href="#">개발자 문서</a></li>
-            <li><a href="#">요금제</a></li>
-            <li><a href="#">마켓플레이스</a></li>
-            <li><a href="#">Amazon Bedrock</a></li>
-            <li><a href="#">Google Cloud's Vertex AI</a></li>
-            <li><a href="#">Microsoft Foundry</a></li>
-            <li><a href="#">지역 규정 준수</a></li>
-            <li><a href="#">콘솔 로그인</a></li>
+            <li><a href="#">에이전시</a></li>
+            <li><a href="#">커머스</a></li>
+            <li><a href="#">마케팅 팀</a></li>
+            <li><a href="#">엔터프라이즈</a></li>
           </ul>
         </nav>
         <nav class="footer-col" aria-label="리소스">
           <h3 class="footer-col__title">리소스</h3>
           <ul class="footer-col__list">
+            <li><a href="#">가이드</a></li>
             <li><a href="#">블로그</a></li>
-            <li><a href="#">Claude 파트너 네트워크</a></li>
-            <li><a href="#">커넥터</a></li>
-            <li><a href="#">강의</a></li>
-            <li><a href="#">고객 사례</a></li>
-            <li><a href="#">Anthropic 엔지니어링</a></li>
-            <li><a href="#">이벤트</a></li>
-            <li><a href="#">플러그인</a></li>
-            <li><a href="#">Powered by Claude</a></li>
-            <li><a href="#">서비스 파트너</a></li>
-            <li><a href="#">커뮤니티</a></li>
-            <li><a href="#">Campus Program</a></li>
-            <li><a href="#">스타트업 프로그램</a></li>
-            <li><a href="#">튜토리얼</a></li>
+            <li><a href="#">업데이트 노트</a></li>
             <li><a href="#">활용 사례</a></li>
           </ul>
         </nav>
         <nav class="footer-col" aria-label="회사">
           <h3 class="footer-col__title">회사</h3>
           <ul class="footer-col__list">
-            <li><a href="#">Anthropic</a></li>
-            <li><a href="#">채용 정보</a></li>
-            <li><a href="#">경제 전망</a></li>
-            <li><a href="#">연구</a></li>
-            <li><a href="#">Anthropic 소식</a></li>
-            <li><a href="#">책임감 있는 확장 정책</a></li>
-            <li><a href="#">보안 및 컴플라이언스</a></li>
-            <li><a href="#">투명성</a></li>
-          </ul>
-        </nav>
-        <nav class="footer-col" aria-label="도움말 및 보안">
-          <h3 class="footer-col__title">도움말 및 보안</h3>
-          <ul class="footer-col__list">
-            <li><a href="#">서비스 지역</a></li>
-            <li><a href="#">상태</a></li>
-            <li><a href="#">지원 센터</a></li>
-          </ul>
-        </nav>
-        <nav class="footer-col" aria-label="약관 및 정책">
-          <h3 class="footer-col__title">약관 및 정책</h3>
-          <ul class="footer-col__list">
-            <li><a href="#">개인정보 선택</a></li>
-            <li><a href="#">개인정보 처리방침</a></li>
-            <li><a href="#">책임감 있는 공개 정책</a></li>
-            <li><a href="#">서비스 약관: 상업용</a></li>
-            <li><a href="#">서비스 약관: 개인용</a></li>
-            <li><a href="#">이용 정책</a></li>
+            <li><a href="#">채용</a></li>
+            <li><a href="#">보도자료</a></li>
+            <li><a href="#">브랜드</a></li>
+            <li><a href="#">연락처</a></li>
           </ul>
         </nav>
       </div>
@@ -541,37 +437,16 @@ function getLandingHTML(viteLogo: string, typescriptLogo: string): string {
 
       <div class="site-footer__company">
         <div class="site-footer__company-main">
-          <a class="site-footer__logo site-footer__logo--inline" href="#">
-            <span class="site-footer__logo-mark" aria-hidden="true"></span>
-            <span class="site-footer__logo-text">AI Web Builder</span>
-          </a>
           <p class="site-footer__legal">
-            (주)데모스튜디오 · 대표이사 홍길동, 김철수 · 개인정보보호책임자 privacy@demo.studio · 고객센터 1588-0000 ·
-            팩스 02-0000-0000 · 서울특별시 강남구 테헤란로 000 · 사업자등록번호 000-00-00000 · 통신판매업 신고
-            제0000-서울강남-0000호
+            (주)데블리 · 대표이사 홍길동 · 개인정보보호책임자 privacy@devely.ai · 고객센터 1588-0000 · 서울특별시 강남구 테헤란로 000
           </p>
           <nav class="site-footer__legal-nav" aria-label="법적 고지">
             <a href="#">이용약관</a>
             <a href="#" class="site-footer__legal-nav--strong">개인정보처리방침</a>
-            <a href="#">네임서버</a>
+            <a href="#">쿠키 정책</a>
+            <a href="#">이용 정책</a>
             <a href="#">사이트맵</a>
-            <a href="#">브랜드 사이트</a>
           </nav>
-        </div>
-        <div class="site-footer__company-aside">
-          <button type="button" class="site-footer__lang" aria-haspopup="listbox" aria-expanded="false">
-            <svg class="site-footer__lang-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-            </svg>
-            한국어
-            <span class="site-footer__lang-chevron" aria-hidden="true">▾</span>
-          </button>
-          <div class="site-footer__awards" aria-label="수상 및 인증">
-            <div class="site-footer__award" role="img" aria-label="웹어워드 수상">WEB<br />AWARD</div>
-            <div class="site-footer__award" role="img" aria-label="고객만족 우수기업">CS<br />2025</div>
-            <div class="site-footer__award" role="img" aria-label="정보보호 인증">ISMS</div>
-          </div>
         </div>
       </div>
 
@@ -770,15 +645,69 @@ interface DemoProject {
 }
 
 const DEMO_PROJECTS: readonly DemoProject[] = [
-  { slug: "cafe-landing-page", status: "pre", kind: "landing", subtitle: "배포되지 않음", updated: "Mar 5 04:25" },
-  { slug: "portfolio-2024", status: "deploying", kind: "portfolio", subtitle: "프로덕션 배포 진행 중", updated: "Jun 23 14:31" },
-  { slug: "saas-intro-site", status: "done", kind: "business", subtitle: "https://intro.example.com", updated: "Apr 11 18:30" },
-  { slug: "event-spring-sale", status: "pre", kind: "landing", subtitle: "배포되지 않음", updated: "Feb 2 09:15" },
-  { slug: "designer-showcase", status: "done", kind: "portfolio", subtitle: "https://folio.example.com", updated: "Jan 19 22:08" },
-  { slug: "corp-pr-page", status: "deploying", kind: "business", subtitle: "스테이징 검증 중", updated: "Mar 28 11:42" },
-  { slug: "newsletter-signup", status: "done", kind: "landing", subtitle: "https://nl.example.com", updated: "Dec 8 16:55" },
-  { slug: "photo-studio-booking", status: "pre", kind: "portfolio", subtitle: "초안만 존재", updated: "Nov 30 07:20" },
-  { slug: "recruit-2026", status: "deploying", kind: "landing", subtitle: "DNS 전파 대기", updated: "Apr 1 13:07" },
+  {
+    slug: "cafe-landing-page",
+    status: "pre",
+    kind: "landing",
+    subtitle: "배포되지 않음",
+    updated: "Mar 5 04:25",
+  },
+  {
+    slug: "portfolio-2024",
+    status: "deploying",
+    kind: "portfolio",
+    subtitle: "프로덕션 배포 진행 중",
+    updated: "Jun 23 14:31",
+  },
+  {
+    slug: "saas-intro-site",
+    status: "done",
+    kind: "business",
+    subtitle: "https://intro.example.com",
+    updated: "Apr 11 18:30",
+  },
+  {
+    slug: "event-spring-sale",
+    status: "pre",
+    kind: "landing",
+    subtitle: "배포되지 않음",
+    updated: "Feb 2 09:15",
+  },
+  {
+    slug: "designer-showcase",
+    status: "done",
+    kind: "portfolio",
+    subtitle: "https://folio.example.com",
+    updated: "Jan 19 22:08",
+  },
+  {
+    slug: "corp-pr-page",
+    status: "deploying",
+    kind: "business",
+    subtitle: "스테이징 검증 중",
+    updated: "Mar 28 11:42",
+  },
+  {
+    slug: "newsletter-signup",
+    status: "done",
+    kind: "landing",
+    subtitle: "https://nl.example.com",
+    updated: "Dec 8 16:55",
+  },
+  {
+    slug: "photo-studio-booking",
+    status: "pre",
+    kind: "portfolio",
+    subtitle: "초안만 존재",
+    updated: "Nov 30 07:20",
+  },
+  {
+    slug: "recruit-2026",
+    status: "deploying",
+    kind: "landing",
+    subtitle: "DNS 전파 대기",
+    updated: "Apr 1 13:07",
+  },
 ];
 
 function escapeHtml(text: string): string {
@@ -789,22 +718,42 @@ function escapeHtml(text: string): string {
     .replace(/"/g, "&quot;");
 }
 
-const STATUS_BADGE: Record<DemoProjectStatus, { className: string; label: string }> = {
+const STATUS_BADGE: Record<
+  DemoProjectStatus,
+  { className: string; label: string }
+> = {
   pre: { className: "proj-badge proj-badge--status-pre", label: "배포 전" },
-  deploying: { className: "proj-badge proj-badge--status-deploying", label: "배포 중" },
+  deploying: {
+    className: "proj-badge proj-badge--status-deploying",
+    label: "배포 중",
+  },
   done: { className: "proj-badge proj-badge--status-done", label: "배포 완료" },
 };
 
-const KIND_BADGE: Record<DemoProjectKind, { className: string; label: string }> = {
-  landing: { className: "proj-badge proj-badge--type-landing", label: "랜딩 페이지" },
-  portfolio: { className: "proj-badge proj-badge--type-portfolio", label: "포트폴리오 페이지" },
-  business: { className: "proj-badge proj-badge--type-business", label: "비즈니스 페이지" },
+const KIND_BADGE: Record<
+  DemoProjectKind,
+  { className: string; label: string }
+> = {
+  landing: {
+    className: "proj-badge proj-badge--type-landing",
+    label: "랜딩 페이지",
+  },
+  portfolio: {
+    className: "proj-badge proj-badge--type-portfolio",
+    label: "포트폴리오 페이지",
+  },
+  business: {
+    className: "proj-badge proj-badge--type-business",
+    label: "비즈니스 페이지",
+  },
 };
 
 function renderProjectThumb(p: DemoProject, index: number): string {
   const tone = (index % 3) + 1;
   const url =
-    p.slug.length > 22 ? `${escapeHtml(p.slug.slice(0, 22))}…` : escapeHtml(p.slug);
+    p.slug.length > 22
+      ? `${escapeHtml(p.slug.slice(0, 22))}…`
+      : escapeHtml(p.slug);
   const bar = `<div class="proj-thumb__bar"><span class="proj-thumb__dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="proj-thumb__fake-url">${url}</span></div>`;
 
   let body = "";
@@ -922,7 +871,9 @@ function mountApp(): void {
   const inner = sub === "projects" ? getProjectsInnerHTML() : DASHBOARD_INNER;
   root.innerHTML = getAppLayoutHTML(sub, inner);
   document.title =
-    sub === "projects" ? "프로젝트 — AI Web Builder" : "대시보드 — AI Web Builder";
+    sub === "projects"
+      ? "프로젝트 — AI Web Builder"
+      : "대시보드 — AI Web Builder";
 }
 
 function renderRoute(): void {
