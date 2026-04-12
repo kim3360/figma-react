@@ -13,6 +13,14 @@ const HASH_DASHBOARD = "#/app";
 const HASH_MAIN_ALT = "#/main";
 const HASH_PROJECTS = "#/app/projects";
 
+function getProjectHash(slug: string): string {
+  return `${HASH_PROJECTS}/${encodeURIComponent(slug)}`;
+}
+
+function getProjectAgentHash(slug: string): string {
+  return `${HASH_PROJECTS}/${encodeURIComponent(slug)}/agent`;
+}
+
 function isAppRoute(): boolean {
   const h = window.location.hash;
   return h === HASH_DASHBOARD || h === HASH_MAIN_ALT || h.startsWith("#/app/");
@@ -21,7 +29,8 @@ function isAppRoute(): boolean {
 type AppRoute =
   | { kind: "dashboard" }
   | { kind: "projects" }
-  | { kind: "project"; slug: string };
+  | { kind: "project"; slug: string }
+  | { kind: "projectAgent"; slug: string };
 
 function parseAppRoute(): AppRoute {
   const h = window.location.hash;
@@ -31,10 +40,15 @@ function parseAppRoute(): AppRoute {
   const prefix = "#/app/projects/";
   if (h.startsWith(prefix)) {
     const rest = h.slice(prefix.length).replace(/\/$/, "");
-    const slug = rest.split("/")[0];
-    if (slug) {
-      return { kind: "project", slug: decodeURIComponent(slug) };
+    const segments = rest.split("/").filter(Boolean);
+    if (segments.length === 0) {
+      return { kind: "projects" };
     }
+    const slug = decodeURIComponent(segments[0]);
+    if (segments[1] === "agent") {
+      return { kind: "projectAgent", slug };
+    }
+    return { kind: "project", slug };
   }
   return { kind: "dashboard" };
 }
@@ -42,7 +56,18 @@ function parseAppRoute(): AppRoute {
 function getAppLayoutHTML(
   active: "dashboard" | "projects",
   mainInnerHTML: string,
+  mainExtraClass = "",
+  omitSidebar = false,
 ): string {
+  const mainClasses = `app-main${mainExtraClass ? ` ${mainExtraClass}` : ""}${omitSidebar ? " app-main--full" : ""}`;
+  if (omitSidebar) {
+    return `
+  <div class="app-shell app-shell--no-sidebar">
+    <div class="${mainClasses}">
+      ${mainInnerHTML}
+    </div>
+  </div>`;
+  }
   const dashActive = active === "dashboard" ? " app-sidebar__link--active" : "";
   const projActive = active === "projects" ? " app-sidebar__link--active" : "";
   return `
@@ -68,7 +93,7 @@ function getAppLayoutHTML(
       </div>
       <a class="app-sidebar__logout" href="#/">← 랜딩으로 나가기</a>
     </aside>
-    <div class="app-main">
+    <div class="${mainClasses}">
       ${mainInnerHTML}
     </div>
   </div>
@@ -796,7 +821,7 @@ function renderProjectCard(p: DemoProject, index: number): string {
   const slug = escapeHtml(p.slug);
   const rel = escapeHtml(p.updatedRelative);
   const thumb = renderProjectThumb(p, index);
-  const navHash = `${HASH_PROJECTS}/${encodeURIComponent(p.slug)}`;
+  const navHash = getProjectHash(p.slug);
   const showUrl = isProjectLiveUrl(p);
   const rawUrl = showUrl ? p.subtitle : "";
   const href = escapeHtml(rawUrl);
@@ -824,9 +849,48 @@ function renderProjectCard(p: DemoProject, index: number): string {
         </article>`;
 }
 
+const PROJECT_LIST_PAGE_COUNT = 8;
+
+function getProjectListPaginationHTML(): string {
+  const pages = Array.from(
+    { length: PROJECT_LIST_PAGE_COUNT },
+    (_, i) => i + 1,
+  );
+  const items = pages
+    .map((n) => {
+      const cur = n === 1 ? " proj-pagination__btn--current" : "";
+      const aria = n === 1 ? ' aria-current="page"' : "";
+      return `<li class="proj-pagination__item">
+          <button type="button" class="proj-pagination__btn${cur}" data-proj-page="${n}" aria-label="${n}페이지"${aria}>${n}</button>
+        </li>`;
+    })
+    .join("");
+  return `<nav id="projPagination" class="proj-pagination" aria-label="프로젝트 목록 페이지">
+        <div class="proj-pagination__shell">
+          <div class="proj-pagination__head">
+            <span class="proj-pagination__title">페이지 탐색</span>
+            <span id="projPaginationStatus" class="proj-pagination__status" aria-live="polite"><strong>1</strong> / ${PROJECT_LIST_PAGE_COUNT}</span>
+          </div>
+          <div class="proj-pagination__controls">
+            <button type="button" class="proj-pagination__edge" id="projPaginationPrev" aria-label="이전 페이지" disabled>
+              <span class="proj-pagination__chev proj-pagination__chev--prev" aria-hidden="true"></span>
+            </button>
+            <ol class="proj-pagination__list">${items}</ol>
+            <button type="button" class="proj-pagination__edge" id="projPaginationNext" aria-label="다음 페이지">
+              <span class="proj-pagination__chev proj-pagination__chev--next" aria-hidden="true"></span>
+            </button>
+          </div>
+          <p class="proj-pagination__note">목록은 데모 데이터입니다. 번호는 UI 예시용입니다.</p>
+        </div>
+      </nav>`;
+}
+
 function getProjectsInnerHTML(): string {
-  const sorted = [...DEMO_PROJECTS].sort((a, b) => b.updatedSort - a.updatedSort);
+  const sorted = [...DEMO_PROJECTS].sort(
+    (a, b) => b.updatedSort - a.updatedSort,
+  );
   const cards = sorted.map((p, i) => renderProjectCard(p, i)).join("");
+  const pagination = getProjectListPaginationHTML();
   return `
       <header class="app-header app-header--row proj-page-head">
         <div>
@@ -840,8 +904,11 @@ function getProjectsInnerHTML(): string {
         </div>
       </header>
 
-      <div class="proj-grid" id="projGrid">
-        ${cards}
+      <div class="proj-list-body">
+        <div class="proj-grid" id="projGrid">
+          ${cards}
+        </div>
+        ${pagination}
       </div>`;
 }
 
@@ -943,7 +1010,11 @@ function getRecentMergeRows(p: DemoProject): string {
       when: "방금",
       deployed: false,
     });
-    rows.push({ sum: "DNS 레코드 안내 발송", when: "1시간 전", deployed: false });
+    rows.push({
+      sum: "DNS 레코드 안내 발송",
+      when: "1시간 전",
+      deployed: false,
+    });
   } else if (p.status === "failed") {
     rows.push({
       sum: "npm ci 단계에서 종료",
@@ -955,7 +1026,11 @@ function getRecentMergeRows(p: DemoProject): string {
       when: "3일 전",
       deployed: true,
     });
-    rows.push({ sum: "preview 브랜치 커밋 적재", when: "같은 세션", deployed: false });
+    rows.push({
+      sum: "preview 브랜치 커밋 적재",
+      when: "같은 세션",
+      deployed: false,
+    });
   } else {
     rows.push({
       sum: "프로젝트 생성 및 템플릿 연결",
@@ -967,7 +1042,11 @@ function getRecentMergeRows(p: DemoProject): string {
       when: "—",
       deployed: false,
     });
-    rows.push({ sum: "다음: 초안 생성 후 미리보기", when: "—", deployed: false });
+    rows.push({
+      sum: "다음: 초안 생성 후 미리보기",
+      when: "—",
+      deployed: false,
+    });
   }
   return rows
     .map(
@@ -1023,11 +1102,11 @@ function getProjectDetailOverviewHTML(p: DemoProject): string {
 }
 
 function demoAiCreditsUsed(slug: string): number {
-  return 12 + (slug.length * 17) % 48;
+  return 12 + ((slug.length * 17) % 48);
 }
 
 function demoAiCreditsLeft(slug: string): number {
-  return 180 + (slug.length * 23) % 420;
+  return 180 + ((slug.length * 23) % 420);
 }
 
 function getDeployEnvBlock(p: DemoProject): { label: string; detail: string } {
@@ -1043,7 +1122,11 @@ function getDeployEnvBlock(p: DemoProject): { label: string; detail: string } {
   return { label: "프로덕션", detail: "CDN · SSL · 자동 빌드" };
 }
 
-function getTimelineEntries(p: DemoProject): { msg: string; meta: string; tone: "violet" | "slate" | "green" | "amber" }[] {
+function getTimelineEntries(p: DemoProject): {
+  msg: string;
+  meta: string;
+  tone: "violet" | "slate" | "green" | "amber";
+}[] {
   const u = escapeHtml(p.updated);
   const kindLine =
     p.kind === "landing"
@@ -1051,7 +1134,11 @@ function getTimelineEntries(p: DemoProject): { msg: string; meta: string; tone: 
       : p.kind === "portfolio"
         ? "갤러리 그리드·프로필 블록 생성"
         : "네비·가격표 레이아웃 적용";
-  const common: { msg: string; meta: string; tone: "violet" | "slate" | "green" | "amber" }[] = [
+  const common: {
+    msg: string;
+    meta: string;
+    tone: "violet" | "slate" | "green" | "amber";
+  }[] = [
     { msg: "프로젝트 설정 저장됨", meta: u, tone: "slate" },
     { msg: kindLine, meta: "AI 생성", tone: "violet" },
     { msg: "프롬프트로 카피 2회 수정", meta: "대화 기록", tone: "violet" },
@@ -1060,7 +1147,11 @@ function getTimelineEntries(p: DemoProject): { msg: string; meta: string; tone: 
     return [
       { msg: "워크스페이스에 프로젝트 생성", meta: u, tone: "slate" },
       ...common.slice(1, 3),
-      { msg: "배포 파이프라인 대기 중", meta: "다음: Open AI Agent", tone: "amber" },
+      {
+        msg: "배포 파이프라인 대기 중",
+        meta: "다음: Open AI Agent",
+        tone: "amber",
+      },
     ];
   }
   if (p.status === "deploying") {
@@ -1074,7 +1165,11 @@ function getTimelineEntries(p: DemoProject): { msg: string; meta: string; tone: 
     return [
       ...common.slice(0, 2),
       { msg: p.subtitle, meta: "빌드 로그", tone: "amber" },
-      { msg: "수정 제안: 의존성 버전 고정 후 재빌드", meta: "AI 제안", tone: "violet" },
+      {
+        msg: "수정 제안: 의존성 버전 고정 후 재빌드",
+        meta: "AI 제안",
+        tone: "violet",
+      },
     ];
   }
   return [
@@ -1123,7 +1218,9 @@ function getProjectDetailExtrasHTML(p: DemoProject): string {
   const timeline = getTimelineEntries(p);
   const timelineHtml = timeline
     .map(
-      (e) => `<li class="proj-detail-timeline__item proj-detail-timeline__item--${e.tone}">
+      (
+        e,
+      ) => `<li class="proj-detail-timeline__item proj-detail-timeline__item--${e.tone}">
       <span class="proj-detail-timeline__dot" aria-hidden="true"></span>
       <div class="proj-detail-timeline__body">
         <p class="proj-detail-timeline__msg">${escapeHtml(e.msg)}</p>
@@ -1132,7 +1229,9 @@ function getProjectDetailExtrasHTML(p: DemoProject): string {
     </li>`,
     )
     .join("");
-  const slugShort = escapeHtml(p.slug.slice(0, 18) + (p.slug.length > 18 ? "…" : ""));
+  const slugShort = escapeHtml(
+    p.slug.slice(0, 18) + (p.slug.length > 18 ? "…" : ""),
+  );
   const next = getNextActionsHTML(p);
 
   return `
@@ -1264,15 +1363,541 @@ function getProjectNotFoundInnerHTML(): string {
       </div>`;
 }
 
+/** 에이전트 화면 미리보기 탭 — 참고 UI와 동일한 데모 랜딩 */
+function getAgentWorkspacePreviewIframeHTML(): string {
+  const doc = `<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Preview</title><style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100%;font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f8fafc;color:#0f172a;}
+.hero{min-height:100%;display:flex;align-items:center;justify-content:center;padding:3rem 1.5rem;text-align:center;}
+h1{font-size:clamp(1.35rem,3vw,1.85rem);font-weight:700;margin:0 0 1rem;letter-spacing:-.03em;line-height:1.3;}
+p{margin:0 auto 1.75rem;max-width:26rem;font-size:.9375rem;line-height:1.65;color:#64748b;}
+.cta{display:inline-block;padding:.7rem 1.5rem;border-radius:999px;background:#2563eb;color:#fff;font-weight:600;font-size:.9rem;box-shadow:0 4px 14px rgba(37,99,235,.22);}
+</style></head><body><div class="hero"><div><h1>비즈니스를 위한 완벽한 공간</h1><p>자연어로 요청한 수정사항이 실시간으로 여기에 반영됩니다.</p><span class="cta">자세히 알아보기</span></div></div></body></html>`;
+  const dataUrl = `data:text/html;charset=utf-8,${encodeURIComponent(doc)}`;
+  return `<iframe class="agent-preview__iframe" title="미리보기" src="${escapeHtml(dataUrl)}" sandbox="allow-scripts"></iframe>`;
+}
+
+interface AgentCodeFileEntry {
+  path: string;
+  diff: string;
+}
+
+function buildAgentCodeFileMap(slug: string): Record<string, AgentCodeFileEntry> {
+  return {
+    index: {
+      path: `sites/${slug}/index.html`,
+      diff: [
+        "-    <section class=\"hero\">",
+        "-      <h1>이전 헤드라인</h1>",
+        "-      <p>이전 설명 문구</p>",
+        "+    <section class=\"hero hero--biz\">",
+        "+      <h1>비즈니스를 위한 완벽한 공간</h1>",
+        "+      <p>자연어로 요청한 수정사항이 실시간으로 여기에 반영됩니다.</p>",
+      ].join("\n"),
+    },
+    layout: {
+      path: `sites/${slug}/layout.tsx`,
+      diff: [
+        "- export default function Root(props: { children: unknown }) {",
+        '-   return <html lang="ko">{props.children}</html>',
+        "+ export default function Root(props: { children: unknown }) {",
+        '+   return <html lang="ko" className="scroll-smooth">{props.children}</html>',
+      ].join("\n"),
+    },
+    globals: {
+      path: "styles/globals.css",
+      diff: [
+        "-  --brand: #6366f1;",
+        "-  --surface: #f8fafc;",
+        "+  --brand: #2563eb;",
+        "+  --surface: #f1f5f9;",
+        "+  --radius-card: 12px;",
+      ].join("\n"),
+    },
+    meta: {
+      path: "public/og-meta.json",
+      diff: [
+        "-  \"title\": \"Draft page\",",
+        "-  \"description\": \"\",",
+        "+  \"title\": \"" + slug + " · preview\",",
+        "+  \"description\": \"AI 생성 데모 메타\"",
+      ].join("\n"),
+    },
+  };
+}
+
+function agentDiffToHtml(diff: string): string {
+  return diff
+    .split("\n")
+    .map((line) => {
+      if (line.startsWith("+")) {
+        return `<span class="agent-diff__line agent-diff__line--add">${escapeHtml(line)}</span>`;
+      }
+      if (line.startsWith("-")) {
+        return `<span class="agent-diff__line agent-diff__line--del">${escapeHtml(line)}</span>`;
+      }
+      return `<span class="agent-diff__line agent-diff__line--ctx">${escapeHtml(line)}</span>`;
+    })
+    .join("");
+}
+
+const AGENT_TREE_SVG_FOLDER =
+  '<span class="agent-tree__icon agent-tree__icon--folder" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg></span>';
+
+const AGENT_TREE_SVG_FILE =
+  '<span class="agent-tree__icon agent-tree__icon--file" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></span>';
+
+function getAgentCodeTreeFoldersHTML(slugLabel: string): string {
+  return `<ul class="agent-tree" role="tree">
+      <li class="agent-tree__node" role="treeitem" aria-expanded="true">
+        <div class="agent-tree__row agent-tree__row--folder">
+          ${AGENT_TREE_SVG_FOLDER}
+          <span class="agent-tree__label">sites</span>
+          <span class="agent-tree__badge">3</span>
+        </div>
+        <ul class="agent-tree__subs" role="group">
+          <li class="agent-tree__node" role="treeitem" aria-expanded="true">
+            <div class="agent-tree__row agent-tree__row--folder">
+              ${AGENT_TREE_SVG_FOLDER}
+              <span class="agent-tree__label">${slugLabel}</span>
+              <span class="agent-tree__badge">2</span>
+            </div>
+            <ul class="agent-tree__subs" role="group">
+              <li role="none">
+                <button type="button" class="agent-tree__row agent-tree__row--file agent-tree__row--active" data-agent-file="index" role="treeitem">
+                  ${AGENT_TREE_SVG_FILE}
+                  <span class="agent-tree__label">index.html</span>
+                  <span class="agent-tree__badge">2</span>
+                </button>
+              </li>
+              <li role="none">
+                <button type="button" class="agent-tree__row agent-tree__row--file" data-agent-file="layout" role="treeitem">
+                  ${AGENT_TREE_SVG_FILE}
+                  <span class="agent-tree__label">layout.tsx</span>
+                  <span class="agent-tree__badge">1</span>
+                </button>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li class="agent-tree__node" role="treeitem" aria-expanded="true">
+        <div class="agent-tree__row agent-tree__row--folder">
+          ${AGENT_TREE_SVG_FOLDER}
+          <span class="agent-tree__label">styles</span>
+          <span class="agent-tree__badge">1</span>
+        </div>
+        <ul class="agent-tree__subs" role="group">
+          <li role="none">
+            <button type="button" class="agent-tree__row agent-tree__row--file" data-agent-file="globals" role="treeitem">
+              ${AGENT_TREE_SVG_FILE}
+              <span class="agent-tree__label">globals.css</span>
+              <span class="agent-tree__badge">1</span>
+            </button>
+          </li>
+        </ul>
+      </li>
+      <li class="agent-tree__node" role="treeitem" aria-expanded="true">
+        <div class="agent-tree__row agent-tree__row--folder">
+          ${AGENT_TREE_SVG_FOLDER}
+          <span class="agent-tree__label">public</span>
+          <span class="agent-tree__badge">1</span>
+        </div>
+        <ul class="agent-tree__subs" role="group">
+          <li role="none">
+            <button type="button" class="agent-tree__row agent-tree__row--file" data-agent-file="meta" role="treeitem">
+              ${AGENT_TREE_SVG_FILE}
+              <span class="agent-tree__label">og-meta.json</span>
+              <span class="agent-tree__badge">1</span>
+            </button>
+          </li>
+        </ul>
+      </li>
+    </ul>`;
+}
+
+function getAgentCodeTreeTagsHTML(): string {
+  return `<div class="agent-tree-tags">
+      <p class="agent-tree-tags__hint">태그로 묶인 변경 파일입니다. 항목을 누르면 같은 diff가 열립니다. (데모)</p>
+      <ul class="agent-tree-tags__list">
+        <li>
+          <button type="button" class="agent-tree-tag agent-tree-tag--active" data-agent-file="index">
+            <span class="agent-tree-tag__text">페이지 · 히어로</span>
+            <span class="agent-tree-tag__badge">2</span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="agent-tree-tag" data-agent-file="layout">
+            <span class="agent-tree-tag__text">레이아웃 / 루트</span>
+            <span class="agent-tree-tag__badge">1</span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="agent-tree-tag" data-agent-file="globals">
+            <span class="agent-tree-tag__text">디자인 토큰</span>
+            <span class="agent-tree-tag__badge">1</span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="agent-tree-tag" data-agent-file="meta">
+            <span class="agent-tree-tag__text">SEO · 메타</span>
+            <span class="agent-tree-tag__badge">1</span>
+          </button>
+        </li>
+      </ul>
+    </div>`;
+}
+
+function getAgentCodeWorkspaceHTML(p: DemoProject): string {
+  const map = buildAgentCodeFileMap(p.slug);
+  const first = map.index;
+  const slugEsc = escapeHtml(p.slug);
+  const foldersTree = getAgentCodeTreeFoldersHTML(slugEsc);
+  const tagsPane = getAgentCodeTreeTagsHTML();
+  return `<div class="agent-code-workspace">
+      <aside class="agent-tree-panel" aria-label="코드 탐색">
+        <div class="agent-tree-tabs" role="tablist" aria-label="탐색기 모드">
+          <button type="button" class="agent-tree-tabs__btn agent-tree-tabs__btn--active" role="tab" aria-selected="true" id="agentCodeTreeTabFolders" data-agent-code-tree-tab="folders">Folders</button>
+          <button type="button" class="agent-tree-tabs__btn" role="tab" aria-selected="false" id="agentCodeTreeTabTags" data-agent-code-tree-tab="tags">Tags</button>
+        </div>
+        <div class="agent-tree-panel__body">
+          <div class="agent-tree-panel__pane" role="tabpanel" aria-labelledby="agentCodeTreeTabFolders" data-agent-code-tree-pane="folders" id="agentCodeTreePaneFolders">
+            ${foldersTree}
+          </div>
+          <div class="agent-tree-panel__pane" role="tabpanel" aria-labelledby="agentCodeTreeTabTags" data-agent-code-tree-pane="tags" id="agentCodeTreePaneTags" hidden>
+            ${tagsPane}
+          </div>
+        </div>
+      </aside>
+      <div class="agent-code-viewer">
+        <p class="agent-code-panel__meta" id="agentCodeFileMeta"><code>${escapeHtml(first.path)}</code><span> · 데모 diff</span></p>
+        <div class="agent-code-panel__diff" id="agentCodeDiffBody" tabindex="0">${agentDiffToHtml(first.diff)}</div>
+      </div>
+    </div>`;
+}
+
+type AgentPipelineStepState =
+  | "done"
+  | "running"
+  | "pending"
+  | "failed"
+  | "skipped";
+
+interface AgentPipelineStep {
+  title: string;
+  detail: string;
+  state: AgentPipelineStepState;
+}
+
+function getAgentPipelineSteps(p: DemoProject): AgentPipelineStep[] {
+  const ver = p.deployVersion > 0 ? `아티팩트 v${p.deployVersion}` : "아티팩트 없음";
+  if (p.status === "done") {
+    return [
+      { title: "Lint · 타입체크", detail: "통과 · ~14s", state: "done" },
+      { title: "의존성 설치 · 빌드", detail: `성공 · ${ver}`, state: "done" },
+      { title: "Preview 배포", detail: "preview 브랜치 반영 완료", state: "done" },
+      { title: "승인 · main 병합", detail: "승인됨 · CI 통과", state: "done" },
+      { title: "Production 배포", detail: "GitHub Pages · 라이브", state: "done" },
+      { title: "배포 후 스모크", detail: "HTTP 200 · 엣지 캐시", state: "done" },
+    ];
+  }
+  if (p.status === "deploying") {
+    return [
+      { title: "Lint · 타입체크", detail: "통과", state: "done" },
+      { title: "의존성 설치 · 빌드", detail: "성공", state: "done" },
+      { title: "Preview 배포", detail: "진행 중 · DNS·SSL 전파", state: "running" },
+      { title: "승인 · main 병합", detail: "대기 중", state: "pending" },
+      { title: "Production 배포", detail: "대기 중", state: "pending" },
+      { title: "배포 후 스모크", detail: "—", state: "pending" },
+    ];
+  }
+  if (p.status === "failed") {
+    const err = p.subtitle.trim() || "빌드 단계에서 종료";
+    return [
+      { title: "Lint · 타입체크", detail: "통과", state: "done" },
+      { title: "의존성 설치 · 빌드", detail: err, state: "failed" },
+      { title: "Preview 배포", detail: "스킵", state: "skipped" },
+      { title: "승인 · main 병합", detail: "—", state: "skipped" },
+      { title: "Production 배포", detail: "—", state: "skipped" },
+      { title: "배포 후 스모크", detail: "—", state: "skipped" },
+    ];
+  }
+  return [
+    { title: "Lint · 타입체크", detail: "저장소 훅 연결 후 실행", state: "pending" },
+    { title: "의존성 설치 · 빌드", detail: "첫 유효 커밋 필요", state: "pending" },
+    { title: "Preview 배포", detail: "—", state: "pending" },
+    { title: "승인 · main 병합", detail: "—", state: "pending" },
+    { title: "Production 배포", detail: "—", state: "pending" },
+    { title: "배포 후 스모크", detail: "—", state: "pending" },
+  ];
+}
+
+function getAgentPipelineSectionHTML(p: DemoProject): string {
+  const steps = getAgentPipelineSteps(p);
+  const rows = steps
+    .map(
+      (s) => `<li class="agent-pipeline__step agent-pipeline__step--${s.state}">
+      <div class="agent-pipeline__track">
+        <span class="agent-pipeline__mark"></span>
+      </div>
+      <div class="agent-pipeline__step-body">
+        <span class="agent-pipeline__step-title">${escapeHtml(s.title)}</span>
+        <span class="agent-pipeline__step-detail">${escapeHtml(s.detail)}</span>
+      </div>
+    </li>`,
+    )
+    .join("");
+  const runLabel =
+    p.status === "done"
+      ? `최근 실행 · 성공 (${escapeHtml(p.updated)})`
+      : p.status === "deploying"
+        ? "실행 중 · Preview 배포 단계"
+        : p.status === "failed"
+          ? "최근 실행 · 실패 (로그 확인)"
+          : "파이프라인 대기 중";
+  return `<section class="agent-pipeline agent-pipeline--embed" aria-labelledby="agent-pipeline-title">
+      <div class="agent-pipeline__head">
+        <div class="agent-pipeline__head-text">
+          <h2 id="agent-pipeline-title" class="agent-pipeline__title">코드 배포 파이프라인</h2>
+          <p class="agent-pipeline__run">${runLabel}</p>
+        </div>
+        <button type="button" class="agent-pipeline__log-btn" id="agentPipelineLog">워크플로 로그</button>
+      </div>
+      <ol class="agent-pipeline__steps">${rows}</ol>
+      <p class="agent-pipeline__hint">CI(GitHub Actions 등)와 연동하면 동일한 단계가 자동으로 갱신됩니다. 지금은 프로젝트 상태 기준 데모입니다.</p>
+    </section>`;
+}
+
+function getProjectAgentInnerHTML(p: DemoProject): string {
+  const slugSafe = escapeHtml(p.slug);
+  const backHref = getProjectHash(p.slug);
+  const previewIframe = getAgentWorkspacePreviewIframeHTML();
+  const codePanel = getAgentCodeWorkspaceHTML(p);
+  const pipeline = getAgentPipelineSectionHTML(p);
+  const liveExtra = isProjectLiveUrl(p)
+    ? `<p class="agent-live-link"><a href="${escapeHtml(p.subtitle.trim())}" target="_blank" rel="noopener noreferrer">실제 라이브 URL 열기 ↗</a></p>`
+    : "";
+
+  return `
+      <div class="agent-page">
+        <div class="agent-shell">
+          <div class="agent-main-col">
+            <div class="agent-toolbar">
+              <a class="agent-exit" href="${backHref}">
+                <span class="agent-exit__chev" aria-hidden="true">‹</span>
+                나가기
+              </a>
+              <div class="agent-tabs" role="tablist" aria-label="작업 영역">
+                <button type="button" class="agent-tab agent-tab--active" role="tab" aria-selected="true" aria-controls="agentPanelPreview" id="agentTabPreview" data-agent-tab="preview">미리보기</button>
+                <button type="button" class="agent-tab" role="tab" aria-selected="false" aria-controls="agentPanelCode" id="agentTabCode" data-agent-tab="code">Code (Diff)</button>
+                <button type="button" class="agent-tab" role="tab" aria-selected="false" aria-controls="agentPanelPipeline" id="agentTabPipeline" data-agent-tab="pipeline">Pipeline</button>
+              </div>
+              <span class="agent-branch-pill">preview branch</span>
+            </div>
+
+            <div class="agent-panels">
+              <div class="agent-panel" id="agentPanelPreview" role="tabpanel" aria-labelledby="agentTabPreview" data-agent-panel="preview">
+                <div class="agent-browser-chrome">
+                  <div class="agent-browser-chrome__dots" aria-hidden="true">
+                    <span></span><span></span><span></span>
+                  </div>
+                  <div class="agent-browser-chrome__url" title="프리뷰 환경 (데모)">sys-ai-preview-env.local</div>
+                </div>
+                <div class="agent-preview__frame agent-preview__frame--panel">
+                  ${previewIframe}
+                </div>
+                ${liveExtra}
+              </div>
+              <div class="agent-panel" id="agentPanelCode" role="tabpanel" aria-labelledby="agentTabCode" data-agent-panel="code" hidden>
+                ${codePanel}
+              </div>
+              <div class="agent-panel agent-panel--scroll" id="agentPanelPipeline" role="tabpanel" aria-labelledby="agentTabPipeline" data-agent-panel="pipeline" hidden>
+                <div class="agent-panel__inner">
+                  ${pipeline}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <aside class="agent-sidebar" aria-label="SYS.AI Agent">
+            <header class="agent-sidebar__head">
+              <h2 class="agent-sidebar__title">SYS.AI Agent</h2>
+              <button type="button" class="agent-sidebar__help" id="agentHelpBtn">도움말 보기</button>
+            </header>
+            <div id="agentChatThread" class="agent-sidebar__thread">
+              <div class="agent-bubble agent-bubble--ai">
+                <div class="agent-bubble__body">안녕하세요! <strong>${slugSafe}</strong> 워크스페이스입니다. 추천 프롬프트를 눌러 보면 수정과 배포가 어떻게 이어지는지 데모로 확인할 수 있어요.</div>
+              </div>
+            </div>
+            <form id="agentChatForm" class="agent-sidebar__composer">
+              <div class="agent-suggestions">
+                <button type="button" class="agent-suggestion" data-agent-chip="UI 수정 요청: 히어로 섹션을 더 미니멀하게 바꿔 주세요">UI 수정 요청</button>
+                <button type="button" class="agent-suggestion" data-agent-chip="도메인 연결과 프로덕션 배포 일정을 알려 주세요">도메인 &amp; 배포 요청</button>
+              </div>
+              <label class="agent-visually-hidden" for="agentChatInput">메시지 입력</label>
+              <div class="agent-compose-row">
+                <textarea id="agentChatInput" class="agent-compose__input" rows="2" placeholder="직접 입력하거나 위 추천 버튼을 누르세요" autocomplete="off"></textarea>
+                <button type="submit" class="agent-compose__send" id="agentChatSend" aria-label="보내기">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                </button>
+              </div>
+            </form>
+          </aside>
+        </div>
+      </div>`;
+}
+
+function bindProjectAgentPage(p: DemoProject): void {
+  const form = document.getElementById("agentChatForm");
+  const input = document.getElementById("agentChatInput") as HTMLTextAreaElement | null;
+  const thread = document.getElementById("agentChatThread");
+  if (!form || !input || !thread) return;
+
+  const codeFileMap = buildAgentCodeFileMap(p.slug);
+  const codeMetaEl = document.getElementById("agentCodeFileMeta");
+  const codeDiffEl = document.getElementById("agentCodeDiffBody");
+  const codePanelEl = document.getElementById("agentPanelCode");
+
+  const showAgentCodeFile = (fileId: string): void => {
+    const entry = codeFileMap[fileId];
+    if (!entry || !codeMetaEl || !codeDiffEl) return;
+    codeMetaEl.innerHTML = `<code>${escapeHtml(entry.path)}</code><span> · 데모 diff</span>`;
+    codeDiffEl.innerHTML = agentDiffToHtml(entry.diff);
+    codePanelEl?.querySelectorAll<HTMLElement>(".agent-tree__row--file[data-agent-file]").forEach((row) => {
+      row.classList.toggle("agent-tree__row--active", row.dataset.agentFile === fileId);
+    });
+    codePanelEl?.querySelectorAll<HTMLButtonElement>(".agent-tree-tag[data-agent-file]").forEach((tag) => {
+      tag.classList.toggle("agent-tree-tag--active", tag.dataset.agentFile === fileId);
+    });
+  };
+
+  codePanelEl?.addEventListener("click", (e) => {
+    const hit = (e.target as HTMLElement).closest("[data-agent-file]");
+    if (hit instanceof HTMLButtonElement) {
+      const fid = hit.dataset.agentFile;
+      if (fid) showAgentCodeFile(fid);
+    }
+  });
+
+  const treeTabButtons = codePanelEl?.querySelectorAll<HTMLButtonElement>("[data-agent-code-tree-tab]");
+  treeTabButtons?.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const id = tab.dataset.agentCodeTreeTab;
+      const root = codePanelEl;
+      if (!id || !root) return;
+      root.querySelectorAll<HTMLButtonElement>("[data-agent-code-tree-tab]").forEach((t) => {
+        const on = t.dataset.agentCodeTreeTab === id;
+        t.classList.toggle("agent-tree-tabs__btn--active", on);
+        t.setAttribute("aria-selected", String(on));
+      });
+      root.querySelectorAll<HTMLElement>("[data-agent-code-tree-pane]").forEach((pane) => {
+        const on = pane.dataset.agentCodeTreePane === id;
+        pane.toggleAttribute("hidden", !on);
+      });
+    });
+  });
+
+  document.querySelectorAll<HTMLButtonElement>("[data-agent-tab]").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const id = tab.dataset.agentTab;
+      if (!id) return;
+      document.querySelectorAll<HTMLButtonElement>("[data-agent-tab]").forEach((t) => {
+        const on = t.dataset.agentTab === id;
+        t.classList.toggle("agent-tab--active", on);
+        t.setAttribute("aria-selected", String(on));
+      });
+      document.querySelectorAll<HTMLElement>("[data-agent-panel]").forEach((panel) => {
+        const on = panel.dataset.agentPanel === id;
+        panel.toggleAttribute("hidden", !on);
+      });
+    });
+  });
+
+  document.querySelectorAll<HTMLButtonElement>(".agent-suggestion").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const v = chip.getAttribute("data-agent-chip");
+      if (v) {
+        input.value = v;
+        input.focus();
+      }
+    });
+  });
+
+  document.getElementById("agentHelpBtn")?.addEventListener("click", () => {
+    window.alert(
+      "SYS.AI Agent에서는 자연어로 UI·카피·배포를 요청할 수 있습니다.\n\n미리보기: 생성 페이지 확인\nCode (Diff): 변경 파일 데모\nPipeline: CI/CD 단계 확인\n\n실제 제품에서는 이 화면이 저장소·호스팅과 실시간으로 연동됩니다.",
+    );
+  });
+
+  const demoReply = (userText: string): string => {
+    const short = userText.length > 160 ? `${userText.slice(0, 160)}…` : userText;
+    return `「${short}」 반영해 볼게요. ${p.slug} 기준으로 (1) 미리보기 HTML을 고치고 (2) Code 탭에 diff를 쌓은 뒤 (3) Pipeline에서 빌드·배포 단계로 넘깁니다. 데모라 이 브라우저 안에서만 메시지가 쌓입니다.`;
+  };
+
+  const appendUser = (text: string): void => {
+    const wrap = document.createElement("div");
+    wrap.className = "agent-bubble agent-bubble--user";
+    wrap.innerHTML = `<div class="agent-bubble__body"></div>`;
+    wrap.querySelector(".agent-bubble__body")!.textContent = text;
+    thread.appendChild(wrap);
+  };
+
+  const appendAssistant = (text: string): void => {
+    const wrap = document.createElement("div");
+    wrap.className = "agent-bubble agent-bubble--ai";
+    wrap.innerHTML = `<div class="agent-bubble__body"></div>`;
+    wrap.querySelector(".agent-bubble__body")!.textContent = text;
+    thread.appendChild(wrap);
+  };
+
+  const scrollThread = (): void => {
+    thread.scrollTop = thread.scrollHeight;
+  };
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = "";
+    appendUser(text);
+    scrollThread();
+    window.setTimeout(() => {
+      appendAssistant(demoReply(text));
+      scrollThread();
+    }, 400);
+  });
+
+  document.getElementById("agentPipelineLog")?.addEventListener("click", () => {
+    const slugLine = `workflow: ${p.slug} · preview-ci.yml (데모)`;
+    let body: string;
+    if (p.status === "failed") {
+      body = `[00:08] checkout ref=preview\n[00:12] npm ci — 184 packages\n[00:41] npm run build\n[00:42] ✖ ${p.subtitle || "Exit code 1"}\n[00:42] 빌드 단계 실패 · 아티팩트 미생성`;
+    } else if (p.status === "done") {
+      body = `[00:07] checkout\n[00:11] npm ci\n[00:38] npm run build — ok\n[00:39] upload artifact ${p.deployVersion > 0 ? `v${p.deployVersion}` : "build/"}\n[00:55] deploy pages — production\n[00:58] smoke https://… — 200 OK`;
+    } else if (p.status === "deploying") {
+      body = `[00:06] checkout preview\n[00:10] npm ci\n[00:35] npm run build — ok\n[00:36] deploy preview — running\n[00:36] … Waiting for DNS propagation`;
+    } else {
+      body = `[—] 워크플로가 아직 트리거되지 않았습니다.\n[—] 첫 푸시 또는 “Open AI Agent”에서 생성된 커밋이 들어오면 파이프라인이 시작됩니다.`;
+    }
+    window.alert(`${slugLine}\n\n${body}`);
+  });
+}
+
 function bindProjectListPage(): void {
   document.getElementById("projBtnZip")?.addEventListener("click", () => {
-    window.alert("ZIP 업로드 후 구조 분석·미리보기 생성까지 연결됩니다. (PRD FR-3)");
+    window.alert(
+      "ZIP 업로드 후 구조 분석·미리보기 생성까지 연결됩니다. (PRD FR-3)",
+    );
   });
   document.getElementById("projBtnGh")?.addEventListener("click", () => {
-    window.alert("GitHub 연동 후 저장소 목록에서 선택·가져오기 확인 단계로 진입합니다. (PRD FR-4)");
+    window.alert(
+      "GitHub 연동 후 저장소 목록에서 선택·가져오기 확인 단계로 진입합니다. (PRD FR-4)",
+    );
   });
   document.getElementById("projBtnNew")?.addEventListener("click", () => {
-    window.alert("빠른 초안 / 고완성도 초안 모드 선택 후 작업이 시작됩니다. (PRD FR-2)");
+    window.alert(
+      "빠른 초안 / 고완성도 초안 모드 선택 후 작업이 시작됩니다. (PRD FR-2)",
+    );
   });
   const grid = document.getElementById("projGrid");
   grid?.addEventListener("click", (e) => {
@@ -1284,11 +1909,63 @@ function bindProjectListPage(): void {
   });
   grid?.addEventListener("keydown", (e) => {
     if (e.key !== "Enter" && e.key !== " ") return;
-    const hit = (e.target as HTMLElement).closest(".proj-card__hit") as HTMLElement | null;
+    const hit = (e.target as HTMLElement).closest(
+      ".proj-card__hit",
+    ) as HTMLElement | null;
     const nav = hit?.dataset.projectNav;
     if (nav) {
       e.preventDefault();
       window.location.hash = nav;
+    }
+  });
+
+  const setProjectListPage = (page: number): void => {
+    const nav = document.getElementById("projPagination");
+    if (!nav) return;
+    const clamped = Math.max(
+      1,
+      Math.min(PROJECT_LIST_PAGE_COUNT, Math.floor(page)),
+    );
+    nav.querySelectorAll<HTMLButtonElement>("[data-proj-page]").forEach((b) => {
+      const n = Number(b.dataset.projPage);
+      const on = n === clamped;
+      b.classList.toggle("proj-pagination__btn--current", on);
+      if (on) b.setAttribute("aria-current", "page");
+      else b.removeAttribute("aria-current");
+    });
+    document
+      .getElementById("projPaginationPrev")
+      ?.toggleAttribute("disabled", clamped <= 1);
+    document
+      .getElementById("projPaginationNext")
+      ?.toggleAttribute("disabled", clamped >= PROJECT_LIST_PAGE_COUNT);
+    const st = document.getElementById("projPaginationStatus");
+    if (st) {
+      st.innerHTML = `<strong>${clamped}</strong> / ${PROJECT_LIST_PAGE_COUNT}`;
+    }
+  };
+
+  document.getElementById("projPagination")?.addEventListener("click", (e) => {
+    const el = e.target as HTMLElement;
+    if (el.closest("#projPaginationPrev")) {
+      const cur =
+        document.querySelector<HTMLButtonElement>(
+          ".proj-pagination__btn--current[data-proj-page]",
+        )?.dataset.projPage ?? "1";
+      setProjectListPage(Number(cur) - 1);
+      return;
+    }
+    if (el.closest("#projPaginationNext")) {
+      const cur =
+        document.querySelector<HTMLButtonElement>(
+          ".proj-pagination__btn--current[data-proj-page]",
+        )?.dataset.projPage ?? "1";
+      setProjectListPage(Number(cur) + 1);
+      return;
+    }
+    const t = el.closest("[data-proj-page]");
+    if (t instanceof HTMLButtonElement) {
+      setProjectListPage(Number(t.dataset.projPage));
     }
   });
 }
@@ -1309,7 +1986,7 @@ function bindProjectDetailPage(p: DemoProject): void {
   });
 
   document.getElementById("projOpenAgent")?.addEventListener("click", () => {
-    window.alert("미리보기·대화·승인 패널이 있는 작업 화면은 다음 구현 단계에서 연결됩니다. (PRD 화면 3)");
+    window.location.hash = getProjectAgentHash(p.slug);
   });
 
   const modal = document.getElementById("projRemoveModal");
@@ -1317,13 +1994,21 @@ function bindProjectDetailPage(p: DemoProject): void {
     if (modal) modal.hidden = !show;
   };
 
-  document.getElementById("projRemoveOpen")?.addEventListener("click", () => showModal(true));
-  document.getElementById("projRemoveBackdrop")?.addEventListener("click", () => showModal(false));
-  document.getElementById("projRemoveCancel")?.addEventListener("click", () => showModal(false));
-  document.getElementById("projRemoveConfirm")?.addEventListener("click", () => {
-    showModal(false);
-    window.location.hash = HASH_PROJECTS;
-  });
+  document
+    .getElementById("projRemoveOpen")
+    ?.addEventListener("click", () => showModal(true));
+  document
+    .getElementById("projRemoveBackdrop")
+    ?.addEventListener("click", () => showModal(false));
+  document
+    .getElementById("projRemoveCancel")
+    ?.addEventListener("click", () => showModal(false));
+  document
+    .getElementById("projRemoveConfirm")
+    ?.addEventListener("click", () => {
+      showModal(false);
+      window.location.hash = HASH_PROJECTS;
+    });
 }
 
 function mountLanding(): void {
@@ -1360,11 +2045,22 @@ function mountApp(): void {
   let inner: string;
   let title: string;
   let sidebar: "dashboard" | "projects" = "dashboard";
+  let mainExtraClass = "";
+  let omitSidebar = false;
 
   if (route.kind === "projects") {
     sidebar = "projects";
     inner = getProjectsInnerHTML();
     title = "프로젝트 — AI Web Builder";
+  } else if (route.kind === "projectAgent") {
+    sidebar = "projects";
+    const p = DEMO_PROJECTS.find((x) => x.slug === route.slug);
+    inner = p ? getProjectAgentInnerHTML(p) : getProjectNotFoundInnerHTML();
+    title = p ? `${p.slug} · 에이전트 — AI Web Builder` : "프로젝트 — AI Web Builder";
+    if (p) {
+      mainExtraClass = "app-main--agent";
+      omitSidebar = true;
+    }
   } else if (route.kind === "project") {
     sidebar = "projects";
     const p = DEMO_PROJECTS.find((x) => x.slug === route.slug);
@@ -1375,11 +2071,14 @@ function mountApp(): void {
     title = "대시보드 — AI Web Builder";
   }
 
-  root.innerHTML = getAppLayoutHTML(sidebar, inner);
+  root.innerHTML = getAppLayoutHTML(sidebar, inner, mainExtraClass, omitSidebar);
   document.title = title;
 
   if (route.kind === "projects") {
     bindProjectListPage();
+  } else if (route.kind === "projectAgent") {
+    const proj = DEMO_PROJECTS.find((x) => x.slug === route.slug);
+    if (proj) bindProjectAgentPage(proj);
   } else if (route.kind === "project") {
     const proj = DEMO_PROJECTS.find((x) => x.slug === route.slug);
     if (proj) bindProjectDetailPage(proj);
