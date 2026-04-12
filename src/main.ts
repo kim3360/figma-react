@@ -9,9 +9,29 @@ function getAppRoot(): HTMLDivElement {
 
 const root = getAppRoot();
 
+let projNewModalEscapeListenerAttached = false;
+let projTemplateSliderResizeListenerAttached = false;
+
 const HASH_DASHBOARD = "#/app";
 const HASH_MAIN_ALT = "#/main";
 const HASH_PROJECTS = "#/app/projects";
+/** 프로젝트 목록에서 「새 프로젝트」모달 (프로젝트 slug로 `create`는 사용하지 않음) */
+const HASH_PROJECTS_CREATE = "#/app/projects/create";
+
+function replaceLocationHashNoNavigate(hash: string): void {
+  const url = new URL(window.location.href);
+  url.hash = hash;
+  history.replaceState(null, "", url.toString());
+}
+
+function dismissProjectsCreateModal(): void {
+  const m = document.getElementById("projNewModal");
+  if (!m || m.hidden) return;
+  m.hidden = true;
+  if (window.location.hash === HASH_PROJECTS_CREATE) {
+    replaceLocationHashNoNavigate(HASH_PROJECTS);
+  }
+}
 
 function getProjectHash(slug: string): string {
   return `${HASH_PROJECTS}/${encodeURIComponent(slug)}`;
@@ -37,21 +57,24 @@ function isAppRoute(): boolean {
 
 type AppRoute =
   | { kind: "dashboard" }
-  | { kind: "projects" }
+  | { kind: "projects"; createModalOpen: boolean }
   | { kind: "project"; slug: string }
   | { kind: "projectAgent"; slug: string; tab: AgentWorkspaceTab };
 
 function parseAppRoute(): AppRoute {
   const h = window.location.hash;
   if (h === HASH_PROJECTS || h === "#/app/projects/") {
-    return { kind: "projects" };
+    return { kind: "projects", createModalOpen: false };
   }
   const prefix = "#/app/projects/";
   if (h.startsWith(prefix)) {
     const rest = h.slice(prefix.length).replace(/\/$/, "");
     const segments = rest.split("/").filter(Boolean);
     if (segments.length === 0) {
-      return { kind: "projects" };
+      return { kind: "projects", createModalOpen: false };
+    }
+    if (segments.length === 1 && segments[0] === "create") {
+      return { kind: "projects", createModalOpen: true };
     }
     const slug = decodeURIComponent(segments[0]);
     if (segments[1] === "agent") {
@@ -919,6 +942,207 @@ function getProjectsInnerHTML(): string {
           ${cards}
         </div>
         ${pagination}
+      </div>
+
+      <div id="projNewModal" class="proj-modal proj-modal--create" hidden>
+        <div class="proj-modal__backdrop" id="projNewBackdrop" tabindex="-1"></div>
+        <div class="proj-modal__dialog proj-modal__dialog--new" role="dialog" aria-modal="true" aria-labelledby="projNewModalTitle">
+          <div class="proj-modal__accent-bar" aria-hidden="true"></div>
+          <div class="proj-modal__head proj-modal__head--new">
+            <div class="proj-modal__title-block">
+              <p class="proj-modal__eyebrow">워크스페이스</p>
+              <h2 id="projNewModalTitle" class="proj-modal__title proj-modal__title--new">새 프로젝트 생성</h2>
+              <p class="proj-modal__lede">템플릿을 고르면 미리보기와 에이전트 대화까지 한 흐름으로 이어집니다.</p>
+            </div>
+            <button type="button" class="proj-modal__close" id="projNewClose" aria-label="닫기">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <form id="projNewForm" class="proj-new-form">
+            <div class="proj-new-field proj-new-field--name">
+              <label class="proj-new-label" for="projNewName">프로젝트 이름</label>
+              <div class="proj-new-input-wrap">
+                <span class="proj-new-input__prefix" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
+                </span>
+                <input
+                  id="projNewName"
+                  name="name"
+                  class="proj-new-input proj-new-input--with-prefix"
+                  type="text"
+                  autocomplete="off"
+                  maxlength="80"
+                  placeholder="예: my-awesome-project"
+                  aria-describedby="projNewNameHint"
+                  required
+                />
+              </div>
+              <p class="proj-new-hint" id="projNewNameHint">영문·숫자·하이픈을 권장합니다. 나중에 언제든 바꿀 수 있어요.</p>
+            </div>
+            <fieldset class="proj-new-fieldset">
+              <legend class="proj-new-label">템플릿 선택 <span class="proj-new-label__muted">(기본: 빈 프로젝트)</span></legend>
+              <p class="proj-template-slider__hint">총 5종 · 기본으로 3개가 보이며, 좌우 화살표나 스와이프로 나머지를 볼 수 있어요.</p>
+              <div class="proj-template-slider" id="projTemplateSlider">
+                <button type="button" class="proj-template-slider__nav proj-template-slider__nav--prev" id="projTemplatePrev" aria-label="이전 템플릿">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+                <div class="proj-template-slider__viewport" id="projTemplateViewport" tabindex="0" role="region" aria-label="템플릿 목록, 좌우로 스크롤">
+                  <div class="proj-template-slider__track" id="projTemplateTrack">
+                    <label class="proj-template-card">
+                      <input class="proj-template-card__input" type="radio" name="template" value="empty" />
+                      <span class="proj-template-card__check" aria-hidden="true">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                      </span>
+                      <span class="proj-template-card__icon proj-template-card__icon--empty" aria-hidden="true"><span class="proj-template-card__plus">+</span></span>
+                      <span class="proj-template-card__title">빈 프로젝트</span>
+                      <span class="proj-template-card__desc">구조만 만들고 에이전트로 채우기</span>
+                    </label>
+                    <label class="proj-template-card">
+                      <input class="proj-template-card__input" type="radio" name="template" value="landing" checked />
+                      <span class="proj-template-card__check" aria-hidden="true">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                      </span>
+                      <span class="proj-template-card__icon" aria-hidden="true"></span>
+                      <span class="proj-template-card__title">랜딩 페이지</span>
+                      <span class="proj-template-card__desc">히어로 · CTA 중심 단일 페이지</span>
+                    </label>
+                    <label class="proj-template-card">
+                      <input class="proj-template-card__input" type="radio" name="template" value="portfolio" />
+                      <span class="proj-template-card__check" aria-hidden="true">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                      </span>
+                      <span class="proj-template-card__icon proj-template-card__icon--portfolio" aria-hidden="true"></span>
+                      <span class="proj-template-card__title">포트폴리오</span>
+                      <span class="proj-template-card__desc">갤러리 · 작품 그리드 레이아웃</span>
+                    </label>
+                    <label class="proj-template-card">
+                      <input class="proj-template-card__input" type="radio" name="template" value="business" />
+                      <span class="proj-template-card__check" aria-hidden="true">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                      </span>
+                      <span class="proj-template-card__icon proj-template-card__icon--biz" aria-hidden="true"></span>
+                      <span class="proj-template-card__title">비즈니스</span>
+                      <span class="proj-template-card__desc">네비 · 서비스 소개형 멀티 페이지</span>
+                    </label>
+                    <label class="proj-template-card">
+                      <input class="proj-template-card__input" type="radio" name="template" value="blog" />
+                      <span class="proj-template-card__check" aria-hidden="true">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                      </span>
+                      <span class="proj-template-card__icon proj-template-card__icon--blog" aria-hidden="true"></span>
+                      <span class="proj-template-card__title">블로그 · 문서</span>
+                      <span class="proj-template-card__desc">글 목록 · 사이드바 · 검색</span>
+                    </label>
+                  </div>
+                </div>
+                <button type="button" class="proj-template-slider__nav proj-template-slider__nav--next" id="projTemplateNext" aria-label="다음 템플릿">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+              </div>
+            </fieldset>
+            <div id="projNewLandingThemes" class="proj-new-field proj-new-landing-themes">
+              <span class="proj-new-label" id="projNewLandingThemeLegend">
+                <span class="proj-new-label__dot" aria-hidden="true"></span>
+                세부 랜딩 테마
+              </span>
+              <div class="proj-theme-landing-stack">
+                <div class="proj-theme-grid" id="projThemeGrid" role="group" aria-labelledby="projNewLandingThemeLegend">
+                  <label class="proj-theme-card">
+                    <input class="proj-theme-card__input" type="radio" name="landingTheme" value="saas" checked />
+                    <span class="proj-theme-card__check" aria-hidden="true">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                    </span>
+                    <span class="proj-theme-card__preview proj-theme-card__preview--saas" aria-hidden="true"></span>
+                    <span class="proj-theme-card__copy">
+                      <span class="proj-theme-card__title">SaaS 프로덕트</span>
+                      <span class="proj-theme-card__desc">소프트웨어/앱 중심 모던 다크 테마</span>
+                    </span>
+                  </label>
+                  <label class="proj-theme-card">
+                    <input class="proj-theme-card__input" type="radio" name="landingTheme" value="local" />
+                    <span class="proj-theme-card__check" aria-hidden="true">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                    </span>
+                    <span class="proj-theme-card__preview proj-theme-card__preview--local" aria-hidden="true"></span>
+                    <span class="proj-theme-card__copy">
+                      <span class="proj-theme-card__title">로컬 비즈니스</span>
+                      <span class="proj-theme-card__desc">카페, 식당용 이미지 위주의 테마</span>
+                    </span>
+                  </label>
+                </div>
+                <div
+                  class="proj-theme-preview-stage"
+                  id="projThemePreviewStage"
+                  data-active-preview="saas"
+                  role="region"
+                  aria-label="랜딩 테마 미리보기"
+                >
+                  <p class="proj-theme-preview-live agent-visually-hidden" id="projThemePreviewLive" aria-live="polite"></p>
+                  <div class="proj-theme-preview-stage__bar">
+                    <span class="proj-theme-preview-stage__bar-title">미리보기</span>
+                    <span class="proj-theme-preview-stage__bar-hint">카드에 포인터를 올리면 해당 테마를 크게 볼 수 있어요.</span>
+                  </div>
+                  <div class="proj-theme-preview-stage__body">
+                    <div class="proj-theme-preview-mock proj-theme-preview-mock--saas" aria-hidden="true">
+                      <div class="proj-tpm-chrome">
+                        <span class="proj-tpm-chrome__dots" aria-hidden="true"><span></span><span></span><span></span></span>
+                        <span class="proj-tpm-chrome__url">app.example.com</span>
+                      </div>
+                      <div class="proj-tpm-saas">
+                        <div class="proj-tpm-saas__nav">
+                          <span class="proj-tpm-saas__logo"></span>
+                          <span class="proj-tpm-saas__navlinks"></span>
+                          <span class="proj-tpm-saas__navbtn"></span>
+                        </div>
+                        <div class="proj-tpm-saas__hero">
+                          <div class="proj-tpm-saas__kicker"></div>
+                          <div class="proj-tpm-saas__headline"></div>
+                          <div class="proj-tpm-saas__sub"></div>
+                          <div class="proj-tpm-saas__cta">
+                            <span></span><span></span>
+                          </div>
+                        </div>
+                        <div class="proj-tpm-saas__cards">
+                          <span></span><span></span><span></span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="proj-theme-preview-mock proj-theme-preview-mock--local" aria-hidden="true">
+                      <div class="proj-tpm-chrome proj-tpm-chrome--warm">
+                        <span class="proj-tpm-chrome__dots" aria-hidden="true"><span></span><span></span><span></span></span>
+                        <span class="proj-tpm-chrome__url">cafe.local</span>
+                      </div>
+                      <div class="proj-tpm-local">
+                        <div class="proj-tpm-local__photo"></div>
+                        <div class="proj-tpm-local__hero">
+                          <div class="proj-tpm-local__title"></div>
+                          <div class="proj-tpm-local__sub"></div>
+                        </div>
+                        <div class="proj-tpm-local__chips">
+                          <span></span><span></span><span></span>
+                        </div>
+                        <div class="proj-tpm-local__grid">
+                          <span></span><span></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="proj-new-banner" role="note">
+              <div class="proj-new-banner__glow" aria-hidden="true"></div>
+              <span class="proj-new-banner__icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2M12 19v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M3 12h2M19 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/><circle cx="12" cy="12" r="4" fill="currentColor" opacity="0.15"/></svg>
+              </span>
+              <p class="proj-new-banner__text">디자인 완성도 및 기능 추가는 생성 후 <strong>AI 에이전트</strong>와 대화하며 자유롭게 수정할 수 있습니다.</p>
+            </div>
+            <div class="proj-modal__actions proj-modal__actions--form">
+              <button type="button" class="app-btn app-btn--ghost proj-new-btn-cancel" id="projNewCancel">취소</button>
+              <button type="submit" class="app-btn app-btn--primary proj-new-submit" id="projNewSubmit">템플릿으로 생성</button>
+            </div>
+          </form>
+        </div>
       </div>`;
 }
 
@@ -1904,7 +2128,7 @@ function bindProjectAgentPage(p: DemoProject): void {
   });
 }
 
-function bindProjectListPage(): void {
+function bindProjectListPage(openCreateFromRoute = false): void {
   document.getElementById("projBtnZip")?.addEventListener("click", () => {
     window.alert(
       "ZIP 업로드 후 구조 분석·미리보기 생성까지 연결됩니다. (PRD FR-3)",
@@ -1915,11 +2139,235 @@ function bindProjectListPage(): void {
       "GitHub 연동 후 저장소 목록에서 선택·가져오기 확인 단계로 진입합니다. (PRD FR-4)",
     );
   });
-  document.getElementById("projBtnNew")?.addEventListener("click", () => {
-    window.alert(
-      "빠른 초안 / 고완성도 초안 모드 선택 후 작업이 시작됩니다. (PRD FR-2)",
+
+  const newModal = document.getElementById("projNewModal");
+  const newForm = document.getElementById("projNewForm") as HTMLFormElement | null;
+  const newNameInput = document.getElementById("projNewName") as HTMLInputElement | null;
+  const landingThemesEl = document.getElementById("projNewLandingThemes");
+  const themePreviewStage = document.getElementById("projThemePreviewStage");
+  const themePreviewLive = document.getElementById("projThemePreviewLive");
+  const projThemeGrid = document.getElementById("projThemeGrid");
+
+  let landingThemePreviewHover: string | null = null;
+
+  const landingThemePreviewLiveLabels: Record<string, string> = {
+    saas: "SaaS 프로덕트 테마 미리보기",
+    local: "로컬 비즈니스 테마 미리보기",
+  };
+
+  const refreshLandingThemePreview = (): void => {
+    if (!themePreviewStage || !newForm) return;
+    const checked =
+      newForm.querySelector<HTMLInputElement>('input[name="landingTheme"]:checked')?.value ?? "saas";
+    const show = landingThemePreviewHover ?? checked;
+    themePreviewStage.dataset.activePreview = show;
+    if (themePreviewLive) {
+      themePreviewLive.textContent = landingThemePreviewLiveLabels[show] ?? "";
+    }
+  };
+
+  const syncProjNewLandingThemes = (): void => {
+    const checked = newForm?.querySelector<HTMLInputElement>(
+      'input[name="template"]:checked',
     );
+    const show = checked?.value === "landing";
+    landingThemesEl?.toggleAttribute("hidden", !show);
+    if (!show) landingThemePreviewHover = null;
+    if (show) refreshLandingThemePreview();
+  };
+
+  const getTemplateScrollStride = (): number => {
+    const first = document.querySelector<HTMLElement>(
+      "#projTemplateTrack .proj-template-card",
+    );
+    if (!first) return 172;
+    return first.offsetWidth + 12;
+  };
+
+  const updateTemplateSliderNav = (): void => {
+    const vp = document.getElementById("projTemplateViewport");
+    const prev = document.getElementById("projTemplatePrev");
+    const next = document.getElementById("projTemplateNext");
+    if (!vp || !prev || !next) return;
+    const max = vp.scrollWidth - vp.clientWidth;
+    const left = vp.scrollLeft;
+    prev.toggleAttribute("disabled", left <= 1);
+    next.toggleAttribute("disabled", max <= 1 || left >= max - 1);
+  };
+
+  const scrollTemplateCardIntoView = (smooth: boolean): void => {
+    const checked = newForm?.querySelector<HTMLInputElement>(
+      'input[name="template"]:checked',
+    );
+    const card = checked?.closest(".proj-template-card") as HTMLElement | undefined;
+    if (!card) return;
+    card.scrollIntoView({
+      behavior: smooth ? "smooth" : "auto",
+      inline: "center",
+      block: "nearest",
+    });
+    window.setTimeout(updateTemplateSliderNav, smooth ? 320 : 40);
+  };
+
+  const openNewModal = (): void => {
+    if (!newModal || !newForm) return;
+    landingThemePreviewHover = null;
+    newModal.hidden = false;
+    newForm.reset();
+    syncProjNewLandingThemes();
+    window.setTimeout(() => {
+      scrollTemplateCardIntoView(false);
+      newNameInput?.focus();
+    }, 30);
+  };
+  const closeNewModal = (): void => {
+    dismissProjectsCreateModal();
+  };
+
+  const pushCreateModalHash = (): void => {
+    const url = new URL(window.location.href);
+    if (url.hash !== HASH_PROJECTS_CREATE) {
+      url.hash = HASH_PROJECTS_CREATE;
+      history.pushState(null, "", url.toString());
+    }
+  };
+
+  document.getElementById("projBtnNew")?.addEventListener("click", () => {
+    pushCreateModalHash();
+    openNewModal();
   });
+  document.getElementById("projNewCancel")?.addEventListener("click", () => {
+    closeNewModal();
+  });
+  document.getElementById("projNewClose")?.addEventListener("click", () => {
+    closeNewModal();
+  });
+  document.getElementById("projNewBackdrop")?.addEventListener("click", () => {
+    closeNewModal();
+  });
+  newForm?.addEventListener("change", (e) => {
+    const t = e.target as HTMLElement;
+    if (t.matches('input[name="template"]')) {
+      syncProjNewLandingThemes();
+      scrollTemplateCardIntoView(true);
+    }
+    if (t.matches('input[name="landingTheme"]')) {
+      landingThemePreviewHover = null;
+      refreshLandingThemePreview();
+    }
+  });
+
+  projThemeGrid?.addEventListener("mouseleave", () => {
+    landingThemePreviewHover = null;
+    refreshLandingThemePreview();
+  });
+  projThemeGrid?.querySelectorAll(".proj-theme-card").forEach((card) => {
+    card.addEventListener("mouseenter", () => {
+      const v = card.querySelector<HTMLInputElement>('input[name="landingTheme"]')?.value;
+      if (v) {
+        landingThemePreviewHover = v;
+        refreshLandingThemePreview();
+      }
+    });
+  });
+  projThemeGrid?.addEventListener("focusin", (ev) => {
+    const el = ev.target as HTMLElement;
+    const c = el.closest(".proj-theme-card");
+    if (!c) return;
+    const v = c.querySelector<HTMLInputElement>('input[name="landingTheme"]')?.value;
+    if (v) {
+      landingThemePreviewHover = v;
+      refreshLandingThemePreview();
+    }
+  });
+  projThemeGrid?.addEventListener("focusout", (ev) => {
+    const next = ev.relatedTarget as HTMLElement | null;
+    if (!projThemeGrid?.contains(next)) {
+      landingThemePreviewHover = null;
+      refreshLandingThemePreview();
+    }
+  });
+
+  document.getElementById("projTemplatePrev")?.addEventListener("click", () => {
+    document.getElementById("projTemplateViewport")?.scrollBy({
+      left: -getTemplateScrollStride(),
+      behavior: "smooth",
+    });
+  });
+  document.getElementById("projTemplateNext")?.addEventListener("click", () => {
+    document.getElementById("projTemplateViewport")?.scrollBy({
+      left: getTemplateScrollStride(),
+      behavior: "smooth",
+    });
+  });
+  document.getElementById("projTemplateViewport")?.addEventListener("scroll", updateTemplateSliderNav);
+  document.getElementById("projTemplateViewport")?.addEventListener("keydown", (e) => {
+    const vp = document.getElementById("projTemplateViewport");
+    if (!vp) return;
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      vp.scrollBy({ left: -getTemplateScrollStride(), behavior: "smooth" });
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      vp.scrollBy({ left: getTemplateScrollStride(), behavior: "smooth" });
+    }
+  });
+  if (!projTemplateSliderResizeListenerAttached) {
+    projTemplateSliderResizeListenerAttached = true;
+    window.addEventListener("resize", updateTemplateSliderNav);
+  }
+  newForm?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!newForm) return;
+    const fd = new FormData(newForm);
+    const name = String(fd.get("name") ?? "").trim();
+    const template = String(fd.get("template") ?? "landing");
+    const landingTheme = String(fd.get("landingTheme") ?? "saas");
+    if (!name) {
+      window.alert("프로젝트 이름을 입력해 주세요.");
+      newNameInput?.focus();
+      return;
+    }
+    const templateLabel =
+      template === "portfolio"
+        ? "포트폴리오"
+        : template === "landing"
+          ? "랜딩 페이지"
+          : template === "business"
+            ? "비즈니스"
+            : template === "blog"
+              ? "블로그 · 문서"
+              : "빈 프로젝트";
+    const themeLine =
+      template === "landing"
+        ? `\n랜딩 테마: ${landingTheme === "local" ? "로컬 비즈니스" : "SaaS 프로덕트"}`
+        : "";
+    window.alert(
+      `「${name}」 프로젝트를 템플릿으로 생성합니다. (데모)\n\n템플릿: ${templateLabel}${themeLine}\n\n실제 제품에서는 저장소 생성 후 에이전트 화면으로 이동합니다.`,
+    );
+    closeNewModal();
+  });
+
+  if (!projNewModalEscapeListenerAttached) {
+    projNewModalEscapeListenerAttached = true;
+    document.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      const m = document.getElementById("projNewModal");
+      if (!m || m.hidden) return;
+      e.preventDefault();
+      dismissProjectsCreateModal();
+    });
+  }
+
+  syncProjNewLandingThemes();
+  refreshLandingThemePreview();
+
+  if (openCreateFromRoute) {
+    window.setTimeout(() => {
+      openNewModal();
+    }, 0);
+  }
+
   const grid = document.getElementById("projGrid");
   grid?.addEventListener("click", (e) => {
     const el = e.target as HTMLElement;
@@ -2072,7 +2520,9 @@ function mountApp(): void {
   if (route.kind === "projects") {
     sidebar = "projects";
     inner = getProjectsInnerHTML();
-    title = "프로젝트 — AI Web Builder";
+    title = route.createModalOpen
+      ? "새 프로젝트 — AI Web Builder"
+      : "프로젝트 — AI Web Builder";
   } else if (route.kind === "projectAgent") {
     sidebar = "projects";
     const p = DEMO_PROJECTS.find((x) => x.slug === route.slug);
@@ -2096,7 +2546,7 @@ function mountApp(): void {
   document.title = title;
 
   if (route.kind === "projects") {
-    bindProjectListPage();
+    bindProjectListPage(route.createModalOpen);
   } else if (route.kind === "projectAgent") {
     const proj = DEMO_PROJECTS.find((x) => x.slug === route.slug);
     if (proj) bindProjectAgentPage(proj);
