@@ -1,7 +1,5 @@
 import "./landing.css";
 import "./app.css";
-import typescriptLogo from "./assets/typescript.svg";
-import viteLogo from "./assets/vite.svg";
 
 function getAppRoot(): HTMLDivElement {
   const el = document.querySelector<HTMLDivElement>("#app");
@@ -20,8 +18,25 @@ function isAppRoute(): boolean {
   return h === HASH_DASHBOARD || h === HASH_MAIN_ALT || h.startsWith("#/app/");
 }
 
-function getAppSubroute(): "dashboard" | "projects" {
-  return window.location.hash === HASH_PROJECTS ? "projects" : "dashboard";
+type AppRoute =
+  | { kind: "dashboard" }
+  | { kind: "projects" }
+  | { kind: "project"; slug: string };
+
+function parseAppRoute(): AppRoute {
+  const h = window.location.hash;
+  if (h === HASH_PROJECTS || h === "#/app/projects/") {
+    return { kind: "projects" };
+  }
+  const prefix = "#/app/projects/";
+  if (h.startsWith(prefix)) {
+    const rest = h.slice(prefix.length).replace(/\/$/, "");
+    const slug = rest.split("/")[0];
+    if (slug) {
+      return { kind: "project", slug: decodeURIComponent(slug) };
+    }
+  }
+  return { kind: "dashboard" };
 }
 
 function getAppLayoutHTML(
@@ -35,7 +50,10 @@ function getAppLayoutHTML(
     <aside class="app-sidebar" aria-label="메인 메뉴">
       <div class="app-sidebar__brand">
         <span class="app-sidebar__mark" aria-hidden="true"></span>
-        <span class="app-sidebar__title">Devely</span>
+        <div class="app-sidebar__brand-text">
+          <span class="app-sidebar__title">Devely</span>
+          <span class="app-sidebar__tagline">AI 웹 자동 생성</span>
+        </div>
       </div>
       <nav class="app-sidebar__nav">
         <a class="app-sidebar__link${dashActive}" href="${HASH_DASHBOARD}">대시보드</a>
@@ -57,7 +75,7 @@ function getAppLayoutHTML(
 `;
 }
 
-function getLandingHTML(viteLogo: string, typescriptLogo: string): string {
+function getLandingHTML(): string {
   return `
   <div class="container">
     <header class="topbar">
@@ -84,31 +102,42 @@ function getLandingHTML(viteLogo: string, typescriptLogo: string): string {
     </header>
 
     <section class="hero" aria-label="Hero section">
-      <div>
-        <div class="badge"><i aria-hidden="true"></i> 이미지처럼 빠르게, 깔끔하게</div>
-        <h1>빠르게 만들고, 더 빠르게 수정하세요</h1>
+      <div class="hero-copy">
+        <div class="badge"><i aria-hidden="true"></i> AI 웹 빌더 · 프롬프트 → 완성 페이지</div>
+        <h1>
+          <span class="hero-line">말로 설명하면,</span>
+          <span class="hero-line hero-line--accent"
+            ><span class="hero-gradient">웹사이트가 완성</span>됩니다</span
+          >
+        </h1>
         <p class="lead">
-          한 문장으로 콘셉트를 입력하면, 보기 좋은 랜딩 페이지를 자동 생성합니다.
-          버튼/섹션/레이아웃을 조정해서 원하는 톤으로 바로 맞춰보세요.
+          Devely는 디자인·레이아웃·문구까지 AI가 한 번에 짜 주는 자동 웹 제작 도구입니다.
+          원하는 톤만 말로 더하면 섹션과 스타일이 바로 따라옵니다.
         </p>
 
-        <form class="prompt" id="promptForm">
-          <input
-            id="promptInput"
-            name="prompt"
-            type="text"
-            placeholder="예: '카페 브랜드'의 따뜻한 다크 랜딩 페이지 만들어줘"
-            autocomplete="off"
-          />
-          <button class="btn btn-primary" type="submit">생성하기</button>
+        <form class="prompt prompt--hero" id="promptForm">
+          <div class="prompt__field">
+            <label class="prompt__label" for="promptInput">무엇을 만들까요?</label>
+            <input
+              id="promptInput"
+              name="prompt"
+              type="text"
+              placeholder="예: 감성 카페 브랜드용 다크톤 랜딩, 예약 버튼 강조"
+              autocomplete="off"
+            />
+          </div>
+          <button class="btn btn-primary btn-generate" type="submit">
+            <span class="btn-generate__spark" aria-hidden="true"></span>
+            AI로 웹 만들기
+          </button>
         </form>
 
         <p class="status" id="status" aria-live="polite"></p>
 
         <div class="hero-meta" aria-label="Highlights">
-          <div class="chip"><strong>3분</strong> 안에 초안</div>
-          <div class="chip"><strong>반응형</strong> 기본 제공</div>
-          <div class="chip"><strong>UI 톤</strong> 커스터마이즈</div>
+          <div class="chip"><strong>코드 없이</strong> 전체 페이지</div>
+          <div class="chip"><strong>대화로</strong> 계속 수정</div>
+          <div class="chip"><strong>반응형</strong> · 배포까지 한 흐름</div>
         </div>
       </div>
 
@@ -120,13 +149,13 @@ function getLandingHTML(viteLogo: string, typescriptLogo: string): string {
               <span class="dot yellow"></span>
               <span class="dot green"></span>
             </div>
-            <div class="mock-title">렌더링 미리보기</div>
+            <div class="mock-title">AI 생성 미리보기</div>
           </div>
 
           <div class="mock-body">
             <div class="mock-grid">
               <div class="mock-left">
-                <h3>채널</h3>
+                <h3>프로젝트</h3>
                 <div class="mock-thumb-row">
                   <div class="thumb"></div>
                   <div class="thumb"></div>
@@ -162,18 +191,8 @@ function getLandingHTML(viteLogo: string, typescriptLogo: string): string {
                     <div class="mock-line mid"></div>
 
                     <div class="mock-actions">
-                      <button class="mini-btn primary" type="button">
-                        <span style="display:inline-flex;gap:8px;align-items:center;">
-                          <img src="${viteLogo}" alt="Vite logo" width="16" height="16" />
-                          생성
-                        </span>
-                      </button>
-                      <button class="mini-btn" type="button">
-                        <span style="display:inline-flex;gap:8px;align-items:center;">
-                          <img src="${typescriptLogo}" alt="TypeScript logo" width="16" height="16" />
-                          수정
-                        </span>
-                      </button>
+                      <button class="mini-btn primary" type="button">✦ AI 생성</button>
+                      <button class="mini-btn" type="button">대화로 수정</button>
                     </div>
                   </div>
                 </div>
@@ -193,27 +212,30 @@ function getLandingHTML(viteLogo: string, typescriptLogo: string): string {
             <div class="stack-card stack-1"></div>
             <div class="stack-card stack-2"></div>
             <div class="stack-card stack-3"></div>
-            <div class="stack-badge">code</div>
+            <div class="stack-badge">AI</div>
           </div>
         </div>
 
         <div class="content-panel">
           <div class="panel-block">
-            <div class="panel-eyebrow">쉽게 시작하는 basic</div>
-            <h2>콘텐츠를 만들고, 바로 붙여넣으세요</h2>
+            <div class="panel-eyebrow">왜 Devely인가요</div>
+            <h2>웹 제작의 대부분을 AI에 맡기세요</h2>
             <p>
-              이미지/문구/구조를 “한 화면에 보기 좋게” 정리하는 방식으로 랜딩 초안을 빠르게 만들어줍니다.
-              톤을 바꿔도 레이아웃이 무너지지 않도록 구성돼요.
+              섹션 구조, 타이포·컬러, 버튼 문구까지 모델이 한 번에 제안합니다.
+              “조금 더 미니멀하게”, “히어로에 영상 느낌”처럼 말로만 다시 요청하면 됩니다.
             </p>
           </div>
 
           <div class="panel-block">
-            <div class="panel-eyebrow accent">월 사용료 0원!</div>
-            <p>먼저 데모 UI로 확인하고, 이후 AI 연동만 연결하면 실서비스로 확장할 수 있어요.</p>
+            <div class="panel-eyebrow accent">프롬프트가 곧 기획서</div>
+            <p>
+              별도 디자인 툴 없이 초안부터 배포 파이프라인까지 같은 화면에서 이어집니다.
+              팀은 검수와 도메인 연결에만 집중하면 됩니다.
+            </p>
           </div>
 
           <div class="panel-block">
-            <div class="panel-eyebrow">사용 방법</div>
+            <div class="panel-eyebrow">이렇게 씁니다</div>
             <ol class="usage-steps">
               <li>프롬프트에 “콘셉트 + 원하는 톤”을 한 문장으로 작성</li>
               <li>페이지 생성 후, 버튼 문구/섹션 구성/색감을 조정</li>
@@ -229,26 +251,26 @@ function getLandingHTML(viteLogo: string, typescriptLogo: string): string {
     <div class="container">
       <div class="section-head">
         <div>
-          <h2>필요한 UI를 바로</h2>
-          <p>랜딩 페이지에 자주 쓰는 구조를 “정리된 카드” 형태로 제공합니다.</p>
+          <h2>AI가 챙기는 것들</h2>
+          <p>반복 작업은 자동화하고, 당신은 메시지와 브랜드에만 집중하세요.</p>
         </div>
       </div>
 
       <div class="feature-grid">
-        <article class="card">
+        <article class="card card--feature">
           <div class="ic" aria-hidden="true">01</div>
-          <h3>섹션 자동 구성</h3>
-          <p>히어로, 기능, 후기, CTA까지. 콘셉트에 맞는 순서로 묶어드립니다.</p>
+          <h3>레이아웃 자동 조립</h3>
+          <p>히어로·기능 소개·후기·CTA까지 콘셉트에 맞는 순서와 여백으로 구성합니다.</p>
         </article>
-        <article class="card">
+        <article class="card card--feature">
           <div class="ic" aria-hidden="true">02</div>
-          <h3>톤 매칭</h3>
-          <p>다크/라이트, 미니멀/화려한 톤 등 스타일 가이드를 기반으로 UI를 조정합니다.</p>
+          <h3>브랜드 톤 맞춤</h3>
+          <p>다크/라이트, 미니멀/감성 등 키워드만으로 타이포와 컬러 시스템을 맞춥니다.</p>
         </article>
-        <article class="card">
+        <article class="card card--feature">
           <div class="ic" aria-hidden="true">03</div>
-          <h3>빠른 수정</h3>
-          <p>버튼 문구, 컬러, 레이아웃 변경을 프롬프트로 반복해서 다듬을 수 있어요.</p>
+          <h3>대화형 수정</h3>
+          <p>문구·섹션 순서·컴포넌트 교체를 자연어로 요청하면 바로 반영된 초안을 받습니다.</p>
         </article>
       </div>
     </div>
@@ -259,25 +281,25 @@ function getLandingHTML(viteLogo: string, typescriptLogo: string): string {
       <div class="section-head">
         <div>
           <h2>작동 방식</h2>
-          <p>프롬프트 -> 레이아웃 생성 -> 편집 -> 배포 순서로 진행됩니다.</p>
+          <p>입력 → AI 생성 → 대화로 다듬기 → 빌드·배포까지 한 플로우로 이어집니다.</p>
         </div>
       </div>
 
       <div class="feature-grid">
-        <article class="card">
+        <article class="card card--feature">
           <div class="ic" aria-hidden="true">A</div>
-          <h3>프롬프트 입력</h3>
-          <p>대상/목표/톤을 한 문장으로 적어보세요.</p>
+          <h3>의도를 문장으로</h3>
+          <p>누구를 위한 사이트인지, 어떤 행동을 유도할지, 분위기는 어떤지 적어 주세요.</p>
         </article>
-        <article class="card">
+        <article class="card card--feature">
           <div class="ic" aria-hidden="true">B</div>
-          <h3>초안 생성</h3>
-          <p>레이아웃과 컴포넌트를 조합해 바로 확인합니다.</p>
+          <h3>모델이 페이지 조립</h3>
+          <p>구조·스타일·카피를 한 번에 생성해 브라우저에서 바로 미리볼 수 있습니다.</p>
         </article>
-        <article class="card">
+        <article class="card card--feature">
           <div class="ic" aria-hidden="true">C</div>
-          <h3>다듬기</h3>
-          <p>원하는 방향으로 “이렇게 바꿔줘”를 추가로 입력합니다.</p>
+          <h3>피드백을 이어 붙이기</h3>
+          <p>“여기 문구 짧게”, “네비 고정”처럼 추가 요청을 쌓아가며 완성도를 올립니다.</p>
         </article>
       </div>
     </div>
@@ -734,8 +756,9 @@ function renderProjectCard(p: DemoProject, index: number): string {
   const sub = escapeHtml(p.subtitle);
   const time = escapeHtml(p.updated);
   const thumb = renderProjectThumb(p, index);
+  const href = `${HASH_PROJECTS}/${encodeURIComponent(p.slug)}`;
   return `
-        <article class="proj-card">
+        <a class="proj-card proj-card--link" href="${href}">
           ${thumb}
           <div class="proj-card__body">
             <div class="proj-card__badges">
@@ -748,7 +771,7 @@ function renderProjectCard(p: DemoProject, index: number): string {
           <footer class="proj-card__foot">
             <span class="proj-card__time">${time}</span>
           </footer>
-        </article>`;
+        </a>`;
 }
 
 function getProjectsInnerHTML(): string {
@@ -767,10 +790,288 @@ function getProjectsInnerHTML(): string {
       </div>`;
 }
 
+function getProjectDetailStatusRow(p: DemoProject): string {
+  if (p.status === "pre") {
+    return `<span class="proj-detail-pill proj-detail-pill--draft" title="초안">
+      <span class="proj-detail-pill__clock" aria-hidden="true"></span>
+      Draft
+    </span>
+    <span class="proj-detail-pill proj-detail-pill--version">Version: v1</span>`;
+  }
+  if (p.status === "deploying") {
+    return `<span class="proj-detail-pill proj-detail-pill--progress">${STATUS_BADGE.deploying.label}</span>
+    <span class="proj-detail-pill proj-detail-pill--version">Version: v1</span>`;
+  }
+  return `<span class="proj-detail-pill proj-detail-pill--live">${STATUS_BADGE.done.label}</span>
+    <span class="proj-detail-pill proj-detail-pill--version">Version: v1</span>`;
+}
+
+function getProjectDetailMainBlock(p: DemoProject): string {
+  if (p.status === "pre") {
+    return `<div class="proj-detail-empty proj-detail-empty--rich" role="status">
+      <div class="proj-detail-empty__visual" aria-hidden="true">
+        <div class="proj-detail-empty__orb"></div>
+        <span class="proj-detail-spark proj-detail-spark--1"></span>
+        <span class="proj-detail-spark proj-detail-spark--2"></span>
+        <span class="proj-detail-spark proj-detail-spark--3"></span>
+      </div>
+      <div class="proj-detail-empty__copy">
+        <p class="proj-detail-empty__title">아직 배포되지 않은 프로젝트입니다</p>
+        <p class="proj-detail-empty__sub">AI 에이전트와 대화하며 페이지를 만들고, 한 번에 배포까지 이어가 보세요.</p>
+      </div>
+      <ol class="proj-detail-steps" aria-label="시작하기">
+        <li class="proj-detail-steps__item">
+          <span class="proj-detail-steps__n">1</span>
+          <span class="proj-detail-steps__text"><strong>Open AI Agent</strong>로 브랜드와 톤을 설명</span>
+        </li>
+        <li class="proj-detail-steps__item">
+          <span class="proj-detail-steps__n">2</span>
+          <span class="proj-detail-steps__text">생성된 초안을 대화로 다듬기</span>
+        </li>
+        <li class="proj-detail-steps__item">
+          <span class="proj-detail-steps__n">3</span>
+          <span class="proj-detail-steps__text">검수 후 배포 · 도메인 연결</span>
+        </li>
+      </ol>
+    </div>`;
+  }
+  if (p.status === "deploying") {
+    return `<div class="proj-detail-empty proj-detail-empty--deploy" role="status">
+      <div class="proj-detail-empty__visual proj-detail-empty__visual--sm" aria-hidden="true">
+        <div class="proj-detail-empty__orb proj-detail-empty__orb--pulse"></div>
+        <span class="proj-detail-spark proj-detail-spark--2"></span>
+      </div>
+      <div class="proj-detail-empty__copy">
+        <p class="proj-detail-empty__title">배포가 진행 중입니다</p>
+        <p class="proj-detail-empty__sub">잠시 후 다시 확인해 주세요. 완료되면 미리보기 URL이 여기 표시됩니다.</p>
+      </div>
+    </div>`;
+  }
+  const url = escapeHtml(p.subtitle);
+  return `<div class="proj-detail-live">
+      <div class="proj-detail-live__icon" aria-hidden="true"></div>
+      <div class="proj-detail-live__content">
+        <p class="proj-detail-live__label">프로덕션 URL</p>
+        <span class="proj-detail-live__url">${url}</span>
+        <p class="proj-detail-live__hint">AI로 생성·배포된 사이트가 연결되어 있습니다.</p>
+      </div>
+    </div>`;
+}
+
+function demoAiCreditsUsed(slug: string): number {
+  return 12 + (slug.length * 17) % 48;
+}
+
+function demoAiCreditsLeft(slug: string): number {
+  return 180 + (slug.length * 23) % 420;
+}
+
+function getDeployEnvBlock(p: DemoProject): { label: string; detail: string } {
+  if (p.status === "pre") {
+    return { label: "미배포", detail: "프리뷰만 · AI 에이전트 초안" };
+  }
+  if (p.status === "deploying") {
+    return { label: "스테이징", detail: p.subtitle };
+  }
+  return { label: "프로덕션", detail: "CDN · SSL · 자동 빌드" };
+}
+
+function getTimelineEntries(p: DemoProject): { msg: string; meta: string; tone: "violet" | "slate" | "green" | "amber" }[] {
+  const u = escapeHtml(p.updated);
+  const kindLine =
+    p.kind === "landing"
+      ? "히어로·기능 소개 섹션 자동 배치"
+      : p.kind === "portfolio"
+        ? "갤러리 그리드·프로필 블록 생성"
+        : "네비·가격표 레이아웃 적용";
+  const common: { msg: string; meta: string; tone: "violet" | "slate" | "green" | "amber" }[] = [
+    { msg: "프로젝트 설정 저장됨", meta: u, tone: "slate" },
+    { msg: kindLine, meta: "AI 생성", tone: "violet" },
+    { msg: "프롬프트로 카피 2회 수정", meta: "대화 기록", tone: "violet" },
+  ];
+  if (p.status === "pre") {
+    return [
+      { msg: "워크스페이스에 프로젝트 생성", meta: u, tone: "slate" },
+      ...common.slice(1, 3),
+      { msg: "배포 파이프라인 대기 중", meta: "다음: Open AI Agent", tone: "amber" },
+    ];
+  }
+  if (p.status === "deploying") {
+    return [
+      ...common,
+      { msg: "프로덕션 빌드 큐 등록", meta: "진행 중", tone: "amber" },
+      { msg: p.subtitle, meta: "배포", tone: "amber" },
+    ];
+  }
+  return [
+    ...common,
+    { msg: "프로덕션 배포 성공", meta: "라이브", tone: "green" },
+    { msg: "엣지 캐시 워밍 완료", meta: "CDN", tone: "green" },
+  ];
+}
+
+function getNextActionsHTML(p: DemoProject): string {
+  if (p.status === "pre") {
+    return `<ul class="proj-detail-checklist">
+        <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--todo" aria-hidden="true"></span><span>브랜드 톤·타깃을 AI에 설명하고 초안 생성</span></li>
+        <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--todo" aria-hidden="true"></span><span>모바일·데스크톱 프리뷰로 레이아웃 확인</span></li>
+        <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--todo" aria-hidden="true"></span><span>메타 설명·OG 이미지 채우기</span></li>
+        <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--todo" aria-hidden="true"></span><span>첫 배포 및 도메인 연결</span></li>
+      </ul>`;
+  }
+  if (p.status === "deploying") {
+    return `<ul class="proj-detail-checklist">
+        <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--done" aria-hidden="true"></span><span>빌드 아티팩트 업로드</span></li>
+        <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--run" aria-hidden="true"></span><span>DNS·SSL 전파 대기</span></li>
+        <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--todo" aria-hidden="true"></span><span>배포 완료 후 스모크 테스트</span></li>
+      </ul>`;
+  }
+  return `<ul class="proj-detail-checklist">
+        <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--done" aria-hidden="true"></span><span>프로덕션 URL 라이브</span></li>
+        <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--todo" aria-hidden="true"></span><span>분석 스크립트·전환 목표 연결</span></li>
+        <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--todo" aria-hidden="true"></span><span>다음 분기용 A/B 카피 실험</span></li>
+      </ul>`;
+}
+
+function getProjectDetailExtrasHTML(p: DemoProject): string {
+  const env = getDeployEnvBlock(p);
+  const used = demoAiCreditsUsed(p.slug);
+  const left = demoAiCreditsLeft(p.slug);
+  const total = used + left;
+  const pct = Math.round((used / total) * 100);
+  const timeline = getTimelineEntries(p);
+  const timelineHtml = timeline
+    .map(
+      (e) => `<li class="proj-detail-timeline__item proj-detail-timeline__item--${e.tone}">
+      <span class="proj-detail-timeline__dot" aria-hidden="true"></span>
+      <div class="proj-detail-timeline__body">
+        <p class="proj-detail-timeline__msg">${escapeHtml(e.msg)}</p>
+        <p class="proj-detail-timeline__meta">${escapeHtml(e.meta)}</p>
+      </div>
+    </li>`,
+    )
+    .join("");
+  const slugShort = escapeHtml(p.slug.slice(0, 18) + (p.slug.length > 18 ? "…" : ""));
+  const next = getNextActionsHTML(p);
+
+  return `
+          <div class="proj-detail-extra" aria-label="프로젝트 부가 정보">
+            <div class="proj-detail-stats">
+              <div class="proj-detail-stat">
+                <p class="proj-detail-stat__label">마지막 활동</p>
+                <p class="proj-detail-stat__value">${escapeHtml(p.updated)}</p>
+                <p class="proj-detail-stat__hint">에디터 · AI 세션 기준</p>
+              </div>
+              <div class="proj-detail-stat">
+                <p class="proj-detail-stat__label">배포 환경</p>
+                <p class="proj-detail-stat__value">${escapeHtml(env.label)}</p>
+                <p class="proj-detail-stat__hint">${escapeHtml(env.detail)}</p>
+              </div>
+              <div class="proj-detail-stat">
+                <p class="proj-detail-stat__label">이번 달 AI 사용</p>
+                <p class="proj-detail-stat__value">${used}회 <span class="proj-detail-stat__sub">/ 잔여 ${left}</span></p>
+                <div class="proj-detail-meter" role="presentation" aria-hidden="true">
+                  <div class="proj-detail-meter__fill" style="width:${pct}%"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="proj-detail-extra__grid">
+              <section class="proj-detail-panel" aria-labelledby="proj-timeline-heading">
+                <h2 id="proj-timeline-heading" class="proj-detail-panel__head">활동 타임라인</h2>
+                <ul class="proj-detail-timeline">${timelineHtml}</ul>
+              </section>
+              <div class="proj-detail-extra__col">
+                <section class="proj-detail-panel" aria-labelledby="proj-next-heading">
+                  <h2 id="proj-next-heading" class="proj-detail-panel__head">다음 할 일</h2>
+                  ${next}
+                </section>
+                <section class="proj-detail-panel" aria-labelledby="proj-res-heading">
+                  <h2 id="proj-res-heading" class="proj-detail-panel__head">연결된 리소스</h2>
+                  <p class="proj-detail-panel__sub">기획·디자인 링크를 팀과 공유해 두면 AI 맥락에 반영하기 쉬워요.</p>
+                  <div class="proj-detail-resources">
+                    <button type="button" class="proj-detail-resource">Figma · ${slugShort}</button>
+                    <button type="button" class="proj-detail-resource">Notion 브리프</button>
+                    <button type="button" class="proj-detail-resource">GitHub 저장소</button>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div>`;
+}
+
+function getProjectDetailInnerHTML(p: DemoProject): string {
+  const title = escapeHtml(p.slug);
+  const badges = getProjectDetailStatusRow(p);
+  const main = getProjectDetailMainBlock(p);
+  const extras = getProjectDetailExtrasHTML(p);
+  return `
+      <div class="proj-detail-page">
+        <div class="proj-detail">
+          <a class="proj-detail-back" href="${HASH_PROJECTS}">
+            <span class="proj-detail-back__arrow" aria-hidden="true"></span>
+            프로젝트 목록으로 돌아가기
+          </a>
+
+          <section class="proj-detail-card" aria-labelledby="proj-detail-title">
+            <div class="proj-detail-card__accent" aria-hidden="true"></div>
+            <div class="proj-detail-card__head">
+              <div class="proj-detail-card__titles">
+                <h1 id="proj-detail-title" class="proj-detail-card__title">${title}</h1>
+                <div class="proj-detail-card__badges">${badges}</div>
+              </div>
+              <button type="button" class="proj-detail-agent">
+                <span class="proj-detail-agent__shine" aria-hidden="true"></span>
+                <span class="proj-detail-agent__inner">
+                  <span class="proj-detail-agent__play" aria-hidden="true"></span>
+                  Open AI Agent
+                </span>
+              </button>
+            </div>
+            <div class="proj-detail-card__body">
+              ${main}
+            </div>
+          </section>
+
+          ${extras}
+
+          <section class="proj-detail-danger" aria-labelledby="proj-detail-danger-title">
+            <div class="proj-detail-danger__inner">
+              <div class="proj-detail-danger__copy">
+                <h2 id="proj-detail-danger-title" class="proj-detail-danger__title">Danger Zone</h2>
+                <p class="proj-detail-danger__desc">되돌릴 수 없는 작업입니다. 워크스페이스에서 제거 시 복구가 어려울 수 있어요.</p>
+              </div>
+              <button type="button" class="proj-detail-danger__btn">
+                <span class="proj-detail-danger__trash" aria-hidden="true"></span>
+                워크스페이스에서 제거
+              </button>
+            </div>
+          </section>
+        </div>
+      </div>`;
+}
+
+function getProjectNotFoundInnerHTML(): string {
+  return `
+      <div class="proj-detail-page">
+        <div class="proj-detail">
+          <a class="proj-detail-back" href="${HASH_PROJECTS}">
+            <span class="proj-detail-back__arrow" aria-hidden="true"></span>
+            프로젝트 목록으로 돌아가기
+          </a>
+          <section class="proj-detail-card">
+            <div class="proj-detail-card__accent" aria-hidden="true"></div>
+            <h1 class="proj-detail-card__title">프로젝트를 찾을 수 없습니다</h1>
+            <p class="proj-detail-muted">주소가 잘못되었거나 삭제된 프로젝트일 수 있습니다.</p>
+          </section>
+        </div>
+      </div>`;
+}
+
 function mountLanding(): void {
   document.body.classList.remove("app-view");
-  root.innerHTML = getLandingHTML(viteLogo, typescriptLogo);
-  document.title = "AI Web Builder";
+  root.innerHTML = getLandingHTML();
+  document.title = "Devely — AI 웹사이트 자동 생성";
 
   document.getElementById("btnLogin")?.addEventListener("click", () => {
     window.location.hash = HASH_DASHBOARD;
@@ -797,13 +1098,27 @@ function mountLanding(): void {
 
 function mountApp(): void {
   document.body.classList.add("app-view");
-  const sub = getAppSubroute();
-  const inner = sub === "projects" ? getProjectsInnerHTML() : DASHBOARD_INNER;
-  root.innerHTML = getAppLayoutHTML(sub, inner);
-  document.title =
-    sub === "projects"
-      ? "프로젝트 — AI Web Builder"
-      : "대시보드 — AI Web Builder";
+  const route = parseAppRoute();
+  let inner: string;
+  let title: string;
+  let sidebar: "dashboard" | "projects" = "dashboard";
+
+  if (route.kind === "projects") {
+    sidebar = "projects";
+    inner = getProjectsInnerHTML();
+    title = "프로젝트 — AI Web Builder";
+  } else if (route.kind === "project") {
+    sidebar = "projects";
+    const p = DEMO_PROJECTS.find((x) => x.slug === route.slug);
+    inner = p ? getProjectDetailInnerHTML(p) : getProjectNotFoundInnerHTML();
+    title = p ? `${p.slug} — AI Web Builder` : "프로젝트 — AI Web Builder";
+  } else {
+    inner = DASHBOARD_INNER;
+    title = "대시보드 — AI Web Builder";
+  }
+
+  root.innerHTML = getAppLayoutHTML(sidebar, inner);
+  document.title = title;
 }
 
 function renderRoute(): void {
