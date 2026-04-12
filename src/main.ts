@@ -1,5 +1,6 @@
 import "./landing.css";
 import "./app.css";
+import { LANDING_PAGE_HTML } from "./landing-page-html";
 
 function getAppRoot(): HTMLDivElement {
   const el = document.querySelector<HTMLDivElement>("#app");
@@ -134,417 +135,7 @@ function getAppLayoutHTML(
 }
 
 function getLandingHTML(): string {
-  return `
-  <div class="container">
-    <header class="topbar">
-      <div class="brand" aria-label="Brand">
-        <div class="brand-mark" aria-hidden="true"></div>
-        <div class="brand-title">
-          <strong>Devely</strong>
-        </div>
-      </div>
-
-      <nav class="nav" aria-label="Primary navigation">
-        <a href="#features">기능</a>
-        <a href="#content">사용 방법</a>
-        <a href="#how">작동 방식</a>
-        <a href="#pricing">요금</a>
-      </nav>
-
-      <div class="actions">
-        <button class="btn btn-ghost" type="button">도입 문의</button>
-        <button class="btn btn-primary btn-github" type="button" id="btnLogin">
-          GitHub 로그인
-        </button>
-      </div>
-    </header>
-
-    <section class="hero" aria-label="Hero section">
-      <div class="hero-copy">
-        <div class="badge"><i aria-hidden="true"></i> AI 웹 빌더 · 프롬프트 → 완성 페이지</div>
-        <h1>
-          <span class="hero-line">말로 설명하면,</span>
-          <span class="hero-line hero-line--accent"
-            ><span class="hero-gradient">웹사이트가 완성</span>됩니다</span
-          >
-        </h1>
-        <p class="lead">
-          Devely는 디자인·레이아웃·문구까지 AI가 한 번에 짜 주는 자동 웹 제작 도구입니다.
-          원하는 톤만 말로 더하면 섹션과 스타일이 바로 따라옵니다.
-        </p>
-
-        <form class="prompt prompt--hero" id="promptForm">
-          <div class="prompt__field">
-            <label class="prompt__label" for="promptInput">무엇을 만들까요?</label>
-            <input
-              id="promptInput"
-              name="prompt"
-              type="text"
-              placeholder="예: 감성 카페 브랜드용 다크톤 랜딩, 예약 버튼 강조"
-              autocomplete="off"
-            />
-          </div>
-          <button class="btn btn-primary btn-generate" type="submit">
-            <span class="btn-generate__spark" aria-hidden="true"></span>
-            AI로 웹 만들기
-          </button>
-        </form>
-
-        <p class="status" id="status" aria-live="polite"></p>
-
-        <div class="hero-meta" aria-label="Highlights">
-          <div class="chip"><strong>코드 없이</strong> 전체 페이지</div>
-          <div class="chip"><strong>대화로</strong> 계속 수정</div>
-          <div class="chip"><strong>반응형</strong> · 배포까지 한 흐름</div>
-        </div>
-      </div>
-
-      <div class="mock-wrap">
-        <div class="mock-window" aria-label="Preview mockup">
-          <div class="mock-top">
-            <div class="traffic" aria-hidden="true">
-              <span class="dot red"></span>
-              <span class="dot yellow"></span>
-              <span class="dot green"></span>
-            </div>
-            <div class="mock-title">AI 생성 미리보기</div>
-          </div>
-
-          <div class="mock-body">
-            <div class="mock-grid">
-              <div class="mock-left">
-                <h3>프로젝트</h3>
-                <div class="mock-thumb-row">
-                  <div class="thumb"></div>
-                  <div class="thumb"></div>
-                </div>
-                <div class="mock-thumb-row" style="margin-top:10px;">
-                  <div class="thumb"></div>
-                  <div class="thumb"></div>
-                </div>
-
-                <div style="height:12px;"></div>
-                <div class="pill-row">
-                  <span class="pill active">웹</span>
-                  <span class="pill">랜딩</span>
-                </div>
-              </div>
-
-              <div class="mock-center">
-                <div class="pill-row">
-                  <span class="pill active">제작</span>
-                  <span class="pill">검수</span>
-                  <span class="pill">배포</span>
-                </div>
-
-                <div class="mock-panel">
-                  <div class="mock-panel-left" aria-hidden="true">
-                    <div class="mock-swatch purple"></div>
-                    <div class="mock-swatch"></div>
-                    <div class="mock-swatch"></div>
-                  </div>
-                  <div class="mock-panel-right">
-                    <div class="mock-line mid"></div>
-                    <div class="mock-line short"></div>
-                    <div class="mock-line mid"></div>
-
-                    <div class="mock-actions">
-                      <button class="mini-btn primary" type="button">✦ AI 생성</button>
-                      <button class="mini-btn" type="button">대화로 수정</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <section id="content" class="section content">
-    <div class="container">
-      <div class="content-split">
-        <div class="content-media" aria-label="콘텐츠 미리보기 목업">
-          <div class="content-stack" aria-hidden="true">
-            <div class="stack-card stack-1"></div>
-            <div class="stack-card stack-2"></div>
-            <div class="stack-card stack-3"></div>
-            <div class="stack-badge">AI</div>
-          </div>
-        </div>
-
-        <div class="content-panel">
-          <div class="panel-block">
-            <div class="panel-eyebrow">왜 Devely인가요</div>
-            <h2>웹 제작의 대부분을 AI에 맡기세요</h2>
-            <p>
-              섹션 구조, 타이포·컬러, 버튼 문구까지 모델이 한 번에 제안합니다.
-              “조금 더 미니멀하게”, “히어로에 영상 느낌”처럼 말로만 다시 요청하면 됩니다.
-            </p>
-          </div>
-
-          <div class="panel-block">
-            <div class="panel-eyebrow accent">프롬프트가 곧 기획서</div>
-            <p>
-              별도 디자인 툴 없이 초안부터 배포 파이프라인까지 같은 화면에서 이어집니다.
-              팀은 검수와 도메인 연결에만 집중하면 됩니다.
-            </p>
-          </div>
-
-          <div class="panel-block">
-            <div class="panel-eyebrow">이렇게 씁니다</div>
-            <ol class="usage-steps">
-              <li>프롬프트에 “콘셉트 + 원하는 톤”을 한 문장으로 작성</li>
-              <li>페이지 생성 후, 버튼 문구/섹션 구성/색감을 조정</li>
-              <li>원하는 결과가 나오면 내보내기(배포) 단계로 진행</li>
-            </ol>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="features" class="section">
-    <div class="container">
-      <div class="section-head">
-        <div>
-          <h2>AI가 챙기는 것들</h2>
-          <p>반복 작업은 자동화하고, 당신은 메시지와 브랜드에만 집중하세요.</p>
-        </div>
-      </div>
-
-      <div class="feature-grid">
-        <article class="card card--feature">
-          <div class="ic" aria-hidden="true">01</div>
-          <h3>레이아웃 자동 조립</h3>
-          <p>히어로·기능 소개·후기·CTA까지 콘셉트에 맞는 순서와 여백으로 구성합니다.</p>
-        </article>
-        <article class="card card--feature">
-          <div class="ic" aria-hidden="true">02</div>
-          <h3>브랜드 톤 맞춤</h3>
-          <p>다크/라이트, 미니멀/감성 등 키워드만으로 타이포와 컬러 시스템을 맞춥니다.</p>
-        </article>
-        <article class="card card--feature">
-          <div class="ic" aria-hidden="true">03</div>
-          <h3>대화형 수정</h3>
-          <p>문구·섹션 순서·컴포넌트 교체를 자연어로 요청하면 바로 반영된 초안을 받습니다.</p>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <section id="how" class="section" style="padding-top:0;">
-    <div class="container">
-      <div class="section-head">
-        <div>
-          <h2>작동 방식</h2>
-          <p>입력 → AI 생성 → 대화로 다듬기 → 빌드·배포까지 한 플로우로 이어집니다.</p>
-        </div>
-      </div>
-
-      <div class="feature-grid">
-        <article class="card card--feature">
-          <div class="ic" aria-hidden="true">A</div>
-          <h3>의도를 문장으로</h3>
-          <p>누구를 위한 사이트인지, 어떤 행동을 유도할지, 분위기는 어떤지 적어 주세요.</p>
-        </article>
-        <article class="card card--feature">
-          <div class="ic" aria-hidden="true">B</div>
-          <h3>모델이 페이지 조립</h3>
-          <p>구조·스타일·카피를 한 번에 생성해 브라우저에서 바로 미리볼 수 있습니다.</p>
-        </article>
-        <article class="card card--feature">
-          <div class="ic" aria-hidden="true">C</div>
-          <h3>피드백을 이어 붙이기</h3>
-          <p>“여기 문구 짧게”, “네비 고정”처럼 추가 요청을 쌓아가며 완성도를 올립니다.</p>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <section id="pricing" class="section">
-    <div class="container">
-      <div class="pricing-shell" role="region" aria-label="Pricing comparison">
-        <div class="pricing-top">
-          <div class="pricing-intro">
-            <div class="pricing-title">
-              한눈에
-              <br />
-              비교해 보세요
-            </div>
-            <div class="pricing-sub">솔루션 선택이 어려우신가요?</div>
-          </div>
-
-          <div class="pricing-plans" aria-label="Plans">
-            <article class="plan-card">
-              <div class="plan-name">고도물 basic</div>
-              <div class="plan-price">
-                <span class="plan-amount">0원</span>
-                <span class="plan-unit">/월</span>
-              </div>
-              <div class="plan-desc">강력한 기능의 평생 무료 쇼핑몰. 외부 서비스 연동에 제한이 없어요.</div>
-              <ul class="plan-bullets">
-                <li>월 이용료 0원</li>
-                <li>프로로 업그레이드 가능</li>
-              </ul>
-              <button class="plan-button" type="button">고도물 basic 시작하기</button>
-            </article>
-
-            <article class="plan-card plan-card--featured">
-              <div class="plan-name">고도물 pro</div>
-              <div class="plan-price">
-                <span class="plan-amount">33,000원</span>
-                <span class="plan-unit">/월</span>
-              </div>
-              <div class="plan-desc">커스터마이징 통합 양장 기능. 더 넓은 영역을 운영하고 싶은 팀에 적합해요.</div>
-              <ul class="plan-bullets">
-                <li>basic 모든 기능 포함</li>
-                <li>DB 커스텀마이징 가능</li>
-                <li>관리자 커스텀디자인 가능</li>
-              </ul>
-              <button class="plan-button plan-button--featured" type="button">고도물 pro 시작하기</button>
-            </article>
-
-            <article class="plan-card">
-              <div class="plan-name">삼바이 enterprise</div>
-              <div class="plan-price">
-                <span class="plan-amount">99,000원</span>
-                <span class="plan-unit">/월</span>
-              </div>
-              <div class="plan-desc">확장성과 안정성을 갖춘 풀패키지. 대규모 트래픽과 고급 기능이 필요할 때.</div>
-              <ul class="plan-bullets">
-                <li>헤드리스 플랫포</li>
-                <li>웹사이트 지원</li>
-                <li>기존 비즈니스 API 연동</li>
-              </ul>
-              <button class="plan-button" type="button">삼바이 enterprise 시작하기</button>
-            </article>
-          </div>
-        </div>
-
-        <div class="pricing-table" aria-label="Feature comparison table">
-          <div class="pricing-table-grid pricing-table-grid--head">
-            <div class="pricing-th pricing-td--label"></div>
-            <div class="pricing-th">고도물 basic</div>
-            <div class="pricing-th">고도물 pro</div>
-            <div class="pricing-th">삼바이 enterprise</div>
-          </div>
-
-          <div class="pricing-table-grid">
-            <div class="pricing-td pricing-td--label">트래픽</div>
-            <div class="pricing-td pricing-td--center">✓</div>
-            <div class="pricing-td pricing-td--center">✓</div>
-            <div class="pricing-td pricing-td--center">✓</div>
-          </div>
-          <div class="pricing-table-grid">
-            <div class="pricing-td pricing-td--label">스토리지</div>
-            <div class="pricing-td pricing-td--center">4GB</div>
-            <div class="pricing-td pricing-td--center">4GB(추가 가능)</div>
-            <div class="pricing-td pricing-td--center">무제한</div>
-          </div>
-          <div class="pricing-table-grid">
-            <div class="pricing-td pricing-td--label">공급사 관리</div>
-            <div class="pricing-td pricing-td--center">✓</div>
-            <div class="pricing-td pricing-td--center">✓</div>
-            <div class="pricing-td pricing-td--center">✓</div>
-          </div>
-          <div class="pricing-table-grid">
-            <div class="pricing-td pricing-td--label">모바일 앱 지원</div>
-            <div class="pricing-td pricing-td--center">✓</div>
-            <div class="pricing-td pricing-td--center">무료 &amp; 앱 푸시 유지</div>
-            <div class="pricing-td pricing-td--center">무료 &amp; 앱 푸시 유지</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <footer class="site-footer" aria-label="사이트 하단 정보">
-    <div class="container site-footer__inner">
-      <div class="site-footer__top">
-        <a class="site-footer__logo" href="#">
-          <span class="site-footer__logo-mark" aria-hidden="true"></span>
-          <span class="site-footer__logo-text">Devely</span>
-        </a>
-        <div class="site-footer__quick-links" aria-label="빠른 링크">
-          <a href="#">회사 소개</a>
-          <a href="#">요금</a>
-          <a href="#">파트너십 문의</a>
-          <a href="#">고객센터</a>
-          <a href="#">보안</a>
-        </div>
-      </div>
-
-      <div class="site-footer__grid">
-        <nav class="footer-col" aria-label="제품">
-          <h3 class="footer-col__title">제품</h3>
-          <ul class="footer-col__list">
-            <li><a href="#">랜딩 생성기</a></li>
-            <li><a href="#">프로젝트 관리</a></li>
-            <li><a href="#">템플릿</a></li>
-            <li><a href="#">요금제</a></li>
-          </ul>
-        </nav>
-        <nav class="footer-col" aria-label="솔루션">
-          <h3 class="footer-col__title">솔루션</h3>
-          <ul class="footer-col__list">
-            <li><a href="#">에이전시</a></li>
-            <li><a href="#">커머스</a></li>
-            <li><a href="#">마케팅 팀</a></li>
-            <li><a href="#">엔터프라이즈</a></li>
-          </ul>
-        </nav>
-        <nav class="footer-col" aria-label="리소스">
-          <h3 class="footer-col__title">리소스</h3>
-          <ul class="footer-col__list">
-            <li><a href="#">가이드</a></li>
-            <li><a href="#">블로그</a></li>
-            <li><a href="#">업데이트 노트</a></li>
-            <li><a href="#">활용 사례</a></li>
-          </ul>
-        </nav>
-        <nav class="footer-col" aria-label="회사">
-          <h3 class="footer-col__title">회사</h3>
-          <ul class="footer-col__list">
-            <li><a href="#">채용</a></li>
-            <li><a href="#">보도자료</a></li>
-            <li><a href="#">브랜드</a></li>
-            <li><a href="#">연락처</a></li>
-          </ul>
-        </nav>
-      </div>
-
-      <div class="site-footer__rule" role="presentation"></div>
-
-      <div class="site-footer__company">
-        <div class="site-footer__company-main">
-          <p class="site-footer__legal">
-            (주)데블리 · 대표이사 홍길동 · 개인정보보호책임자 privacy@devely.ai · 고객센터 1588-0000 · 서울특별시 강남구 테헤란로 000
-          </p>
-          <nav class="site-footer__legal-nav" aria-label="법적 고지">
-            <a href="#">이용약관</a>
-            <a href="#" class="site-footer__legal-nav--strong">개인정보처리방침</a>
-            <a href="#">쿠키 정책</a>
-            <a href="#">이용 정책</a>
-            <a href="#">사이트맵</a>
-          </nav>
-        </div>
-      </div>
-
-      <div class="site-footer__bottom">
-        <p class="site-footer__copyright">© DEMO STUDIO Corp. All rights reserved.</p>
-        <div class="site-footer__social site-footer__social--bottom" aria-label="소셜 미디어">
-          <a href="#" aria-label="블로그"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 4h16v16H4V4zm2 2v12h12V6H6zm2 2h8v2H8V8zm0 4h8v2H8v-2zm0 4h5v2H8v-2z"/></svg></a>
-          <a href="#" aria-label="YouTube"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
-          <a href="#" aria-label="Facebook"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
-          <a href="#" aria-label="Instagram"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
-          <a href="#" aria-label="LinkedIn"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
-        </div>
-      </div>
-    </div>
-  </footer>
-`;
+  return LANDING_PAGE_HTML;
 }
 
 const DASHBOARD_INNER = `
@@ -1142,6 +733,133 @@ function getProjectsInnerHTML(): string {
               <button type="submit" class="app-btn app-btn--primary proj-new-submit" id="projNewSubmit">템플릿으로 생성</button>
             </div>
           </form>
+        </div>
+      </div>
+
+      <div id="projZipModal" class="proj-modal proj-modal--import" hidden>
+        <div class="proj-modal__backdrop" id="projZipBackdrop" tabindex="-1"></div>
+        <div
+          class="proj-modal__dialog proj-modal__dialog--import"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="projZipModalTitle"
+        >
+          <div class="proj-modal__head proj-modal__head--import">
+            <div class="proj-modal__title-block">
+              <p class="proj-modal__eyebrow">가져오기</p>
+              <h2 id="projZipModalTitle" class="proj-modal__title proj-modal__title--import">ZIP 업로드</h2>
+              <p class="proj-modal__lede proj-modal__lede--import">
+                정적 사이트 소스(ZIP)를 올리면 디렉터리 구조를 분석하고 미리보기·에이전트 컨텍스트까지 이어집니다.
+              </p>
+            </div>
+            <button type="button" class="proj-modal__close" id="projZipClose" aria-label="닫기">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <div class="proj-import-zip">
+            <input
+              type="file"
+              id="projZipFile"
+              class="proj-import-zip__file"
+              accept=".zip,application/zip,application/x-zip-compressed"
+              tabindex="-1"
+              aria-hidden="true"
+            />
+            <label for="projZipFile" class="proj-import-dropzone" id="projZipDropzone" tabindex="0">
+              <span class="proj-import-dropzone__icon" aria-hidden="true">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+              </span>
+              <span class="proj-import-dropzone__title">ZIP을 끌어다 놓거나 클릭하여 선택</span>
+              <span class="proj-import-dropzone__hint">정적 HTML/CSS/JS · 최대 100MB (제품 연동 시 적용)</span>
+            </label>
+            <p id="projZipFileName" class="proj-import-zip__picked" hidden></p>
+            <ul class="proj-import-zip__bullets">
+              <li>루트에 <code>index.html</code>이 있으면 바로 미리보기에 맞춥니다.</li>
+              <li>압축 해제 후 트리는 Code 탭에서 확인할 수 있습니다.</li>
+            </ul>
+          </div>
+          <div class="proj-modal__actions proj-modal__actions--import">
+            <button type="button" class="app-btn app-btn--ghost" id="projZipCancel">취소</button>
+            <button type="button" class="app-btn app-btn--primary" id="projZipSubmit" disabled>분석 시작</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="projGhModal" class="proj-modal proj-modal--import" hidden>
+        <div class="proj-modal__backdrop" id="projGhBackdrop" tabindex="-1"></div>
+        <div
+          class="proj-modal__dialog proj-modal__dialog--import"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="projGhModalTitle"
+        >
+          <div class="proj-modal__head proj-modal__head--import">
+            <div class="proj-modal__title-block">
+              <p class="proj-modal__eyebrow">가져오기</p>
+              <h2 id="projGhModalTitle" class="proj-modal__title proj-modal__title--import">GitHub에서 불러오기</h2>
+              <p class="proj-modal__lede proj-modal__lede--import">
+                저장소를 연결한 뒤 브랜치·경로를 지정하면 클론·빌드·미리보기까지 한 흐름으로 이어집니다.
+              </p>
+            </div>
+            <button type="button" class="proj-modal__close" id="projGhClose" aria-label="닫기">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <form id="projGhForm" class="proj-import-gh">
+            <div class="proj-import-gh__oauth">
+              <div class="proj-import-gh__oauth-copy">
+                <p class="proj-import-gh__oauth-title">GitHub 계정</p>
+                <p class="proj-import-gh__oauth-desc">연결하면 조직·비공개 저장소 권한을 불러옵니다.</p>
+              </div>
+              <div class="proj-import-gh__oauth-actions">
+                <button type="button" class="app-btn app-btn--ghost proj-import-gh__connect" id="projGhConnect">
+                  <span class="proj-import-gh__gh-mark" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path
+                        d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.113.825-.258.825-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.757-1.333-1.757-1.09-.745.083-.729.083-.729 1.205.084 1.84 1.236 1.84 1.236 1.07 1.835 2.807 1.305 3.492.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.225.694.825.576C20.565 21.795 24 17.31 24 12c0-6.63-5.37-12-12-12z"
+                      />
+                    </svg>
+                  </span>
+                  GitHub 연결
+                </button>
+                <span id="projGhConnectBadge" class="proj-import-gh__badge" hidden>연결됨 · 데모</span>
+              </div>
+            </div>
+            <div class="proj-import-field">
+              <label class="proj-import-label" for="projGhRepo">저장소 URL</label>
+              <input
+                id="projGhRepo"
+                name="repo"
+                class="proj-import-input"
+                type="url"
+                autocomplete="off"
+                placeholder="https://github.com/owner/repository"
+                required
+              />
+            </div>
+            <div class="proj-import-field-row">
+              <div class="proj-import-field">
+                <label class="proj-import-label" for="projGhBranch">브랜치</label>
+                <input id="projGhBranch" name="branch" class="proj-import-input" type="text" value="main" autocomplete="off" />
+              </div>
+              <div class="proj-import-field">
+                <label class="proj-import-label" for="projGhPath">루트 경로 <span class="proj-import-label__opt">(선택)</span></label>
+                <input
+                  id="projGhPath"
+                  name="path"
+                  class="proj-import-input"
+                  type="text"
+                  placeholder="예: apps/web"
+                  autocomplete="off"
+                />
+              </div>
+            </div>
+            <p class="proj-import-gh__note">데모에서는 입력값만 검증합니다. 실제 OAuth·클론은 백엔드 연동 후 동작합니다.</p>
+          </form>
+          <div class="proj-modal__actions proj-modal__actions--import">
+            <button type="button" class="app-btn app-btn--ghost" id="projGhCancel">취소</button>
+            <button type="submit" class="app-btn app-btn--primary" id="projGhSubmit" form="projGhForm">저장소 가져오기</button>
+          </div>
         </div>
       </div>`;
 }
@@ -2129,15 +1847,160 @@ function bindProjectAgentPage(p: DemoProject): void {
 }
 
 function bindProjectListPage(openCreateFromRoute = false): void {
-  document.getElementById("projBtnZip")?.addEventListener("click", () => {
-    window.alert(
-      "ZIP 업로드 후 구조 분석·미리보기 생성까지 연결됩니다. (PRD FR-3)",
-    );
+  const zipModal = document.getElementById("projZipModal");
+  const zipFile = document.getElementById("projZipFile") as HTMLInputElement | null;
+  const zipFileName = document.getElementById("projZipFileName");
+  const zipDropzone = document.getElementById("projZipDropzone");
+  const zipSubmit = document.getElementById("projZipSubmit") as HTMLButtonElement | null;
+  let projZipPick: File | null = null;
+
+  const formatImportBytes = (n: number): string => {
+    if (n < 1024) return `${n} B`;
+    if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+    return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const isZipFile = (f: File): boolean =>
+    f.name.toLowerCase().endsWith(".zip") ||
+    f.type === "application/zip" ||
+    f.type === "application/x-zip-compressed";
+
+  const setZipPick = (file: File | null): void => {
+    projZipPick = file;
+    if (zipFile && !file) zipFile.value = "";
+    if (zipFileName) {
+      if (file) {
+        zipFileName.textContent = `선택됨: ${file.name} (${formatImportBytes(file.size)})`;
+        zipFileName.hidden = false;
+      } else {
+        zipFileName.textContent = "";
+        zipFileName.hidden = true;
+      }
+    }
+    if (zipSubmit) {
+      if (file) zipSubmit.removeAttribute("disabled");
+      else zipSubmit.setAttribute("disabled", "");
+    }
+    zipDropzone?.classList.toggle("proj-import-dropzone--has-file", Boolean(file));
+  };
+
+  const openProjZipModal = (): void => {
+    projZipPick = null;
+    if (zipFile) zipFile.value = "";
+    setZipPick(null);
+    if (zipModal) zipModal.hidden = false;
+  };
+
+  const closeProjZipModal = (): void => {
+    if (zipModal) zipModal.hidden = true;
+    projZipPick = null;
+    if (zipFile) zipFile.value = "";
+    setZipPick(null);
+  };
+
+  zipFile?.addEventListener("change", () => {
+    const f = zipFile.files?.[0] ?? null;
+    if (f && !isZipFile(f)) {
+      window.alert("ZIP 파일만 선택할 수 있습니다.");
+      zipFile.value = "";
+      setZipPick(null);
+      return;
+    }
+    setZipPick(f);
   });
-  document.getElementById("projBtnGh")?.addEventListener("click", () => {
+
+  zipDropzone?.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    zipDropzone.classList.add("proj-import-dropzone--drag");
+  });
+  zipDropzone?.addEventListener("dragleave", (e) => {
+    e.preventDefault();
+    zipDropzone.classList.remove("proj-import-dropzone--drag");
+  });
+  zipDropzone?.addEventListener("drop", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    zipDropzone.classList.remove("proj-import-dropzone--drag");
+    const f = e.dataTransfer?.files?.[0];
+    if (!f) return;
+    if (!isZipFile(f)) {
+      window.alert("ZIP 파일만 놓을 수 있습니다.");
+      return;
+    }
+    setZipPick(f);
+    if (zipFile) {
+      const dt = new DataTransfer();
+      dt.items.add(f);
+      zipFile.files = dt.files;
+    }
+  });
+
+  document.getElementById("projBtnZip")?.addEventListener("click", openProjZipModal);
+  document.getElementById("projZipBackdrop")?.addEventListener("click", closeProjZipModal);
+  document.getElementById("projZipClose")?.addEventListener("click", closeProjZipModal);
+  document.getElementById("projZipCancel")?.addEventListener("click", closeProjZipModal);
+  document.getElementById("projZipSubmit")?.addEventListener("click", () => {
+    if (!projZipPick) return;
     window.alert(
-      "GitHub 연동 후 저장소 목록에서 선택·가져오기 확인 단계로 진입합니다. (PRD FR-4)",
+      `「${projZipPick.name}」 분석을 시작합니다. (데모)\n\n실제 제품에서는 업로드 → 트리 분석 → 미리보기 생성까지 서버에서 처리합니다.`,
     );
+    closeProjZipModal();
+  });
+
+  const ghModal = document.getElementById("projGhModal");
+  const ghForm = document.getElementById("projGhForm") as HTMLFormElement | null;
+  const ghConnect = document.getElementById("projGhConnect");
+  const ghConnectBadge = document.getElementById("projGhConnectBadge");
+
+  const resetProjGhModal = (): void => {
+    ghForm?.reset();
+    const branchEl = document.getElementById("projGhBranch") as HTMLInputElement | null;
+    if (branchEl) branchEl.value = "main";
+    ghConnect?.removeAttribute("hidden");
+    ghConnectBadge?.setAttribute("hidden", "");
+  };
+
+  const openProjGhModal = (): void => {
+    resetProjGhModal();
+    if (ghModal) ghModal.hidden = false;
+  };
+
+  const closeProjGhModal = (): void => {
+    if (ghModal) ghModal.hidden = true;
+    resetProjGhModal();
+  };
+
+  document.getElementById("projBtnGh")?.addEventListener("click", openProjGhModal);
+  document.getElementById("projGhBackdrop")?.addEventListener("click", closeProjGhModal);
+  document.getElementById("projGhClose")?.addEventListener("click", closeProjGhModal);
+  document.getElementById("projGhCancel")?.addEventListener("click", closeProjGhModal);
+  ghConnect?.addEventListener("click", () => {
+    ghConnect.setAttribute("hidden", "");
+    ghConnectBadge?.removeAttribute("hidden");
+  });
+  ghForm?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!ghForm) return;
+    const fd = new FormData(ghForm);
+    const repo = String(fd.get("repo") ?? "").trim();
+    const branch = String(fd.get("branch") ?? "").trim() || "main";
+    const path = String(fd.get("path") ?? "").trim();
+    try {
+      const u = new URL(repo);
+      if (!/github\.com$/i.test(u.hostname)) {
+        window.alert("github.com 저장소 URL만 지원합니다.");
+        return;
+      }
+    } catch {
+      window.alert("올바른 저장소 URL을 입력해 주세요.");
+      return;
+    }
+    const pathLine = path ? `\n경로: ${path}` : "";
+    window.alert(
+      `저장소를 가져옵니다. (데모)\n\n${repo}\n브랜치: ${branch}${pathLine}\n\n실제 제품에서는 OAuth·클론·파이프라인이 이어집니다.`,
+    );
+    closeProjGhModal();
   });
 
   const newModal = document.getElementById("projNewModal");
@@ -2352,10 +2215,24 @@ function bindProjectListPage(openCreateFromRoute = false): void {
     projNewModalEscapeListenerAttached = true;
     document.addEventListener("keydown", (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
-      const m = document.getElementById("projNewModal");
-      if (!m || m.hidden) return;
-      e.preventDefault();
-      dismissProjectsCreateModal();
+      const mNew = document.getElementById("projNewModal");
+      if (mNew && !mNew.hidden) {
+        e.preventDefault();
+        dismissProjectsCreateModal();
+        return;
+      }
+      const mZip = document.getElementById("projZipModal");
+      if (mZip && !mZip.hidden) {
+        e.preventDefault();
+        closeProjZipModal();
+        return;
+      }
+      const mGh = document.getElementById("projGhModal");
+      if (mGh && !mGh.hidden) {
+        e.preventDefault();
+        closeProjGhModal();
+        return;
+      }
     });
   }
 
@@ -2483,11 +2360,13 @@ function bindProjectDetailPage(p: DemoProject): void {
 function mountLanding(): void {
   document.body.classList.remove("app-view");
   root.innerHTML = getLandingHTML();
-  document.title = "Devely — AI 웹사이트 자동 생성";
+  document.title = "Devely — AI 웹 제작 · 프롬프트부터 배포까지";
 
-  document.getElementById("btnLogin")?.addEventListener("click", () => {
+  const goDashboard = (): void => {
     window.location.hash = HASH_DASHBOARD;
-  });
+  };
+  document.getElementById("btnLogin")?.addEventListener("click", goDashboard);
+  document.getElementById("btnLoginMid")?.addEventListener("click", goDashboard);
 
   const form = root.querySelector<HTMLFormElement>("#promptForm");
   const input = root.querySelector<HTMLInputElement>("#promptInput");
