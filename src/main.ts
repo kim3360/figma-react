@@ -585,15 +585,23 @@ const DASHBOARD_INNER = `
       </div>
 `;
 
-type DemoProjectStatus = "pre" | "deploying" | "done";
+type DemoProjectStatus = "pre" | "deploying" | "done" | "failed";
 type DemoProjectKind = "landing" | "portfolio" | "business";
 
 interface DemoProject {
   slug: string;
   status: DemoProjectStatus;
   kind: DemoProjectKind;
+  /** 라이브 시 공개 URL, 그 외에는 내부 메모·오류 메시지 */
   subtitle: string;
+  /** 카드·로그용 절대 시각 표기 */
   updated: string;
+  /** FR-1: GitHub 스타일 상대 시각 (목록) */
+  updatedRelative: string;
+  /** 목록 정렬: 최근 수정순 */
+  updatedSort: number;
+  /** merge 기준 배포 버전 (PRD FR-12-1) */
+  deployVersion: number;
 }
 
 const DEMO_PROJECTS: readonly DemoProject[] = [
@@ -601,8 +609,11 @@ const DEMO_PROJECTS: readonly DemoProject[] = [
     slug: "cafe-landing-page",
     status: "pre",
     kind: "landing",
-    subtitle: "배포되지 않음",
+    subtitle: "",
     updated: "Mar 5 04:25",
+    updatedRelative: "5주 전",
+    updatedSort: 50,
+    deployVersion: 0,
   },
   {
     slug: "portfolio-2024",
@@ -610,6 +621,9 @@ const DEMO_PROJECTS: readonly DemoProject[] = [
     kind: "portfolio",
     subtitle: "프로덕션 배포 진행 중",
     updated: "Jun 23 14:31",
+    updatedRelative: "어제",
+    updatedSort: 92,
+    deployVersion: 2,
   },
   {
     slug: "saas-intro-site",
@@ -617,13 +631,19 @@ const DEMO_PROJECTS: readonly DemoProject[] = [
     kind: "business",
     subtitle: "https://intro.example.com",
     updated: "Apr 11 18:30",
+    updatedRelative: "3일 전",
+    updatedSort: 88,
+    deployVersion: 4,
   },
   {
     slug: "event-spring-sale",
     status: "pre",
     kind: "landing",
-    subtitle: "배포되지 않음",
+    subtitle: "",
     updated: "Feb 2 09:15",
+    updatedRelative: "2월 2일",
+    updatedSort: 30,
+    deployVersion: 0,
   },
   {
     slug: "designer-showcase",
@@ -631,6 +651,9 @@ const DEMO_PROJECTS: readonly DemoProject[] = [
     kind: "portfolio",
     subtitle: "https://folio.example.com",
     updated: "Jan 19 22:08",
+    updatedRelative: "1월 19일",
+    updatedSort: 40,
+    deployVersion: 3,
   },
   {
     slug: "corp-pr-page",
@@ -638,6 +661,9 @@ const DEMO_PROJECTS: readonly DemoProject[] = [
     kind: "business",
     subtitle: "스테이징 검증 중",
     updated: "Mar 28 11:42",
+    updatedRelative: "2주 전",
+    updatedSort: 55,
+    deployVersion: 1,
   },
   {
     slug: "newsletter-signup",
@@ -645,13 +671,19 @@ const DEMO_PROJECTS: readonly DemoProject[] = [
     kind: "landing",
     subtitle: "https://nl.example.com",
     updated: "Dec 8 16:55",
+    updatedRelative: "12월 8일",
+    updatedSort: 35,
+    deployVersion: 2,
   },
   {
     slug: "photo-studio-booking",
-    status: "pre",
+    status: "failed",
     kind: "portfolio",
-    subtitle: "초안만 존재",
+    subtitle: "빌드 단계 오류: 패키지 의존성 해석 실패",
     updated: "Nov 30 07:20",
+    updatedRelative: "2주 전",
+    updatedSort: 45,
+    deployVersion: 1,
   },
   {
     slug: "recruit-2026",
@@ -659,6 +691,9 @@ const DEMO_PROJECTS: readonly DemoProject[] = [
     kind: "landing",
     subtitle: "DNS 전파 대기",
     updated: "Apr 1 13:07",
+    updatedRelative: "11일 전",
+    updatedSort: 85,
+    deployVersion: 2,
   },
 ];
 
@@ -670,16 +705,18 @@ function escapeHtml(text: string): string {
     .replace(/"/g, "&quot;");
 }
 
+/** PRD §10.1 FR-1 · 화면1 — Draft / Pending / Live / Failed */
 const STATUS_BADGE: Record<
   DemoProjectStatus,
   { className: string; label: string }
 > = {
-  pre: { className: "proj-badge proj-badge--status-pre", label: "배포 전" },
+  pre: { className: "proj-badge proj-badge--prd-draft", label: "초안" },
   deploying: {
-    className: "proj-badge proj-badge--status-deploying",
-    label: "배포 중",
+    className: "proj-badge proj-badge--prd-pending",
+    label: "배포 대기",
   },
-  done: { className: "proj-badge proj-badge--status-done", label: "배포 완료" },
+  done: { className: "proj-badge proj-badge--prd-live", label: "라이브" },
+  failed: { className: "proj-badge proj-badge--prd-failed", label: "실패" },
 };
 
 const KIND_BADGE: Record<
@@ -749,61 +786,73 @@ function renderProjectThumb(p: DemoProject, index: number): string {
         </div>`;
 }
 
+function isProjectLiveUrl(p: DemoProject): boolean {
+  return p.status === "done" && /^https?:\/\//i.test(p.subtitle);
+}
+
 function renderProjectCard(p: DemoProject, index: number): string {
   const st = STATUS_BADGE[p.status];
   const kd = KIND_BADGE[p.kind];
   const slug = escapeHtml(p.slug);
-  const sub = escapeHtml(p.subtitle);
-  const time = escapeHtml(p.updated);
+  const rel = escapeHtml(p.updatedRelative);
   const thumb = renderProjectThumb(p, index);
-  const href = `${HASH_PROJECTS}/${encodeURIComponent(p.slug)}`;
+  const navHash = `${HASH_PROJECTS}/${encodeURIComponent(p.slug)}`;
+  const showUrl = isProjectLiveUrl(p);
+  const rawUrl = showUrl ? p.subtitle : "";
+  const href = escapeHtml(rawUrl);
+  const urlDisplay = escapeHtml(rawUrl.replace(/^https?:\/\//i, ""));
+  const urlBlock = showUrl
+    ? `<a class="proj-card__live-url" href="${href}" target="_blank" rel="noopener noreferrer">${urlDisplay}</a>`
+    : "";
+
   return `
-        <a class="proj-card proj-card--link" href="${href}">
-          ${thumb}
-          <div class="proj-card__body">
-            <div class="proj-card__badges">
-              <span class="${st.className}">${st.label}</span>
-              <span class="${kd.className}">${kd.label}</span>
+        <article class="proj-card">
+          <div class="proj-card__hit" data-project-nav="${navHash}" role="link" tabindex="0" aria-label="${slug} 프로젝트 개요">
+            ${thumb}
+            <div class="proj-card__body">
+              <div class="proj-card__badges">
+                <span class="${st.className}">${st.label}</span>
+                <span class="${kd.className}">${kd.label}</span>
+              </div>
+              <h2 class="proj-card__title">${slug}</h2>
             </div>
-            <h2 class="proj-card__title">${slug}</h2>
-            <p class="proj-card__desc">${sub}</p>
+            ${urlBlock}
+            <footer class="proj-card__foot">
+              <span class="proj-card__time">Updated ${rel}</span>
+            </footer>
           </div>
-          <footer class="proj-card__foot">
-            <span class="proj-card__time">${time}</span>
-          </footer>
-        </a>`;
+        </article>`;
 }
 
 function getProjectsInnerHTML(): string {
-  const cards = DEMO_PROJECTS.map((p, i) => renderProjectCard(p, i)).join("");
+  const sorted = [...DEMO_PROJECTS].sort((a, b) => b.updatedSort - a.updatedSort);
+  const cards = sorted.map((p, i) => renderProjectCard(p, i)).join("");
   return `
       <header class="app-header app-header--row proj-page-head">
         <div>
           <h1 class="app-header__title">프로젝트</h1>
-          <p class="app-header__sub">워크스페이스의 프로젝트를 한눈에 확인하세요.</p>
+          <p class="app-header__sub">AI로 만든 사이트를 수정·미리보기·배포까지 이어갑니다. (PRD MVP 흐름 반영 데모)</p>
         </div>
-        <button type="button" class="app-btn app-btn--primary">+ 새 프로젝트</button>
+        <div class="proj-page-actions">
+          <button type="button" class="app-btn app-btn--primary" id="projBtnNew">+ 새 프로젝트</button>
+          <button type="button" class="app-btn app-btn--ghost" id="projBtnZip">ZIP 업로드</button>
+          <button type="button" class="app-btn app-btn--ghost" id="projBtnGh">GitHub에서 불러오기</button>
+        </div>
       </header>
 
-      <div class="proj-grid">
+      <div class="proj-grid" id="projGrid">
         ${cards}
       </div>`;
 }
 
 function getProjectDetailStatusRow(p: DemoProject): string {
-  if (p.status === "pre") {
-    return `<span class="proj-detail-pill proj-detail-pill--draft" title="초안">
-      <span class="proj-detail-pill__clock" aria-hidden="true"></span>
-      Draft
-    </span>
-    <span class="proj-detail-pill proj-detail-pill--version">Version: v1</span>`;
-  }
-  if (p.status === "deploying") {
-    return `<span class="proj-detail-pill proj-detail-pill--progress">${STATUS_BADGE.deploying.label}</span>
-    <span class="proj-detail-pill proj-detail-pill--version">Version: v1</span>`;
-  }
-  return `<span class="proj-detail-pill proj-detail-pill--live">${STATUS_BADGE.done.label}</span>
-    <span class="proj-detail-pill proj-detail-pill--version">Version: v1</span>`;
+  const st = STATUS_BADGE[p.status];
+  const ver =
+    p.deployVersion > 0
+      ? `현재 버전: v${p.deployVersion}`
+      : "현재 버전: — (미배포)";
+  return `<span class="proj-detail-pill proj-detail-pill--${p.status === "pre" ? "draft" : p.status === "deploying" ? "progress" : p.status === "failed" ? "failed" : "live"}">${st.label}</span>
+    <span class="proj-detail-pill proj-detail-pill--version">${escapeHtml(ver)}</span>`;
 }
 
 function getProjectDetailMainBlock(p: DemoProject): string {
@@ -847,15 +896,130 @@ function getProjectDetailMainBlock(p: DemoProject): string {
       </div>
     </div>`;
   }
-  const url = escapeHtml(p.subtitle);
-  return `<div class="proj-detail-live">
-      <div class="proj-detail-live__icon" aria-hidden="true"></div>
-      <div class="proj-detail-live__content">
-        <p class="proj-detail-live__label">프로덕션 URL</p>
-        <span class="proj-detail-live__url">${url}</span>
-        <p class="proj-detail-live__hint">AI로 생성·배포된 사이트가 연결되어 있습니다.</p>
-      </div>
+  if (p.status === "failed") {
+    const err = escapeHtml(p.subtitle);
+    return `<div class="proj-detail-failed" role="alert">
+      <p class="proj-detail-failed__title">빌드에 실패했습니다</p>
+      <p class="proj-detail-failed__msg">${err}</p>
+      <p class="proj-detail-failed__hint">Open AI Agent에서 원인 설명과 수정 제안을 요청한 뒤, 미리보기를 다시 받을 수 있습니다.</p>
     </div>`;
+  }
+  return `<div class="proj-detail-workspace-hint">
+      <p><strong>라이브 URL</strong>은 위 개요에서 확인하세요. 실제 코드 빌드 미리보기·승인·배포는 AI 에이전트 작업 화면에서 이어집니다.</p>
+    </div>`;
+}
+
+function demoCommitHash(slug: string): string {
+  let h = 2166136261;
+  for (let i = 0; i < slug.length; i++) {
+    h ^= slug.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0).toString(16).slice(0, 7);
+}
+
+function getRecentMergeRows(p: DemoProject): string {
+  const rows: { sum: string; when: string; deployed: boolean }[] = [];
+  if (p.status === "done") {
+    rows.push({
+      sum: "히어로 카피·메타 태그 반영",
+      when: p.updated,
+      deployed: true,
+    });
+    rows.push({
+      sum: "문의 CTA 섹션 추가",
+      when: "2일 전",
+      deployed: true,
+    });
+    rows.push({ sum: "스타일 토큰 정리", when: "1주 전", deployed: false });
+  } else if (p.status === "deploying") {
+    rows.push({
+      sum: "프리뷰 브랜치 빌드 성공",
+      when: "10분 전",
+      deployed: false,
+    });
+    rows.push({
+      sum: "배포 승인 대기 (main merge 전)",
+      when: "방금",
+      deployed: false,
+    });
+    rows.push({ sum: "DNS 레코드 안내 발송", when: "1시간 전", deployed: false });
+  } else if (p.status === "failed") {
+    rows.push({
+      sum: "npm ci 단계에서 종료",
+      when: p.updated,
+      deployed: false,
+    });
+    rows.push({
+      sum: "이전 성공 빌드: v" + Math.max(0, p.deployVersion - 1),
+      when: "3일 전",
+      deployed: true,
+    });
+    rows.push({ sum: "preview 브랜치 커밋 적재", when: "같은 세션", deployed: false });
+  } else {
+    rows.push({
+      sum: "프로젝트 생성 및 템플릿 연결",
+      when: p.updated,
+      deployed: false,
+    });
+    rows.push({
+      sum: "아직 승인된 merge 없음",
+      when: "—",
+      deployed: false,
+    });
+    rows.push({ sum: "다음: 초안 생성 후 미리보기", when: "—", deployed: false });
+  }
+  return rows
+    .map(
+      (r) => `<li class="proj-prd-merge__row">
+      <span class="proj-prd-merge__sum">${escapeHtml(r.sum)}</span>
+      <span class="proj-prd-merge__when">${escapeHtml(r.when)}</span>
+      <span class="proj-prd-merge__tag${r.deployed ? " proj-prd-merge__tag--ok" : ""}">${r.deployed ? "배포됨" : "미배포"}</span>
+    </li>`,
+    )
+    .join("");
+}
+
+function getProjectDetailOverviewHTML(p: DemoProject): string {
+  const title = escapeHtml(p.slug);
+  const badges = getProjectDetailStatusRow(p);
+  const live = isProjectLiveUrl(p);
+  const url = live ? escapeHtml(p.subtitle) : "";
+  const urlRow = live
+    ? `<div class="proj-prd-url-row">
+        <a class="proj-prd-url" href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>
+        <button type="button" class="proj-prd-copy" id="projCopyUrl">복사</button>
+      </div>`
+    : `<p class="proj-prd-url-empty">라이브 URL은 <strong>라이브</strong> 상태에서만 표시됩니다. GitHub Pages 등 배포 완료 후 확인하세요.</p>`;
+
+  const traffic = `<div class="proj-prd-traffic">
+      <p class="proj-prd-traffic__label">트래픽 현황</p>
+      <p class="proj-prd-traffic__off">GA4 미연동 · 연결하면 방문 요약이 이 영역에 표시됩니다.</p>
+    </div>`;
+
+  const mergeList = getRecentMergeRows(p);
+  const hash = demoCommitHash(p.slug);
+
+  return `<section class="proj-prd-overview" aria-labelledby="proj-prd-overview-title">
+      <h1 id="proj-prd-overview-title" class="proj-prd-overview__title">${title}</h1>
+      <div class="proj-prd-overview__badges">${badges}</div>
+      <div class="proj-prd-overview__block">
+        <h2 class="proj-prd-overview__h">현재 URL</h2>
+        ${urlRow}
+      </div>
+      <div class="proj-prd-overview__grid">
+        <div class="proj-prd-overview__block">
+          <h2 class="proj-prd-overview__h">최근 반영 이력</h2>
+          <ol class="proj-prd-merge">${mergeList}</ol>
+        </div>
+        <div class="proj-prd-overview__block">
+          <h2 class="proj-prd-overview__h">가장 최근 커밋 (preview)</h2>
+          <p class="proj-prd-commit"><code>${escapeHtml(hash)}</code> · ${escapeHtml(p.updatedRelative)}에 푸시됨</p>
+          <p class="proj-prd-commit__sub">요청별 커밋은 preview 브랜치에 기록됩니다. (PRD FR-12-1)</p>
+        </div>
+      </div>
+      ${traffic}
+    </section>`;
 }
 
 function demoAiCreditsUsed(slug: string): number {
@@ -872,6 +1036,9 @@ function getDeployEnvBlock(p: DemoProject): { label: string; detail: string } {
   }
   if (p.status === "deploying") {
     return { label: "스테이징", detail: p.subtitle };
+  }
+  if (p.status === "failed") {
+    return { label: "빌드 실패", detail: "미리보기 재시도 전" };
   }
   return { label: "프로덕션", detail: "CDN · SSL · 자동 빌드" };
 }
@@ -903,6 +1070,13 @@ function getTimelineEntries(p: DemoProject): { msg: string; meta: string; tone: 
       { msg: p.subtitle, meta: "배포", tone: "amber" },
     ];
   }
+  if (p.status === "failed") {
+    return [
+      ...common.slice(0, 2),
+      { msg: p.subtitle, meta: "빌드 로그", tone: "amber" },
+      { msg: "수정 제안: 의존성 버전 고정 후 재빌드", meta: "AI 제안", tone: "violet" },
+    ];
+  }
   return [
     ...common,
     { msg: "프로덕션 배포 성공", meta: "라이브", tone: "green" },
@@ -924,6 +1098,13 @@ function getNextActionsHTML(p: DemoProject): string {
         <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--done" aria-hidden="true"></span><span>빌드 아티팩트 업로드</span></li>
         <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--run" aria-hidden="true"></span><span>DNS·SSL 전파 대기</span></li>
         <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--todo" aria-hidden="true"></span><span>배포 완료 후 스모크 테스트</span></li>
+      </ul>`;
+  }
+  if (p.status === "failed") {
+    return `<ul class="proj-detail-checklist">
+        <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--todo" aria-hidden="true"></span><span>오류 로그 확인 후 AI에 재빌드 요청</span></li>
+        <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--todo" aria-hidden="true"></span><span>제안된 수정안 승인 → 미리보기 재검증</span></li>
+        <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--todo" aria-hidden="true"></span><span>성공 시 변경 반영 승인 → 배포 단계</span></li>
       </ul>`;
   }
   return `<ul class="proj-detail-checklist">
@@ -1001,8 +1182,7 @@ function getProjectDetailExtrasHTML(p: DemoProject): string {
 }
 
 function getProjectDetailInnerHTML(p: DemoProject): string {
-  const title = escapeHtml(p.slug);
-  const badges = getProjectDetailStatusRow(p);
+  const overview = getProjectDetailOverviewHTML(p);
   const main = getProjectDetailMainBlock(p);
   const extras = getProjectDetailExtrasHTML(p);
   return `
@@ -1013,22 +1193,26 @@ function getProjectDetailInnerHTML(p: DemoProject): string {
             프로젝트 목록으로 돌아가기
           </a>
 
-          <section class="proj-detail-card" aria-labelledby="proj-detail-title">
+          ${overview}
+
+          <div class="proj-detail-toolbar">
+            <button type="button" class="proj-detail-agent" id="projOpenAgent">
+              <span class="proj-detail-agent__shine" aria-hidden="true"></span>
+              <span class="proj-detail-agent__inner">
+                <span class="proj-detail-agent__play" aria-hidden="true"></span>
+                Open AI Agent
+              </span>
+            </button>
+            <button type="button" class="proj-detail-settings" id="projSettings" disabled>
+              프로젝트 설정
+            </button>
+          </div>
+          <p class="proj-detail-settings__hint">프로젝트 설정은 MVP 이후 폼·체크박스 기반으로 확장 예정입니다. (PRD FR-14-2)</p>
+
+          <section class="proj-detail-card" aria-labelledby="proj-work-title">
             <div class="proj-detail-card__accent" aria-hidden="true"></div>
-            <div class="proj-detail-card__head">
-              <div class="proj-detail-card__titles">
-                <h1 id="proj-detail-title" class="proj-detail-card__title">${title}</h1>
-                <div class="proj-detail-card__badges">${badges}</div>
-              </div>
-              <button type="button" class="proj-detail-agent">
-                <span class="proj-detail-agent__shine" aria-hidden="true"></span>
-                <span class="proj-detail-agent__inner">
-                  <span class="proj-detail-agent__play" aria-hidden="true"></span>
-                  Open AI Agent
-                </span>
-              </button>
-            </div>
-            <div class="proj-detail-card__body">
+            <h2 id="proj-work-title" class="proj-detail-card__section-title">작업 요약</h2>
+            <div class="proj-detail-card__body proj-detail-card__body--flush">
               ${main}
             </div>
           </section>
@@ -1038,15 +1222,27 @@ function getProjectDetailInnerHTML(p: DemoProject): string {
           <section class="proj-detail-danger" aria-labelledby="proj-detail-danger-title">
             <div class="proj-detail-danger__inner">
               <div class="proj-detail-danger__copy">
-                <h2 id="proj-detail-danger-title" class="proj-detail-danger__title">Danger Zone</h2>
-                <p class="proj-detail-danger__desc">되돌릴 수 없는 작업입니다. 워크스페이스에서 제거 시 복구가 어려울 수 있어요.</p>
+                <h2 id="proj-detail-danger-title" class="proj-detail-danger__title">프로젝트 제거</h2>
+                <p class="proj-detail-danger__desc">목록에서만 제거됩니다. 대화 세션은 휴지통으로 이동하며, GitHub 레포는 삭제되지 않습니다.</p>
               </div>
-              <button type="button" class="proj-detail-danger__btn">
+              <button type="button" class="proj-detail-danger__btn" id="projRemoveOpen">
                 <span class="proj-detail-danger__trash" aria-hidden="true"></span>
                 워크스페이스에서 제거
               </button>
             </div>
           </section>
+        </div>
+
+        <div id="projRemoveModal" class="proj-modal" hidden>
+          <div class="proj-modal__backdrop" id="projRemoveBackdrop"></div>
+          <div class="proj-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="projRemoveModalTitle">
+            <h2 id="projRemoveModalTitle" class="proj-modal__title">워크스페이스에서 제거할까요?</h2>
+            <p class="proj-modal__body">프로젝트 목록에서만 삭제되고, 실제 GitHub 레포는 삭제되지 않습니다. 연결된 대화 세션은 휴지통으로 옮겨집니다.</p>
+            <div class="proj-modal__actions">
+              <button type="button" class="app-btn app-btn--ghost" id="projRemoveCancel">취소</button>
+              <button type="button" class="proj-modal__confirm" id="projRemoveConfirm">워크스페이스에서 제거</button>
+            </div>
+          </div>
         </div>
       </div>`;
 }
@@ -1066,6 +1262,68 @@ function getProjectNotFoundInnerHTML(): string {
           </section>
         </div>
       </div>`;
+}
+
+function bindProjectListPage(): void {
+  document.getElementById("projBtnZip")?.addEventListener("click", () => {
+    window.alert("ZIP 업로드 후 구조 분석·미리보기 생성까지 연결됩니다. (PRD FR-3)");
+  });
+  document.getElementById("projBtnGh")?.addEventListener("click", () => {
+    window.alert("GitHub 연동 후 저장소 목록에서 선택·가져오기 확인 단계로 진입합니다. (PRD FR-4)");
+  });
+  document.getElementById("projBtnNew")?.addEventListener("click", () => {
+    window.alert("빠른 초안 / 고완성도 초안 모드 선택 후 작업이 시작됩니다. (PRD FR-2)");
+  });
+  const grid = document.getElementById("projGrid");
+  grid?.addEventListener("click", (e) => {
+    const el = e.target as HTMLElement;
+    if (el.closest(".proj-card__live-url")) return;
+    const hit = el.closest(".proj-card__hit") as HTMLElement | null;
+    const nav = hit?.dataset.projectNav;
+    if (nav) window.location.hash = nav;
+  });
+  grid?.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const hit = (e.target as HTMLElement).closest(".proj-card__hit") as HTMLElement | null;
+    const nav = hit?.dataset.projectNav;
+    if (nav) {
+      e.preventDefault();
+      window.location.hash = nav;
+    }
+  });
+}
+
+function bindProjectDetailPage(p: DemoProject): void {
+  const copyBtn = document.getElementById("projCopyUrl");
+  copyBtn?.addEventListener("click", async () => {
+    if (!isProjectLiveUrl(p)) return;
+    try {
+      await navigator.clipboard.writeText(p.subtitle);
+      copyBtn.textContent = "복사됨";
+      window.setTimeout(() => {
+        copyBtn.textContent = "복사";
+      }, 2000);
+    } catch {
+      window.alert("클립보드 복사에 실패했습니다.");
+    }
+  });
+
+  document.getElementById("projOpenAgent")?.addEventListener("click", () => {
+    window.alert("미리보기·대화·승인 패널이 있는 작업 화면은 다음 구현 단계에서 연결됩니다. (PRD 화면 3)");
+  });
+
+  const modal = document.getElementById("projRemoveModal");
+  const showModal = (show: boolean): void => {
+    if (modal) modal.hidden = !show;
+  };
+
+  document.getElementById("projRemoveOpen")?.addEventListener("click", () => showModal(true));
+  document.getElementById("projRemoveBackdrop")?.addEventListener("click", () => showModal(false));
+  document.getElementById("projRemoveCancel")?.addEventListener("click", () => showModal(false));
+  document.getElementById("projRemoveConfirm")?.addEventListener("click", () => {
+    showModal(false);
+    window.location.hash = HASH_PROJECTS;
+  });
 }
 
 function mountLanding(): void {
@@ -1119,6 +1377,13 @@ function mountApp(): void {
 
   root.innerHTML = getAppLayoutHTML(sidebar, inner);
   document.title = title;
+
+  if (route.kind === "projects") {
+    bindProjectListPage();
+  } else if (route.kind === "project") {
+    const proj = DEMO_PROJECTS.find((x) => x.slug === route.slug);
+    if (proj) bindProjectDetailPage(proj);
+  }
 }
 
 function renderRoute(): void {
