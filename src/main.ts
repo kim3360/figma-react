@@ -17,8 +17,17 @@ function getProjectHash(slug: string): string {
   return `${HASH_PROJECTS}/${encodeURIComponent(slug)}`;
 }
 
-function getProjectAgentHash(slug: string): string {
-  return `${HASH_PROJECTS}/${encodeURIComponent(slug)}/agent`;
+type AgentWorkspaceTab = "preview" | "code" | "pipeline";
+
+function parseAgentWorkspaceTabSegment(seg: string | undefined): AgentWorkspaceTab {
+  if (seg === "code" || seg === "pipeline" || seg === "preview") return seg;
+  return "preview";
+}
+
+function getProjectAgentHash(slug: string, tab: AgentWorkspaceTab = "preview"): string {
+  const base = `${HASH_PROJECTS}/${encodeURIComponent(slug)}/agent`;
+  if (tab === "preview") return base;
+  return `${base}/${tab}`;
 }
 
 function isAppRoute(): boolean {
@@ -30,7 +39,7 @@ type AppRoute =
   | { kind: "dashboard" }
   | { kind: "projects" }
   | { kind: "project"; slug: string }
-  | { kind: "projectAgent"; slug: string };
+  | { kind: "projectAgent"; slug: string; tab: AgentWorkspaceTab };
 
 function parseAppRoute(): AppRoute {
   const h = window.location.hash;
@@ -46,7 +55,8 @@ function parseAppRoute(): AppRoute {
     }
     const slug = decodeURIComponent(segments[0]);
     if (segments[1] === "agent") {
-      return { kind: "projectAgent", slug };
+      const tab = parseAgentWorkspaceTabSegment(segments[2]);
+      return { kind: "projectAgent", slug, tab };
     }
     return { kind: "project", slug };
   }
@@ -1668,7 +1678,7 @@ function getAgentPipelineSectionHTML(p: DemoProject): string {
     </section>`;
 }
 
-function getProjectAgentInnerHTML(p: DemoProject): string {
+function getProjectAgentInnerHTML(p: DemoProject, activeTab: AgentWorkspaceTab): string {
   const slugSafe = escapeHtml(p.slug);
   const backHref = getProjectHash(p.slug);
   const previewIframe = getAgentWorkspacePreviewIframeHTML();
@@ -1677,6 +1687,9 @@ function getProjectAgentInnerHTML(p: DemoProject): string {
   const liveExtra = isProjectLiveUrl(p)
     ? `<p class="agent-live-link"><a href="${escapeHtml(p.subtitle.trim())}" target="_blank" rel="noopener noreferrer">실제 라이브 URL 열기 ↗</a></p>`
     : "";
+  const onPreview = activeTab === "preview";
+  const onCode = activeTab === "code";
+  const onPipeline = activeTab === "pipeline";
 
   return `
       <div class="agent-page">
@@ -1688,15 +1701,15 @@ function getProjectAgentInnerHTML(p: DemoProject): string {
                 나가기
               </a>
               <div class="agent-tabs" role="tablist" aria-label="작업 영역">
-                <button type="button" class="agent-tab agent-tab--active" role="tab" aria-selected="true" aria-controls="agentPanelPreview" id="agentTabPreview" data-agent-tab="preview">미리보기</button>
-                <button type="button" class="agent-tab" role="tab" aria-selected="false" aria-controls="agentPanelCode" id="agentTabCode" data-agent-tab="code">Code (Diff)</button>
-                <button type="button" class="agent-tab" role="tab" aria-selected="false" aria-controls="agentPanelPipeline" id="agentTabPipeline" data-agent-tab="pipeline">Pipeline</button>
+                <button type="button" class="agent-tab${onPreview ? " agent-tab--active" : ""}" role="tab" aria-selected="${onPreview}" aria-controls="agentPanelPreview" id="agentTabPreview" data-agent-tab="preview">미리보기</button>
+                <button type="button" class="agent-tab${onCode ? " agent-tab--active" : ""}" role="tab" aria-selected="${onCode}" aria-controls="agentPanelCode" id="agentTabCode" data-agent-tab="code">Code (Diff)</button>
+                <button type="button" class="agent-tab${onPipeline ? " agent-tab--active" : ""}" role="tab" aria-selected="${onPipeline}" aria-controls="agentPanelPipeline" id="agentTabPipeline" data-agent-tab="pipeline">Pipeline</button>
               </div>
               <span class="agent-branch-pill">preview branch</span>
             </div>
 
             <div class="agent-panels">
-              <div class="agent-panel" id="agentPanelPreview" role="tabpanel" aria-labelledby="agentTabPreview" data-agent-panel="preview">
+              <div class="agent-panel" id="agentPanelPreview" role="tabpanel" aria-labelledby="agentTabPreview" data-agent-panel="preview"${onPreview ? "" : " hidden"}>
                 <div class="agent-browser-chrome">
                   <div class="agent-browser-chrome__dots" aria-hidden="true">
                     <span></span><span></span><span></span>
@@ -1708,10 +1721,10 @@ function getProjectAgentInnerHTML(p: DemoProject): string {
                 </div>
                 ${liveExtra}
               </div>
-              <div class="agent-panel" id="agentPanelCode" role="tabpanel" aria-labelledby="agentTabCode" data-agent-panel="code" hidden>
+              <div class="agent-panel" id="agentPanelCode" role="tabpanel" aria-labelledby="agentTabCode" data-agent-panel="code"${onCode ? "" : " hidden"}>
                 ${codePanel}
               </div>
-              <div class="agent-panel agent-panel--scroll" id="agentPanelPipeline" role="tabpanel" aria-labelledby="agentTabPipeline" data-agent-panel="pipeline" hidden>
+              <div class="agent-panel agent-panel--scroll" id="agentPanelPipeline" role="tabpanel" aria-labelledby="agentTabPipeline" data-agent-panel="pipeline"${onPipeline ? "" : " hidden"}>
                 <div class="agent-panel__inner">
                   ${pipeline}
                 </div>
@@ -1797,19 +1810,27 @@ function bindProjectAgentPage(p: DemoProject): void {
     });
   });
 
-  document.querySelectorAll<HTMLButtonElement>("[data-agent-tab]").forEach((tab) => {
-    tab.addEventListener("click", () => {
-      const id = tab.dataset.agentTab;
-      if (!id) return;
-      document.querySelectorAll<HTMLButtonElement>("[data-agent-tab]").forEach((t) => {
-        const on = t.dataset.agentTab === id;
-        t.classList.toggle("agent-tab--active", on);
-        t.setAttribute("aria-selected", String(on));
-      });
-      document.querySelectorAll<HTMLElement>("[data-agent-panel]").forEach((panel) => {
-        const on = panel.dataset.agentPanel === id;
-        panel.toggleAttribute("hidden", !on);
-      });
+  const applyAgentWorkspaceTab = (tab: AgentWorkspaceTab): void => {
+    document.querySelectorAll<HTMLButtonElement>("[data-agent-tab]").forEach((t) => {
+      const on = t.dataset.agentTab === tab;
+      t.classList.toggle("agent-tab--active", on);
+      t.setAttribute("aria-selected", String(on));
+    });
+    document.querySelectorAll<HTMLElement>("[data-agent-panel]").forEach((panel) => {
+      const on = panel.dataset.agentPanel === tab;
+      panel.toggleAttribute("hidden", !on);
+    });
+  };
+
+  document.querySelectorAll<HTMLButtonElement>("[data-agent-tab]").forEach((tabBtn) => {
+    tabBtn.addEventListener("click", () => {
+      const id = tabBtn.dataset.agentTab as AgentWorkspaceTab | undefined;
+      if (id !== "preview" && id !== "code" && id !== "pipeline") return;
+      applyAgentWorkspaceTab(id);
+      const nextHash = getProjectAgentHash(p.slug, id);
+      if (window.location.hash !== nextHash) {
+        history.pushState(null, "", nextHash);
+      }
     });
   });
 
@@ -2055,7 +2076,7 @@ function mountApp(): void {
   } else if (route.kind === "projectAgent") {
     sidebar = "projects";
     const p = DEMO_PROJECTS.find((x) => x.slug === route.slug);
-    inner = p ? getProjectAgentInnerHTML(p) : getProjectNotFoundInnerHTML();
+    inner = p ? getProjectAgentInnerHTML(p, route.tab) : getProjectNotFoundInnerHTML();
     title = p ? `${p.slug} · 에이전트 — AI Web Builder` : "프로젝트 — AI Web Builder";
     if (p) {
       mainExtraClass = "app-main--agent";
@@ -2094,4 +2115,5 @@ function renderRoute(): void {
 }
 
 window.addEventListener("hashchange", renderRoute);
+window.addEventListener("popstate", renderRoute);
 renderRoute();
