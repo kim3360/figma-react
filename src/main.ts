@@ -1,5 +1,6 @@
 import "./landing.css";
 import "./app.css";
+import "./error-pages.css";
 import { LANDING_PAGE_HTML } from "./landing-page-html";
 
 function getAppRoot(): HTMLDivElement {
@@ -18,6 +19,10 @@ const HASH_MAIN_ALT = "#/main";
 const HASH_PROJECTS = "#/app/projects";
 /** 프로젝트 목록에서 「새 프로젝트」모달 (프로젝트 slug로 `create`는 사용하지 않음) */
 const HASH_PROJECTS_CREATE = "#/app/projects/create";
+
+/** 데모용 전역 오류 화면 (예: 공유 링크 테스트) */
+const HASH_ERROR_404 = "#/error/404";
+const HASH_ERROR_400 = "#/error/400";
 
 function replaceLocationHashNoNavigate(hash: string): void {
   const url = new URL(window.location.href);
@@ -60,11 +65,22 @@ type AppRoute =
   | { kind: "dashboard" }
   | { kind: "projects"; createModalOpen: boolean }
   | { kind: "project"; slug: string }
-  | { kind: "projectAgent"; slug: string; tab: AgentWorkspaceTab };
+  | { kind: "projectAgent"; slug: string; tab: AgentWorkspaceTab }
+  | { kind: "notFound" };
 
 function parseAppRoute(): AppRoute {
-  const h = window.location.hash;
-  if (h === HASH_PROJECTS || h === "#/app/projects/") {
+  const raw = window.location.hash;
+  const h = raw.replace(/\/+$/, "") || "#";
+
+  if (h === HASH_MAIN_ALT || h === HASH_DASHBOARD) {
+    return { kind: "dashboard" };
+  }
+
+  if (raw.startsWith("#/app/") && !raw.startsWith("#/app/projects")) {
+    return { kind: "notFound" };
+  }
+
+  if (h === HASH_PROJECTS || h === "#/app/projects") {
     return { kind: "projects", createModalOpen: false };
   }
   const prefix = "#/app/projects/";
@@ -85,6 +101,122 @@ function parseAppRoute(): AppRoute {
     return { kind: "project", slug };
   }
   return { kind: "dashboard" };
+}
+
+function parseStandaloneErrorRoute(): 404 | 400 | null {
+  const h = window.location.hash.replace(/\/+$/, "") || "#";
+  if (h === HASH_ERROR_404 || h === "#/404") return 404;
+  if (h === HASH_ERROR_400 || h === "#/400") return 400;
+  return null;
+}
+
+/** 브랜드 404/400 히어로 — 브라우저 창 + 404 숫자 + 좌측 말풍선·우측 경고 (라인 일러스트) */
+function getErrorHeroIllustrationSvg(code: 404 | 400): string {
+  const num = String(code);
+  const is404 = code === 404;
+  const leftExtra = is404
+    ? `<g stroke="#0f172a" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" fill="none">
+        <path d="M28 118h52l10-18h36l10 18h24" />
+        <path d="M36 118v-8h64v8" />
+        <circle cx="48" cy="128" r="5" fill="#0f172a" />
+        <circle cx="100" cy="128" r="5" fill="#0f172a" />
+        <ellipse cx="58" cy="68" rx="22" ry="16" />
+        <path d="M52 80 L46 92" />
+        <path d="M70 76h12M70 82h8" stroke-width="1.5" />
+      </g>`
+    : `<g stroke="#0f172a" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" fill="none">
+        <rect x="34" y="88" width="72" height="40" rx="4" />
+        <path d="M46 104h48M46 112h32" stroke-width="1.5" />
+        <path d="M58 52 L82 88 H34 Z" />
+        <circle cx="58" cy="62" r="2" fill="#0f172a" />
+      </g>`;
+  const rightShape = is404
+    ? `<path d="M352 52 L376 98 H328 Z" stroke="#0f172a" stroke-width="1.75" fill="none" stroke-linejoin="round" />
+       <line x1="352" y1="72" x2="352" y2="82" stroke="#0f172a" stroke-width="1.75" stroke-linecap="round" />
+       <circle cx="352" cy="90" r="2" fill="#0f172a" />`
+    : `<rect x="318" y="56" width="56" height="44" rx="4" stroke="#0f172a" stroke-width="1.75" fill="none" />
+       <path d="M330 68h32M330 76h24M330 84h28" stroke="#0f172a" stroke-width="1.5" stroke-linecap="round" />`;
+  return `<svg class="err-page__hero-svg" viewBox="0 0 420 168" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+    ${leftExtra}
+    <g stroke="#0f172a" stroke-width="1.75" fill="none">
+      <rect x="118" y="36" width="184" height="112" rx="8" />
+      <line x1="118" y1="56" x2="302" y2="56" />
+      <circle cx="132" cy="46" r="3.5" fill="#0f172a" stroke="none" />
+      <circle cx="146" cy="46" r="3.5" fill="#cbd5e1" stroke="none" />
+      <circle cx="160" cy="46" r="3.5" fill="#cbd5e1" stroke="none" />
+      <rect x="132" y="68" width="156" height="64" rx="2" stroke="#cbd5e1" stroke-width="1.25" />
+    </g>
+    <text x="210" y="118" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="44" font-weight="800" fill="#0f172a" letter-spacing="-0.04em">${num}</text>
+    ${rightShape}
+  </svg>`;
+}
+
+function getHttpErrorPageHTML(code: 404 | 400, embeddedInApp: boolean): string {
+  const is404 = code === 404;
+  const line1 = is404
+    ? "현재 입력하신 주소의 페이지는 삭제되었거나, 다른 페이지로 변경되었습니다."
+    : "보내신 요청을 처리할 수 없습니다. 입력값이나 형식이 서버에서 기대하는 것과 다를 수 있습니다.";
+  const line2 = is404 ? "주소를 다시 확인해 주세요." : "입력 내용을 다시 확인한 뒤, 잠시 후 다시 시도해 주세요.";
+  const hero = getErrorHeroIllustrationSvg(code);
+  const pageTitle = is404 ? "페이지를 찾을 수 없습니다" : "잘못된 요청입니다";
+
+  if (embeddedInApp) {
+    return `
+    <div class="err-page err-page--in-app">
+      <div class="err-page__embed">
+        <h1 class="err-page__embed-title visually-hidden">${pageTitle}</h1>
+        <div class="err-page__embed-art">${hero}</div>
+        <p class="err-page__lead err-page__lead--embed">${line1}<br />${line2}</p>
+        <a class="err-page__cta-main" href="#/">메인 페이지로 이동</a>
+        <a class="err-page__cta-sub" href="${HASH_DASHBOARD}">대시보드로 이동</a>
+      </div>
+    </div>`;
+  }
+
+  return `
+    <div class="err-page err-page--site">
+      <header class="err-page__site-header">
+        <nav class="err-page__site-nav err-page__site-nav--left" aria-label="주요 메뉴">
+          <a class="err-page__site-link" href="#/">서비스</a>
+          <a class="err-page__site-link" href="${HASH_DASHBOARD}">워크스페이스</a>
+          <a class="err-page__site-link" href="${HASH_PROJECTS}">프로젝트</a>
+          <a class="err-page__site-link" href="#/">가이드</a>
+        </nav>
+        <a class="err-page__site-logo" href="#/">Devely</a>
+        <nav class="err-page__site-nav err-page__site-nav--right" aria-label="유틸">
+          <a class="err-page__site-link err-page__site-link--muted" href="#/">KR</a>
+          <a class="err-page__site-link err-page__site-link--muted" href="#/">통합검색</a>
+          <a class="err-page__site-link err-page__site-link--muted" href="${HASH_DASHBOARD}">로그인</a>
+        </nav>
+      </header>
+      <main class="err-page__site-main">
+        <h1 class="err-page__hero-heading visually-hidden">${pageTitle}</h1>
+        <div class="err-page__hero-art">${hero}</div>
+        <p class="err-page__lead">${line1}<br />${line2}</p>
+        <a class="err-page__cta-main" href="#/">메인 페이지로 이동</a>
+        <a class="err-page__cta-sub" href="${HASH_DASHBOARD}">대시보드로 이동</a>
+      </main>
+      <footer class="err-page__site-footer">
+        <nav class="err-page__footer-grid" aria-label="바로가기">
+          <a class="err-page__footer-cell err-page__footer-cell--active" href="#/">랜딩</a>
+          <a class="err-page__footer-cell" href="${HASH_DASHBOARD}">대시보드</a>
+          <a class="err-page__footer-cell" href="${HASH_PROJECTS}">프로젝트</a>
+          <a class="err-page__footer-cell" href="${HASH_DASHBOARD}">템플릿</a>
+          <a class="err-page__footer-cell" href="#/">시작하기</a>
+          <a class="err-page__footer-cell" href="#/">고객 지원</a>
+          <a class="err-page__footer-cell" href="${HASH_DASHBOARD}">마이페이지</a>
+          <a class="err-page__footer-cell" href="#/">Devely 소개</a>
+        </nav>
+      </footer>
+    </div>`;
+}
+
+function mountStandaloneHttpError(code: 404 | 400): void {
+  document.body.classList.remove("app-view");
+  document.body.classList.add("error-view");
+  root.innerHTML = getHttpErrorPageHTML(code, false);
+  document.title =
+    code === 404 ? "404 — 페이지 없음 — Devely" : "400 — 잘못된 요청 — Devely";
 }
 
 function getAppLayoutHTML(
@@ -2359,6 +2491,7 @@ function bindProjectDetailPage(p: DemoProject): void {
 
 function mountLanding(): void {
   document.body.classList.remove("app-view");
+  document.body.classList.remove("error-view");
   root.innerHTML = getLandingHTML();
   document.title = "Devely — AI 웹 제작 · 프롬프트부터 배포까지";
 
@@ -2388,6 +2521,7 @@ function mountLanding(): void {
 }
 
 function mountApp(): void {
+  document.body.classList.remove("error-view");
   document.body.classList.add("app-view");
   const route = parseAppRoute();
   let inner: string;
@@ -2396,7 +2530,13 @@ function mountApp(): void {
   let mainExtraClass = "";
   let omitSidebar = false;
 
-  if (route.kind === "projects") {
+  if (route.kind === "notFound") {
+    omitSidebar = true;
+    mainExtraClass = "app-main--error";
+    inner = getHttpErrorPageHTML(404, true);
+    title = "404 — AI Web Builder";
+    sidebar = "dashboard";
+  } else if (route.kind === "projects") {
     sidebar = "projects";
     inner = getProjectsInnerHTML();
     title = route.createModalOpen
@@ -2424,7 +2564,9 @@ function mountApp(): void {
   root.innerHTML = getAppLayoutHTML(sidebar, inner, mainExtraClass, omitSidebar);
   document.title = title;
 
-  if (route.kind === "projects") {
+  if (route.kind === "notFound") {
+    /* no-op */
+  } else if (route.kind === "projects") {
     bindProjectListPage(route.createModalOpen);
   } else if (route.kind === "projectAgent") {
     const proj = DEMO_PROJECTS.find((x) => x.slug === route.slug);
@@ -2436,6 +2578,12 @@ function mountApp(): void {
 }
 
 function renderRoute(): void {
+  document.body.classList.remove("error-view");
+  const standaloneErr = parseStandaloneErrorRoute();
+  if (standaloneErr) {
+    mountStandaloneHttpError(standaloneErr);
+    return;
+  }
   if (isAppRoute()) {
     mountApp();
   } else {
