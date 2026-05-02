@@ -1,119 +1,133 @@
-import "./landing.css";
-import "./app.css";
-import "./error-pages.css";
-import { LANDING_PAGE_HTML } from "./landing-page-html";
+import "./landing.css"
+import "./app.css"
+import "./error-pages.css"
+import { LANDING_PAGE_HTML } from "./landing-page-html"
 
 function getAppRoot(): HTMLDivElement {
-  const el = document.querySelector<HTMLDivElement>("#app");
-  if (!el) throw new Error("Missing #app element");
-  return el;
+  const el = document.querySelector<HTMLDivElement>("#app")
+  if (!el) throw new Error("Missing #app element")
+  return el
 }
 
-const root = getAppRoot();
+const root = getAppRoot()
 
-let projNewModalEscapeListenerAttached = false;
-let projTemplateSliderResizeListenerAttached = false;
+let projNewModalEscapeListenerAttached = false
+let projTemplateSliderResizeListenerAttached = false
 
-const HASH_DASHBOARD = "#/app";
-const HASH_MAIN_ALT = "#/main";
-const HASH_PROJECTS = "#/app/projects";
+const HASH_DASHBOARD = "#/app"
+const HASH_MAIN_ALT = "#/main"
+const HASH_PROJECTS = "#/app/projects"
 /** 프로젝트 목록에서 「새 프로젝트」모달 (프로젝트 slug로 `create`는 사용하지 않음) */
-const HASH_PROJECTS_CREATE = "#/app/projects/create";
+const HASH_PROJECTS_CREATE = "#/app/projects/create"
+
+const STORAGE_KEY_SIDEBAR_COLLAPSED = "devely.sidebar.collapsed"
+
+function readSidebarCollapsed(): boolean {
+  try {
+    return localStorage.getItem(STORAGE_KEY_SIDEBAR_COLLAPSED) === "1"
+  } catch {
+    return false
+  }
+}
+
+function writeSidebarCollapsed(collapsed: boolean): void {
+  try {
+    if (collapsed) localStorage.setItem(STORAGE_KEY_SIDEBAR_COLLAPSED, "1")
+    else localStorage.removeItem(STORAGE_KEY_SIDEBAR_COLLAPSED)
+  } catch {
+    /* ignore */
+  }
+}
 
 /** 데모용 전역 오류 화면 (예: 공유 링크 테스트) */
-const HASH_ERROR_404 = "#/error/404";
-const HASH_ERROR_400 = "#/error/400";
+const HASH_ERROR_404 = "#/error/404"
+const HASH_ERROR_400 = "#/error/400"
 
 function replaceLocationHashNoNavigate(hash: string): void {
-  const url = new URL(window.location.href);
-  url.hash = hash;
-  history.replaceState(null, "", url.toString());
+  const url = new URL(window.location.href)
+  url.hash = hash
+  history.replaceState(null, "", url.toString())
 }
 
 function dismissProjectsCreateModal(): void {
-  const m = document.getElementById("projNewModal");
-  if (!m || m.hidden) return;
-  m.hidden = true;
+  const m = document.getElementById("projNewModal")
+  if (!m || m.hidden) return
+  m.hidden = true
   if (window.location.hash === HASH_PROJECTS_CREATE) {
-    replaceLocationHashNoNavigate(HASH_PROJECTS);
+    replaceLocationHashNoNavigate(HASH_PROJECTS)
   }
 }
 
 function getProjectHash(slug: string): string {
-  return `${HASH_PROJECTS}/${encodeURIComponent(slug)}`;
+  return `${HASH_PROJECTS}/${encodeURIComponent(slug)}`
 }
 
-type AgentWorkspaceTab = "preview" | "code" | "pipeline";
+type AgentWorkspaceTab = "preview" | "code" | "pipeline"
 
 function parseAgentWorkspaceTabSegment(seg: string | undefined): AgentWorkspaceTab {
-  if (seg === "code" || seg === "pipeline" || seg === "preview") return seg;
-  return "preview";
+  if (seg === "code" || seg === "pipeline" || seg === "preview") return seg
+  return "preview"
 }
 
 function getProjectAgentHash(slug: string, tab: AgentWorkspaceTab = "preview"): string {
-  const base = `${HASH_PROJECTS}/${encodeURIComponent(slug)}/agent`;
-  if (tab === "preview") return base;
-  return `${base}/${tab}`;
+  const base = `${HASH_PROJECTS}/${encodeURIComponent(slug)}/agent`
+  if (tab === "preview") return base
+  return `${base}/${tab}`
 }
 
 function isAppRoute(): boolean {
-  const h = window.location.hash;
-  return h === HASH_DASHBOARD || h === HASH_MAIN_ALT || h.startsWith("#/app/");
+  const h = window.location.hash
+  return h === HASH_DASHBOARD || h === HASH_MAIN_ALT || h.startsWith("#/app/")
 }
 
-type AppRoute =
-  | { kind: "dashboard" }
-  | { kind: "projects"; createModalOpen: boolean }
-  | { kind: "project"; slug: string }
-  | { kind: "projectAgent"; slug: string; tab: AgentWorkspaceTab }
-  | { kind: "notFound" };
+type AppRoute = { kind: "dashboard" } | { kind: "projects"; createModalOpen: boolean } | { kind: "project"; slug: string } | { kind: "projectAgent"; slug: string; tab: AgentWorkspaceTab } | { kind: "notFound" }
 
 function parseAppRoute(): AppRoute {
-  const raw = window.location.hash;
-  const h = raw.replace(/\/+$/, "") || "#";
+  const raw = window.location.hash
+  const h = raw.replace(/\/+$/, "") || "#"
 
   if (h === HASH_MAIN_ALT || h === HASH_DASHBOARD) {
-    return { kind: "dashboard" };
+    return { kind: "dashboard" }
   }
 
   if (raw.startsWith("#/app/") && !raw.startsWith("#/app/projects")) {
-    return { kind: "notFound" };
+    return { kind: "notFound" }
   }
 
   if (h === HASH_PROJECTS || h === "#/app/projects") {
-    return { kind: "projects", createModalOpen: false };
+    return { kind: "projects", createModalOpen: false }
   }
-  const prefix = "#/app/projects/";
+  const prefix = "#/app/projects/"
   if (h.startsWith(prefix)) {
-    const rest = h.slice(prefix.length).replace(/\/$/, "");
-    const segments = rest.split("/").filter(Boolean);
+    const rest = h.slice(prefix.length).replace(/\/$/, "")
+    const segments = rest.split("/").filter(Boolean)
     if (segments.length === 0) {
-      return { kind: "projects", createModalOpen: false };
+      return { kind: "projects", createModalOpen: false }
     }
     if (segments.length === 1 && segments[0] === "create") {
-      return { kind: "projects", createModalOpen: true };
+      return { kind: "projects", createModalOpen: true }
     }
-    const slug = decodeURIComponent(segments[0]);
+    const slug = decodeURIComponent(segments[0])
     if (segments[1] === "agent") {
-      const tab = parseAgentWorkspaceTabSegment(segments[2]);
-      return { kind: "projectAgent", slug, tab };
+      const tab = parseAgentWorkspaceTabSegment(segments[2])
+      return { kind: "projectAgent", slug, tab }
     }
-    return { kind: "project", slug };
+    return { kind: "project", slug }
   }
-  return { kind: "dashboard" };
+  return { kind: "dashboard" }
 }
 
 function parseStandaloneErrorRoute(): 404 | 400 | null {
-  const h = window.location.hash.replace(/\/+$/, "") || "#";
-  if (h === HASH_ERROR_404 || h === "#/404") return 404;
-  if (h === HASH_ERROR_400 || h === "#/400") return 400;
-  return null;
+  const h = window.location.hash.replace(/\/+$/, "") || "#"
+  if (h === HASH_ERROR_404 || h === "#/404") return 404
+  if (h === HASH_ERROR_400 || h === "#/400") return 400
+  return null
 }
 
 /** 브랜드 404/400 히어로 — 브라우저 창 + 404 숫자 + 좌측 말풍선·우측 경고 (라인 일러스트) */
 function getErrorHeroIllustrationSvg(code: 404 | 400): string {
-  const num = String(code);
-  const is404 = code === 404;
+  const num = String(code)
+  const is404 = code === 404
   const leftExtra = is404
     ? `<g stroke="#0f172a" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" fill="none">
         <path d="M28 118h52l10-18h36l10 18h24" />
@@ -129,13 +143,13 @@ function getErrorHeroIllustrationSvg(code: 404 | 400): string {
         <path d="M46 104h48M46 112h32" stroke-width="1.5" />
         <path d="M58 52 L82 88 H34 Z" />
         <circle cx="58" cy="62" r="2" fill="#0f172a" />
-      </g>`;
+      </g>`
   const rightShape = is404
     ? `<path d="M352 52 L376 98 H328 Z" stroke="#0f172a" stroke-width="1.75" fill="none" stroke-linejoin="round" />
        <line x1="352" y1="72" x2="352" y2="82" stroke="#0f172a" stroke-width="1.75" stroke-linecap="round" />
        <circle cx="352" cy="90" r="2" fill="#0f172a" />`
     : `<rect x="318" y="56" width="56" height="44" rx="4" stroke="#0f172a" stroke-width="1.75" fill="none" />
-       <path d="M330 68h32M330 76h24M330 84h28" stroke="#0f172a" stroke-width="1.5" stroke-linecap="round" />`;
+       <path d="M330 68h32M330 76h24M330 84h28" stroke="#0f172a" stroke-width="1.5" stroke-linecap="round" />`
   return `<svg class="err-page__hero-svg" viewBox="0 0 420 168" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
     ${leftExtra}
     <g stroke="#0f172a" stroke-width="1.75" fill="none">
@@ -148,17 +162,15 @@ function getErrorHeroIllustrationSvg(code: 404 | 400): string {
     </g>
     <text x="210" y="118" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="44" font-weight="800" fill="#0f172a" letter-spacing="-0.04em">${num}</text>
     ${rightShape}
-  </svg>`;
+  </svg>`
 }
 
 function getHttpErrorPageHTML(code: 404 | 400, embeddedInApp: boolean): string {
-  const is404 = code === 404;
-  const line1 = is404
-    ? "현재 입력하신 주소의 페이지는 삭제되었거나, 다른 페이지로 변경되었습니다."
-    : "보내신 요청을 처리할 수 없습니다. 입력값이나 형식이 서버에서 기대하는 것과 다를 수 있습니다.";
-  const line2 = is404 ? "주소를 다시 확인해 주세요." : "입력 내용을 다시 확인한 뒤, 잠시 후 다시 시도해 주세요.";
-  const hero = getErrorHeroIllustrationSvg(code);
-  const pageTitle = is404 ? "페이지를 찾을 수 없습니다" : "잘못된 요청입니다";
+  const is404 = code === 404
+  const line1 = is404 ? "현재 입력하신 주소의 페이지는 삭제되었거나, 다른 페이지로 변경되었습니다." : "보내신 요청을 처리할 수 없습니다. 입력값이나 형식이 서버에서 기대하는 것과 다를 수 있습니다."
+  const line2 = is404 ? "주소를 다시 확인해 주세요." : "입력 내용을 다시 확인한 뒤, 잠시 후 다시 시도해 주세요."
+  const hero = getErrorHeroIllustrationSvg(code)
+  const pageTitle = is404 ? "페이지를 찾을 수 없습니다" : "잘못된 요청입니다"
 
   if (embeddedInApp) {
     return `
@@ -170,7 +182,7 @@ function getHttpErrorPageHTML(code: 404 | 400, embeddedInApp: boolean): string {
         <a class="err-page__cta-main" href="#/">메인 페이지로 이동</a>
         <a class="err-page__cta-sub" href="${HASH_DASHBOARD}">대시보드로 이동</a>
       </div>
-    </div>`;
+    </div>`
   }
 
   return `
@@ -208,66 +220,101 @@ function getHttpErrorPageHTML(code: 404 | 400, embeddedInApp: boolean): string {
           <a class="err-page__footer-cell" href="#/">Devely 소개</a>
         </nav>
       </footer>
-    </div>`;
+    </div>`
 }
 
 function mountStandaloneHttpError(code: 404 | 400): void {
-  document.body.classList.remove("app-view");
-  document.body.classList.add("error-view");
-  root.innerHTML = getHttpErrorPageHTML(code, false);
-  document.title =
-    code === 404 ? "404 — 페이지 없음 — Devely" : "400 — 잘못된 요청 — Devely";
+  document.body.classList.remove("app-view")
+  document.body.classList.add("error-view")
+  root.innerHTML = getHttpErrorPageHTML(code, false)
+  document.title = code === 404 ? "404 — 페이지 없음 — Devely" : "400 — 잘못된 요청 — Devely"
 }
 
-function getAppLayoutHTML(
-  active: "dashboard" | "projects",
-  mainInnerHTML: string,
-  mainExtraClass = "",
-  omitSidebar = false,
-): string {
-  const mainClasses = `app-main${mainExtraClass ? ` ${mainExtraClass}` : ""}${omitSidebar ? " app-main--full" : ""}`;
+function getAppLayoutHTML(active: "dashboard" | "projects", mainInnerHTML: string, mainExtraClass = "", omitSidebar = false, sidebarCollapsed = false): string {
+  const mainClasses = `app-main${mainExtraClass ? ` ${mainExtraClass}` : ""}${omitSidebar ? " app-main--full" : ""}`
   if (omitSidebar) {
     return `
   <div class="app-shell app-shell--no-sidebar">
     <div class="${mainClasses}">
       ${mainInnerHTML}
     </div>
-  </div>`;
+  </div>`
   }
-  const dashActive = active === "dashboard" ? " app-sidebar__link--active" : "";
-  const projActive = active === "projects" ? " app-sidebar__link--active" : "";
+  const dashActive = active === "dashboard" ? " app-sidebar__link--active" : ""
+  const projActive = active === "projects" ? " app-sidebar__link--active" : ""
+  const shellCollapsedClass = sidebarCollapsed ? " app-shell--sidebar-collapsed" : ""
+  const toggleExpanded = sidebarCollapsed ? "false" : "true"
+  const toggleLabel = sidebarCollapsed ? "사이드바 열기" : "사이드바 닫기"
   return `
-  <div class="app-shell">
+  <div class="app-shell${shellCollapsedClass}">
     <aside class="app-sidebar" aria-label="메인 메뉴">
-      <div class="app-sidebar__brand">
-        <span class="app-sidebar__mark" aria-hidden="true"></span>
-        <div class="app-sidebar__brand-text">
-          <span class="app-sidebar__title">Devely</span>
-          <span class="app-sidebar__tagline">AI 웹 자동 생성</span>
+      <div class="app-sidebar__header">
+        <div class="app-sidebar__brand">
+          <span class="app-sidebar__mark" aria-hidden="true"></span>
+          <div class="app-sidebar__brand-text">
+            <span class="app-sidebar__title">Devely</span>
+            <span class="app-sidebar__tagline">AI 웹 자동 생성</span>
+          </div>
         </div>
+        <button type="button" class="app-sidebar__toggle" data-sidebar-toggle aria-expanded="${toggleExpanded}" title="${toggleLabel}" aria-label="${toggleLabel}">
+          <svg class="app-sidebar__toggle-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="16" rx="2"/>
+            <line x1="9" y1="4" x2="9" y2="20"/>
+          </svg>
+        </button>
       </div>
       <nav class="app-sidebar__nav">
-        <a class="app-sidebar__link${dashActive}" href="${HASH_DASHBOARD}">대시보드</a>
-        <a class="app-sidebar__link${projActive}" href="${HASH_PROJECTS}">프로젝트</a>
-        <a class="app-sidebar__link" href="${HASH_DASHBOARD}">템플릿</a>
-        <a class="app-sidebar__link" href="${HASH_DASHBOARD}">분석</a>
-        <a class="app-sidebar__link" href="${HASH_DASHBOARD}">설정</a>
+        <a class="app-sidebar__link${dashActive}" href="${HASH_DASHBOARD}" title="대시보드">
+          <span class="app-sidebar__icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+          </span>
+          <span class="app-sidebar__label-text">대시보드</span>
+        </a>
+        <a class="app-sidebar__link${projActive}" href="${HASH_PROJECTS}" title="프로젝트">
+          <span class="app-sidebar__icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          </span>
+          <span class="app-sidebar__label-text">프로젝트</span>
+        </a>
+        <a class="app-sidebar__link" href="${HASH_DASHBOARD}" title="템플릿">
+          <span class="app-sidebar__icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M10 13h4"/><path d="M10 17h4"/></svg>
+          </span>
+          <span class="app-sidebar__label-text">템플릿</span>
+        </a>
+        <a class="app-sidebar__link" href="${HASH_DASHBOARD}" title="분석">
+          <span class="app-sidebar__icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 6-7"/></svg>
+          </span>
+          <span class="app-sidebar__label-text">분석</span>
+        </a>
+        <a class="app-sidebar__link" href="${HASH_DASHBOARD}" title="설정">
+          <span class="app-sidebar__icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          </span>
+          <span class="app-sidebar__label-text">설정</span>
+        </a>
       </nav>
       <div class="app-sidebar__section">
         <p class="app-sidebar__label">워크스페이스</p>
         <div class="app-sidebar__pill">데모 팀 · Pro</div>
       </div>
-      <a class="app-sidebar__logout" href="#/">← 랜딩으로 나가기</a>
+      <a class="app-sidebar__logout" href="#/" aria-label="랜딩으로 나가기" title="랜딩으로 나가기">
+        <span class="app-sidebar__icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </span>
+        <span class="app-sidebar__label-text">랜딩으로 나가기</span>
+      </a>
     </aside>
     <div class="${mainClasses}">
       ${mainInnerHTML}
     </div>
   </div>
-`;
+`
 }
 
 function getLandingHTML(): string {
-  return LANDING_PAGE_HTML;
+  return LANDING_PAGE_HTML
 }
 
 const DASHBOARD_INNER = `
@@ -364,25 +411,25 @@ const DASHBOARD_INNER = `
           </div>
         </section>
       </div>
-`;
+`
 
-type DemoProjectStatus = "pre" | "deploying" | "done" | "failed";
-type DemoProjectKind = "landing" | "portfolio" | "business";
+type DemoProjectStatus = "pre" | "deploying" | "done" | "failed"
+type DemoProjectKind = "landing" | "portfolio" | "business"
 
 interface DemoProject {
-  slug: string;
-  status: DemoProjectStatus;
-  kind: DemoProjectKind;
+  slug: string
+  status: DemoProjectStatus
+  kind: DemoProjectKind
   /** 라이브 시 공개 URL, 그 외에는 내부 메모·오류 메시지 */
-  subtitle: string;
+  subtitle: string
   /** 카드·로그용 절대 시각 표기 */
-  updated: string;
+  updated: string
   /** FR-1: GitHub 스타일 상대 시각 (목록) */
-  updatedRelative: string;
+  updatedRelative: string
   /** 목록 정렬: 최근 수정순 */
-  updatedSort: number;
+  updatedSort: number
   /** merge 기준 배포 버전 (PRD FR-12-1) */
-  deployVersion: number;
+  deployVersion: number
 }
 
 const DEMO_PROJECTS: readonly DemoProject[] = [
@@ -476,21 +523,14 @@ const DEMO_PROJECTS: readonly DemoProject[] = [
     updatedSort: 85,
     deployVersion: 2,
   },
-];
+]
 
 function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
 }
 
 /** PRD §10.1 FR-1 · 화면1 — Draft / Pending / Live / Failed */
-const STATUS_BADGE: Record<
-  DemoProjectStatus,
-  { className: string; label: string }
-> = {
+const STATUS_BADGE: Record<DemoProjectStatus, { className: string; label: string }> = {
   pre: { className: "proj-badge proj-badge--prd-draft", label: "초안" },
   deploying: {
     className: "proj-badge proj-badge--prd-pending",
@@ -498,12 +538,9 @@ const STATUS_BADGE: Record<
   },
   done: { className: "proj-badge proj-badge--prd-live", label: "라이브" },
   failed: { className: "proj-badge proj-badge--prd-failed", label: "실패" },
-};
+}
 
-const KIND_BADGE: Record<
-  DemoProjectKind,
-  { className: string; label: string }
-> = {
+const KIND_BADGE: Record<DemoProjectKind, { className: string; label: string }> = {
   landing: {
     className: "proj-badge proj-badge--type-landing",
     label: "랜딩 페이지",
@@ -516,17 +553,14 @@ const KIND_BADGE: Record<
     className: "proj-badge proj-badge--type-business",
     label: "비즈니스 페이지",
   },
-};
+}
 
 function renderProjectThumb(p: DemoProject, index: number): string {
-  const tone = (index % 3) + 1;
-  const url =
-    p.slug.length > 22
-      ? `${escapeHtml(p.slug.slice(0, 22))}…`
-      : escapeHtml(p.slug);
-  const bar = `<div class="proj-thumb__bar"><span class="proj-thumb__dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="proj-thumb__fake-url">${url}</span></div>`;
+  const tone = (index % 3) + 1
+  const url = p.slug.length > 22 ? `${escapeHtml(p.slug.slice(0, 22))}…` : escapeHtml(p.slug)
+  const bar = `<div class="proj-thumb__bar"><span class="proj-thumb__dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="proj-thumb__fake-url">${url}</span></div>`
 
-  let body = "";
+  let body = ""
   if (p.kind === "landing") {
     body = `<div class="proj-thumb__body proj-thumb__body--landing">
             <div class="proj-thumb__hero"></div>
@@ -539,7 +573,7 @@ function renderProjectThumb(p: DemoProject, index: number): string {
               <span class="proj-thumb__pill"></span>
               <span class="proj-thumb__pill proj-thumb__pill--ghost"></span>
             </div>
-          </div>`;
+          </div>`
   } else if (p.kind === "portfolio") {
     body = `<div class="proj-thumb__body proj-thumb__body--portfolio">
             <div class="proj-thumb__gallery">
@@ -548,7 +582,7 @@ function renderProjectThumb(p: DemoProject, index: number): string {
               <div class="proj-thumb__shot"></div>
               <div class="proj-thumb__shot"></div>
             </div>
-          </div>`;
+          </div>`
   } else {
     body = `<div class="proj-thumb__body proj-thumb__body--business">
             <div class="proj-thumb__nav"></div>
@@ -556,7 +590,7 @@ function renderProjectThumb(p: DemoProject, index: number): string {
               <div class="proj-thumb__biz-row"></div>
               <div class="proj-thumb__biz-grid"><span></span><span></span><span></span></div>
             </div>
-          </div>`;
+          </div>`
   }
 
   return `<div class="proj-card__preview">
@@ -564,27 +598,25 @@ function renderProjectThumb(p: DemoProject, index: number): string {
             ${bar}
             ${body}
           </div>
-        </div>`;
+        </div>`
 }
 
 function isProjectLiveUrl(p: DemoProject): boolean {
-  return p.status === "done" && /^https?:\/\//i.test(p.subtitle);
+  return p.status === "done" && /^https?:\/\//i.test(p.subtitle)
 }
 
 function renderProjectCard(p: DemoProject, index: number): string {
-  const st = STATUS_BADGE[p.status];
-  const kd = KIND_BADGE[p.kind];
-  const slug = escapeHtml(p.slug);
-  const rel = escapeHtml(p.updatedRelative);
-  const thumb = renderProjectThumb(p, index);
-  const navHash = getProjectHash(p.slug);
-  const showUrl = isProjectLiveUrl(p);
-  const rawUrl = showUrl ? p.subtitle : "";
-  const href = escapeHtml(rawUrl);
-  const urlDisplay = escapeHtml(rawUrl.replace(/^https?:\/\//i, ""));
-  const urlBlock = showUrl
-    ? `<a class="proj-card__live-url" href="${href}" target="_blank" rel="noopener noreferrer">${urlDisplay}</a>`
-    : "";
+  const st = STATUS_BADGE[p.status]
+  const kd = KIND_BADGE[p.kind]
+  const slug = escapeHtml(p.slug)
+  const rel = escapeHtml(p.updatedRelative)
+  const thumb = renderProjectThumb(p, index)
+  const navHash = getProjectHash(p.slug)
+  const showUrl = isProjectLiveUrl(p)
+  const rawUrl = showUrl ? p.subtitle : ""
+  const href = escapeHtml(rawUrl)
+  const urlDisplay = escapeHtml(rawUrl.replace(/^https?:\/\//i, ""))
+  const urlBlock = showUrl ? `<a class="proj-card__live-url" href="${href}" target="_blank" rel="noopener noreferrer">${urlDisplay}</a>` : ""
 
   return `
         <article class="proj-card">
@@ -602,25 +634,22 @@ function renderProjectCard(p: DemoProject, index: number): string {
               <span class="proj-card__time">Updated ${rel}</span>
             </footer>
           </div>
-        </article>`;
+        </article>`
 }
 
-const PROJECT_LIST_PAGE_COUNT = 8;
+const PROJECT_LIST_PAGE_COUNT = 8
 
 function getProjectListPaginationHTML(): string {
-  const pages = Array.from(
-    { length: PROJECT_LIST_PAGE_COUNT },
-    (_, i) => i + 1,
-  );
+  const pages = Array.from({ length: PROJECT_LIST_PAGE_COUNT }, (_, i) => i + 1)
   const items = pages
     .map((n) => {
-      const cur = n === 1 ? " proj-pagination__btn--current" : "";
-      const aria = n === 1 ? ' aria-current="page"' : "";
+      const cur = n === 1 ? " proj-pagination__btn--current" : ""
+      const aria = n === 1 ? ' aria-current="page"' : ""
       return `<li class="proj-pagination__item">
           <button type="button" class="proj-pagination__btn${cur}" data-proj-page="${n}" aria-label="${n}페이지"${aria}>${n}</button>
-        </li>`;
+        </li>`
     })
-    .join("");
+    .join("")
   return `<nav id="projPagination" class="proj-pagination" aria-label="프로젝트 목록 페이지">
         <div class="proj-pagination__shell">
           <div class="proj-pagination__head">
@@ -638,15 +667,13 @@ function getProjectListPaginationHTML(): string {
           </div>
           <p class="proj-pagination__note">목록은 데모 데이터입니다. 번호는 UI 예시용입니다.</p>
         </div>
-      </nav>`;
+      </nav>`
 }
 
 function getProjectsInnerHTML(): string {
-  const sorted = [...DEMO_PROJECTS].sort(
-    (a, b) => b.updatedSort - a.updatedSort,
-  );
-  const cards = sorted.map((p, i) => renderProjectCard(p, i)).join("");
-  const pagination = getProjectListPaginationHTML();
+  const sorted = [...DEMO_PROJECTS].sort((a, b) => b.updatedSort - a.updatedSort)
+  const cards = sorted.map((p, i) => renderProjectCard(p, i)).join("")
+  const pagination = getProjectListPaginationHTML()
   return `
       <header class="app-header app-header--row proj-page-head">
         <div>
@@ -993,17 +1020,14 @@ function getProjectsInnerHTML(): string {
             <button type="submit" class="app-btn app-btn--primary" id="projGhSubmit" form="projGhForm">저장소 가져오기</button>
           </div>
         </div>
-      </div>`;
+      </div>`
 }
 
 function getProjectDetailStatusRow(p: DemoProject): string {
-  const st = STATUS_BADGE[p.status];
-  const ver =
-    p.deployVersion > 0
-      ? `현재 버전: v${p.deployVersion}`
-      : "현재 버전: — (미배포)";
+  const st = STATUS_BADGE[p.status]
+  const ver = p.deployVersion > 0 ? `현재 버전: v${p.deployVersion}` : "현재 버전: — (미배포)"
   return `<span class="proj-detail-pill proj-detail-pill--${p.status === "pre" ? "draft" : p.status === "deploying" ? "progress" : p.status === "failed" ? "failed" : "live"}">${st.label}</span>
-    <span class="proj-detail-pill proj-detail-pill--version">${escapeHtml(ver)}</span>`;
+    <span class="proj-detail-pill proj-detail-pill--version">${escapeHtml(ver)}</span>`
 }
 
 function getProjectDetailMainBlock(p: DemoProject): string {
@@ -1033,7 +1057,7 @@ function getProjectDetailMainBlock(p: DemoProject): string {
           <span class="proj-detail-steps__text">검수 후 배포 · 도메인 연결</span>
         </li>
       </ol>
-    </div>`;
+    </div>`
   }
   if (p.status === "deploying") {
     return `<div class="proj-detail-empty proj-detail-empty--deploy" role="status">
@@ -1045,92 +1069,92 @@ function getProjectDetailMainBlock(p: DemoProject): string {
         <p class="proj-detail-empty__title">배포가 진행 중입니다</p>
         <p class="proj-detail-empty__sub">잠시 후 다시 확인해 주세요. 완료되면 미리보기 URL이 여기 표시됩니다.</p>
       </div>
-    </div>`;
+    </div>`
   }
   if (p.status === "failed") {
-    const err = escapeHtml(p.subtitle);
+    const err = escapeHtml(p.subtitle)
     return `<div class="proj-detail-failed" role="alert">
       <p class="proj-detail-failed__title">빌드에 실패했습니다</p>
       <p class="proj-detail-failed__msg">${err}</p>
       <p class="proj-detail-failed__hint">Open AI Agent에서 원인 설명과 수정 제안을 요청한 뒤, 미리보기를 다시 받을 수 있습니다.</p>
-    </div>`;
+    </div>`
   }
   return `<div class="proj-detail-workspace-hint">
       <p><strong>라이브 URL</strong>은 위 개요에서 확인하세요. 실제 코드 빌드 미리보기·승인·배포는 AI 에이전트 작업 화면에서 이어집니다.</p>
-    </div>`;
+    </div>`
 }
 
 function demoCommitHash(slug: string): string {
-  let h = 2166136261;
+  let h = 2166136261
   for (let i = 0; i < slug.length; i++) {
-    h ^= slug.charCodeAt(i);
-    h = Math.imul(h, 16777619);
+    h ^= slug.charCodeAt(i)
+    h = Math.imul(h, 16777619)
   }
-  return (h >>> 0).toString(16).slice(0, 7);
+  return (h >>> 0).toString(16).slice(0, 7)
 }
 
 function getRecentMergeRows(p: DemoProject): string {
-  const rows: { sum: string; when: string; deployed: boolean }[] = [];
+  const rows: { sum: string; when: string; deployed: boolean }[] = []
   if (p.status === "done") {
     rows.push({
       sum: "히어로 카피·메타 태그 반영",
       when: p.updated,
       deployed: true,
-    });
+    })
     rows.push({
       sum: "문의 CTA 섹션 추가",
       when: "2일 전",
       deployed: true,
-    });
-    rows.push({ sum: "스타일 토큰 정리", when: "1주 전", deployed: false });
+    })
+    rows.push({ sum: "스타일 토큰 정리", when: "1주 전", deployed: false })
   } else if (p.status === "deploying") {
     rows.push({
       sum: "프리뷰 브랜치 빌드 성공",
       when: "10분 전",
       deployed: false,
-    });
+    })
     rows.push({
       sum: "배포 승인 대기 (main merge 전)",
       when: "방금",
       deployed: false,
-    });
+    })
     rows.push({
       sum: "DNS 레코드 안내 발송",
       when: "1시간 전",
       deployed: false,
-    });
+    })
   } else if (p.status === "failed") {
     rows.push({
       sum: "npm ci 단계에서 종료",
       when: p.updated,
       deployed: false,
-    });
+    })
     rows.push({
       sum: "이전 성공 빌드: v" + Math.max(0, p.deployVersion - 1),
       when: "3일 전",
       deployed: true,
-    });
+    })
     rows.push({
       sum: "preview 브랜치 커밋 적재",
       when: "같은 세션",
       deployed: false,
-    });
+    })
   } else {
     rows.push({
       sum: "프로젝트 생성 및 템플릿 연결",
       when: p.updated,
       deployed: false,
-    });
+    })
     rows.push({
       sum: "아직 승인된 merge 없음",
       when: "—",
       deployed: false,
-    });
+    })
     rows.push({
       sum: "다음: 초안 생성 후 미리보기",
       when: "—",
       deployed: false,
-    });
+    })
   }
   return rows
     .map(
@@ -1140,28 +1164,28 @@ function getRecentMergeRows(p: DemoProject): string {
       <span class="proj-prd-merge__tag${r.deployed ? " proj-prd-merge__tag--ok" : ""}">${r.deployed ? "배포됨" : "미배포"}</span>
     </li>`,
     )
-    .join("");
+    .join("")
 }
 
 function getProjectDetailOverviewHTML(p: DemoProject): string {
-  const title = escapeHtml(p.slug);
-  const badges = getProjectDetailStatusRow(p);
-  const live = isProjectLiveUrl(p);
-  const url = live ? escapeHtml(p.subtitle) : "";
+  const title = escapeHtml(p.slug)
+  const badges = getProjectDetailStatusRow(p)
+  const live = isProjectLiveUrl(p)
+  const url = live ? escapeHtml(p.subtitle) : ""
   const urlRow = live
     ? `<div class="proj-prd-url-row">
         <a class="proj-prd-url" href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>
         <button type="button" class="proj-prd-copy" id="projCopyUrl">복사</button>
       </div>`
-    : `<p class="proj-prd-url-empty">라이브 URL은 <strong>라이브</strong> 상태에서만 표시됩니다. GitHub Pages 등 배포 완료 후 확인하세요.</p>`;
+    : `<p class="proj-prd-url-empty">라이브 URL은 <strong>라이브</strong> 상태에서만 표시됩니다. GitHub Pages 등 배포 완료 후 확인하세요.</p>`
 
   const traffic = `<div class="proj-prd-traffic">
       <p class="proj-prd-traffic__label">트래픽 현황</p>
       <p class="proj-prd-traffic__off">GA4 미연동 · 연결하면 방문 요약이 이 영역에 표시됩니다.</p>
-    </div>`;
+    </div>`
 
-  const mergeList = getRecentMergeRows(p);
-  const hash = demoCommitHash(p.slug);
+  const mergeList = getRecentMergeRows(p)
+  const hash = demoCommitHash(p.slug)
 
   return `<section class="proj-prd-overview" aria-labelledby="proj-prd-overview-title">
       <h1 id="proj-prd-overview-title" class="proj-prd-overview__title">${title}</h1>
@@ -1182,51 +1206,46 @@ function getProjectDetailOverviewHTML(p: DemoProject): string {
         </div>
       </div>
       ${traffic}
-    </section>`;
+    </section>`
 }
 
 function demoAiCreditsUsed(slug: string): number {
-  return 12 + ((slug.length * 17) % 48);
+  return 12 + ((slug.length * 17) % 48)
 }
 
 function demoAiCreditsLeft(slug: string): number {
-  return 180 + ((slug.length * 23) % 420);
+  return 180 + ((slug.length * 23) % 420)
 }
 
 function getDeployEnvBlock(p: DemoProject): { label: string; detail: string } {
   if (p.status === "pre") {
-    return { label: "미배포", detail: "프리뷰만 · AI 에이전트 초안" };
+    return { label: "미배포", detail: "프리뷰만 · AI 에이전트 초안" }
   }
   if (p.status === "deploying") {
-    return { label: "스테이징", detail: p.subtitle };
+    return { label: "스테이징", detail: p.subtitle }
   }
   if (p.status === "failed") {
-    return { label: "빌드 실패", detail: "미리보기 재시도 전" };
+    return { label: "빌드 실패", detail: "미리보기 재시도 전" }
   }
-  return { label: "프로덕션", detail: "CDN · SSL · 자동 빌드" };
+  return { label: "프로덕션", detail: "CDN · SSL · 자동 빌드" }
 }
 
 function getTimelineEntries(p: DemoProject): {
-  msg: string;
-  meta: string;
-  tone: "violet" | "slate" | "green" | "amber";
+  msg: string
+  meta: string
+  tone: "violet" | "slate" | "green" | "amber"
 }[] {
-  const u = escapeHtml(p.updated);
-  const kindLine =
-    p.kind === "landing"
-      ? "히어로·기능 소개 섹션 자동 배치"
-      : p.kind === "portfolio"
-        ? "갤러리 그리드·프로필 블록 생성"
-        : "네비·가격표 레이아웃 적용";
+  const u = escapeHtml(p.updated)
+  const kindLine = p.kind === "landing" ? "히어로·기능 소개 섹션 자동 배치" : p.kind === "portfolio" ? "갤러리 그리드·프로필 블록 생성" : "네비·가격표 레이아웃 적용"
   const common: {
-    msg: string;
-    meta: string;
-    tone: "violet" | "slate" | "green" | "amber";
+    msg: string
+    meta: string
+    tone: "violet" | "slate" | "green" | "amber"
   }[] = [
     { msg: "프로젝트 설정 저장됨", meta: u, tone: "slate" },
     { msg: kindLine, meta: "AI 생성", tone: "violet" },
     { msg: "프롬프트로 카피 2회 수정", meta: "대화 기록", tone: "violet" },
-  ];
+  ]
   if (p.status === "pre") {
     return [
       { msg: "워크스페이스에 프로젝트 생성", meta: u, tone: "slate" },
@@ -1236,14 +1255,10 @@ function getTimelineEntries(p: DemoProject): {
         meta: "다음: Open AI Agent",
         tone: "amber",
       },
-    ];
+    ]
   }
   if (p.status === "deploying") {
-    return [
-      ...common,
-      { msg: "프로덕션 빌드 큐 등록", meta: "진행 중", tone: "amber" },
-      { msg: p.subtitle, meta: "배포", tone: "amber" },
-    ];
+    return [...common, { msg: "프로덕션 빌드 큐 등록", meta: "진행 중", tone: "amber" }, { msg: p.subtitle, meta: "배포", tone: "amber" }]
   }
   if (p.status === "failed") {
     return [
@@ -1254,13 +1269,9 @@ function getTimelineEntries(p: DemoProject): {
         meta: "AI 제안",
         tone: "violet",
       },
-    ];
+    ]
   }
-  return [
-    ...common,
-    { msg: "프로덕션 배포 성공", meta: "라이브", tone: "green" },
-    { msg: "엣지 캐시 워밍 완료", meta: "CDN", tone: "green" },
-  ];
+  return [...common, { msg: "프로덕션 배포 성공", meta: "라이브", tone: "green" }, { msg: "엣지 캐시 워밍 완료", meta: "CDN", tone: "green" }]
 }
 
 function getNextActionsHTML(p: DemoProject): string {
@@ -1270,41 +1281,39 @@ function getNextActionsHTML(p: DemoProject): string {
         <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--todo" aria-hidden="true"></span><span>모바일·데스크톱 프리뷰로 레이아웃 확인</span></li>
         <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--todo" aria-hidden="true"></span><span>메타 설명·OG 이미지 채우기</span></li>
         <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--todo" aria-hidden="true"></span><span>첫 배포 및 도메인 연결</span></li>
-      </ul>`;
+      </ul>`
   }
   if (p.status === "deploying") {
     return `<ul class="proj-detail-checklist">
         <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--done" aria-hidden="true"></span><span>빌드 아티팩트 업로드</span></li>
         <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--run" aria-hidden="true"></span><span>DNS·SSL 전파 대기</span></li>
         <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--todo" aria-hidden="true"></span><span>배포 완료 후 스모크 테스트</span></li>
-      </ul>`;
+      </ul>`
   }
   if (p.status === "failed") {
     return `<ul class="proj-detail-checklist">
         <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--todo" aria-hidden="true"></span><span>오류 로그 확인 후 AI에 재빌드 요청</span></li>
         <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--todo" aria-hidden="true"></span><span>제안된 수정안 승인 → 미리보기 재검증</span></li>
         <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--todo" aria-hidden="true"></span><span>성공 시 변경 반영 승인 → 배포 단계</span></li>
-      </ul>`;
+      </ul>`
   }
   return `<ul class="proj-detail-checklist">
         <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--done" aria-hidden="true"></span><span>프로덕션 URL 라이브</span></li>
         <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--todo" aria-hidden="true"></span><span>분석 스크립트·전환 목표 연결</span></li>
         <li class="proj-detail-checklist__row"><span class="proj-detail-check proj-detail-check--todo" aria-hidden="true"></span><span>다음 분기용 A/B 카피 실험</span></li>
-      </ul>`;
+      </ul>`
 }
 
 function getProjectDetailExtrasHTML(p: DemoProject): string {
-  const env = getDeployEnvBlock(p);
-  const used = demoAiCreditsUsed(p.slug);
-  const left = demoAiCreditsLeft(p.slug);
-  const total = used + left;
-  const pct = Math.round((used / total) * 100);
-  const timeline = getTimelineEntries(p);
+  const env = getDeployEnvBlock(p)
+  const used = demoAiCreditsUsed(p.slug)
+  const left = demoAiCreditsLeft(p.slug)
+  const total = used + left
+  const pct = Math.round((used / total) * 100)
+  const timeline = getTimelineEntries(p)
   const timelineHtml = timeline
     .map(
-      (
-        e,
-      ) => `<li class="proj-detail-timeline__item proj-detail-timeline__item--${e.tone}">
+      (e) => `<li class="proj-detail-timeline__item proj-detail-timeline__item--${e.tone}">
       <span class="proj-detail-timeline__dot" aria-hidden="true"></span>
       <div class="proj-detail-timeline__body">
         <p class="proj-detail-timeline__msg">${escapeHtml(e.msg)}</p>
@@ -1312,11 +1321,9 @@ function getProjectDetailExtrasHTML(p: DemoProject): string {
       </div>
     </li>`,
     )
-    .join("");
-  const slugShort = escapeHtml(
-    p.slug.slice(0, 18) + (p.slug.length > 18 ? "…" : ""),
-  );
-  const next = getNextActionsHTML(p);
+    .join("")
+  const slugShort = escapeHtml(p.slug.slice(0, 18) + (p.slug.length > 18 ? "…" : ""))
+  const next = getNextActionsHTML(p)
 
   return `
           <div class="proj-detail-extra" aria-label="프로젝트 부가 정보">
@@ -1361,13 +1368,13 @@ function getProjectDetailExtrasHTML(p: DemoProject): string {
                 </section>
               </div>
             </div>
-          </div>`;
+          </div>`
 }
 
 function getProjectDetailInnerHTML(p: DemoProject): string {
-  const overview = getProjectDetailOverviewHTML(p);
-  const main = getProjectDetailMainBlock(p);
-  const extras = getProjectDetailExtrasHTML(p);
+  const overview = getProjectDetailOverviewHTML(p)
+  const main = getProjectDetailMainBlock(p)
+  const extras = getProjectDetailExtrasHTML(p)
   return `
       <div class="proj-detail-page">
         <div class="proj-detail">
@@ -1427,7 +1434,7 @@ function getProjectDetailInnerHTML(p: DemoProject): string {
             </div>
           </div>
         </div>
-      </div>`;
+      </div>`
 }
 
 function getProjectNotFoundInnerHTML(): string {
@@ -1444,7 +1451,7 @@ function getProjectNotFoundInnerHTML(): string {
             <p class="proj-detail-muted">주소가 잘못되었거나 삭제된 프로젝트일 수 있습니다.</p>
           </section>
         </div>
-      </div>`;
+      </div>`
 }
 
 /** 에이전트 화면 미리보기 탭 — 참고 UI와 동일한 데모 랜딩 */
@@ -1456,58 +1463,35 @@ body{margin:0;min-height:100%;font-family:ui-sans-serif,system-ui,-apple-system,
 h1{font-size:clamp(1.35rem,3vw,1.85rem);font-weight:700;margin:0 0 1rem;letter-spacing:-.03em;line-height:1.3;}
 p{margin:0 auto 1.75rem;max-width:26rem;font-size:.9375rem;line-height:1.65;color:#64748b;}
 .cta{display:inline-block;padding:.7rem 1.5rem;border-radius:999px;background:#2563eb;color:#fff;font-weight:600;font-size:.9rem;box-shadow:0 4px 14px rgba(37,99,235,.22);}
-</style></head><body><div class="hero"><div><h1>비즈니스를 위한 완벽한 공간</h1><p>자연어로 요청한 수정사항이 실시간으로 여기에 반영됩니다.</p><span class="cta">자세히 알아보기</span></div></div></body></html>`;
-  const dataUrl = `data:text/html;charset=utf-8,${encodeURIComponent(doc)}`;
-  return `<iframe class="agent-preview__iframe" title="미리보기" src="${escapeHtml(dataUrl)}" sandbox="allow-scripts"></iframe>`;
+</style></head><body><div class="hero"><div><h1>비즈니스를 위한 완벽한 공간</h1><p>자연어로 요청한 수정사항이 실시간으로 여기에 반영됩니다.</p><span class="cta">자세히 알아보기</span></div></div></body></html>`
+  const dataUrl = `data:text/html;charset=utf-8,${encodeURIComponent(doc)}`
+  return `<iframe class="agent-preview__iframe" title="미리보기" src="${escapeHtml(dataUrl)}" sandbox="allow-scripts"></iframe>`
 }
 
 interface AgentCodeFileEntry {
-  path: string;
-  diff: string;
+  path: string
+  diff: string
 }
 
 function buildAgentCodeFileMap(slug: string): Record<string, AgentCodeFileEntry> {
   return {
     index: {
       path: `sites/${slug}/index.html`,
-      diff: [
-        "-    <section class=\"hero\">",
-        "-      <h1>이전 헤드라인</h1>",
-        "-      <p>이전 설명 문구</p>",
-        "+    <section class=\"hero hero--biz\">",
-        "+      <h1>비즈니스를 위한 완벽한 공간</h1>",
-        "+      <p>자연어로 요청한 수정사항이 실시간으로 여기에 반영됩니다.</p>",
-      ].join("\n"),
+      diff: ['-    <section class="hero">', "-      <h1>이전 헤드라인</h1>", "-      <p>이전 설명 문구</p>", '+    <section class="hero hero--biz">', "+      <h1>비즈니스를 위한 완벽한 공간</h1>", "+      <p>자연어로 요청한 수정사항이 실시간으로 여기에 반영됩니다.</p>"].join("\n"),
     },
     layout: {
       path: `sites/${slug}/layout.tsx`,
-      diff: [
-        "- export default function Root(props: { children: unknown }) {",
-        '-   return <html lang="ko">{props.children}</html>',
-        "+ export default function Root(props: { children: unknown }) {",
-        '+   return <html lang="ko" className="scroll-smooth">{props.children}</html>',
-      ].join("\n"),
+      diff: ["- export default function Root(props: { children: unknown }) {", '-   return <html lang="ko">{props.children}</html>', "+ export default function Root(props: { children: unknown }) {", '+   return <html lang="ko" className="scroll-smooth">{props.children}</html>'].join("\n"),
     },
     globals: {
       path: "styles/globals.css",
-      diff: [
-        "-  --brand: #6366f1;",
-        "-  --surface: #f8fafc;",
-        "+  --brand: #2563eb;",
-        "+  --surface: #f1f5f9;",
-        "+  --radius-card: 12px;",
-      ].join("\n"),
+      diff: ["-  --brand: #6366f1;", "-  --surface: #f8fafc;", "+  --brand: #2563eb;", "+  --surface: #f1f5f9;", "+  --radius-card: 12px;"].join("\n"),
     },
     meta: {
       path: "public/og-meta.json",
-      diff: [
-        "-  \"title\": \"Draft page\",",
-        "-  \"description\": \"\",",
-        "+  \"title\": \"" + slug + " · preview\",",
-        "+  \"description\": \"AI 생성 데모 메타\"",
-      ].join("\n"),
+      diff: ['-  "title": "Draft page",', '-  "description": "",', '+  "title": "' + slug + ' · preview",', '+  "description": "AI 생성 데모 메타"'].join("\n"),
     },
-  };
+  }
 }
 
 function agentDiffToHtml(diff: string): string {
@@ -1515,21 +1499,19 @@ function agentDiffToHtml(diff: string): string {
     .split("\n")
     .map((line) => {
       if (line.startsWith("+")) {
-        return `<span class="agent-diff__line agent-diff__line--add">${escapeHtml(line)}</span>`;
+        return `<span class="agent-diff__line agent-diff__line--add">${escapeHtml(line)}</span>`
       }
       if (line.startsWith("-")) {
-        return `<span class="agent-diff__line agent-diff__line--del">${escapeHtml(line)}</span>`;
+        return `<span class="agent-diff__line agent-diff__line--del">${escapeHtml(line)}</span>`
       }
-      return `<span class="agent-diff__line agent-diff__line--ctx">${escapeHtml(line)}</span>`;
+      return `<span class="agent-diff__line agent-diff__line--ctx">${escapeHtml(line)}</span>`
     })
-    .join("");
+    .join("")
 }
 
-const AGENT_TREE_SVG_FOLDER =
-  '<span class="agent-tree__icon agent-tree__icon--folder" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg></span>';
+const AGENT_TREE_SVG_FOLDER = '<span class="agent-tree__icon agent-tree__icon--folder" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg></span>'
 
-const AGENT_TREE_SVG_FILE =
-  '<span class="agent-tree__icon agent-tree__icon--file" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></span>';
+const AGENT_TREE_SVG_FILE = '<span class="agent-tree__icon agent-tree__icon--file" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></span>'
 
 function getAgentCodeTreeFoldersHTML(slugLabel: string): string {
   return `<ul class="agent-tree" role="tree">
@@ -1597,7 +1579,7 @@ function getAgentCodeTreeFoldersHTML(slugLabel: string): string {
           </li>
         </ul>
       </li>
-    </ul>`;
+    </ul>`
 }
 
 function getAgentCodeTreeTagsHTML(): string {
@@ -1629,15 +1611,15 @@ function getAgentCodeTreeTagsHTML(): string {
           </button>
         </li>
       </ul>
-    </div>`;
+    </div>`
 }
 
 function getAgentCodeWorkspaceHTML(p: DemoProject): string {
-  const map = buildAgentCodeFileMap(p.slug);
-  const first = map.index;
-  const slugEsc = escapeHtml(p.slug);
-  const foldersTree = getAgentCodeTreeFoldersHTML(slugEsc);
-  const tagsPane = getAgentCodeTreeTagsHTML();
+  const map = buildAgentCodeFileMap(p.slug)
+  const first = map.index
+  const slugEsc = escapeHtml(p.slug)
+  const foldersTree = getAgentCodeTreeFoldersHTML(slugEsc)
+  const tagsPane = getAgentCodeTreeTagsHTML()
   return `<div class="agent-code-workspace">
       <aside class="agent-tree-panel" aria-label="코드 탐색">
         <div class="agent-tree-tabs" role="tablist" aria-label="탐색기 모드">
@@ -1657,24 +1639,19 @@ function getAgentCodeWorkspaceHTML(p: DemoProject): string {
         <p class="agent-code-panel__meta" id="agentCodeFileMeta"><code>${escapeHtml(first.path)}</code><span> · 데모 diff</span></p>
         <div class="agent-code-panel__diff" id="agentCodeDiffBody" tabindex="0">${agentDiffToHtml(first.diff)}</div>
       </div>
-    </div>`;
+    </div>`
 }
 
-type AgentPipelineStepState =
-  | "done"
-  | "running"
-  | "pending"
-  | "failed"
-  | "skipped";
+type AgentPipelineStepState = "done" | "running" | "pending" | "failed" | "skipped"
 
 interface AgentPipelineStep {
-  title: string;
-  detail: string;
-  state: AgentPipelineStepState;
+  title: string
+  detail: string
+  state: AgentPipelineStepState
 }
 
 function getAgentPipelineSteps(p: DemoProject): AgentPipelineStep[] {
-  const ver = p.deployVersion > 0 ? `아티팩트 v${p.deployVersion}` : "아티팩트 없음";
+  const ver = p.deployVersion > 0 ? `아티팩트 v${p.deployVersion}` : "아티팩트 없음"
   if (p.status === "done") {
     return [
       { title: "Lint · 타입체크", detail: "통과 · ~14s", state: "done" },
@@ -1683,7 +1660,7 @@ function getAgentPipelineSteps(p: DemoProject): AgentPipelineStep[] {
       { title: "승인 · main 병합", detail: "승인됨 · CI 통과", state: "done" },
       { title: "Production 배포", detail: "GitHub Pages · 라이브", state: "done" },
       { title: "배포 후 스모크", detail: "HTTP 200 · 엣지 캐시", state: "done" },
-    ];
+    ]
   }
   if (p.status === "deploying") {
     return [
@@ -1693,10 +1670,10 @@ function getAgentPipelineSteps(p: DemoProject): AgentPipelineStep[] {
       { title: "승인 · main 병합", detail: "대기 중", state: "pending" },
       { title: "Production 배포", detail: "대기 중", state: "pending" },
       { title: "배포 후 스모크", detail: "—", state: "pending" },
-    ];
+    ]
   }
   if (p.status === "failed") {
-    const err = p.subtitle.trim() || "빌드 단계에서 종료";
+    const err = p.subtitle.trim() || "빌드 단계에서 종료"
     return [
       { title: "Lint · 타입체크", detail: "통과", state: "done" },
       { title: "의존성 설치 · 빌드", detail: err, state: "failed" },
@@ -1704,7 +1681,7 @@ function getAgentPipelineSteps(p: DemoProject): AgentPipelineStep[] {
       { title: "승인 · main 병합", detail: "—", state: "skipped" },
       { title: "Production 배포", detail: "—", state: "skipped" },
       { title: "배포 후 스모크", detail: "—", state: "skipped" },
-    ];
+    ]
   }
   return [
     { title: "Lint · 타입체크", detail: "저장소 훅 연결 후 실행", state: "pending" },
@@ -1713,11 +1690,11 @@ function getAgentPipelineSteps(p: DemoProject): AgentPipelineStep[] {
     { title: "승인 · main 병합", detail: "—", state: "pending" },
     { title: "Production 배포", detail: "—", state: "pending" },
     { title: "배포 후 스모크", detail: "—", state: "pending" },
-  ];
+  ]
 }
 
 function getAgentPipelineSectionHTML(p: DemoProject): string {
-  const steps = getAgentPipelineSteps(p);
+  const steps = getAgentPipelineSteps(p)
   const rows = steps
     .map(
       (s) => `<li class="agent-pipeline__step agent-pipeline__step--${s.state}">
@@ -1730,15 +1707,8 @@ function getAgentPipelineSectionHTML(p: DemoProject): string {
       </div>
     </li>`,
     )
-    .join("");
-  const runLabel =
-    p.status === "done"
-      ? `최근 실행 · 성공 (${escapeHtml(p.updated)})`
-      : p.status === "deploying"
-        ? "실행 중 · Preview 배포 단계"
-        : p.status === "failed"
-          ? "최근 실행 · 실패 (로그 확인)"
-          : "파이프라인 대기 중";
+    .join("")
+  const runLabel = p.status === "done" ? `최근 실행 · 성공 (${escapeHtml(p.updated)})` : p.status === "deploying" ? "실행 중 · Preview 배포 단계" : p.status === "failed" ? "최근 실행 · 실패 (로그 확인)" : "파이프라인 대기 중"
   return `<section class="agent-pipeline agent-pipeline--embed" aria-labelledby="agent-pipeline-title">
       <div class="agent-pipeline__head">
         <div class="agent-pipeline__head-text">
@@ -1749,21 +1719,19 @@ function getAgentPipelineSectionHTML(p: DemoProject): string {
       </div>
       <ol class="agent-pipeline__steps">${rows}</ol>
       <p class="agent-pipeline__hint">CI(GitHub Actions 등)와 연동하면 동일한 단계가 자동으로 갱신됩니다. 지금은 프로젝트 상태 기준 데모입니다.</p>
-    </section>`;
+    </section>`
 }
 
 function getProjectAgentInnerHTML(p: DemoProject, activeTab: AgentWorkspaceTab): string {
-  const slugSafe = escapeHtml(p.slug);
-  const backHref = getProjectHash(p.slug);
-  const previewIframe = getAgentWorkspacePreviewIframeHTML();
-  const codePanel = getAgentCodeWorkspaceHTML(p);
-  const pipeline = getAgentPipelineSectionHTML(p);
-  const liveExtra = isProjectLiveUrl(p)
-    ? `<p class="agent-live-link"><a href="${escapeHtml(p.subtitle.trim())}" target="_blank" rel="noopener noreferrer">실제 라이브 URL 열기 ↗</a></p>`
-    : "";
-  const onPreview = activeTab === "preview";
-  const onCode = activeTab === "code";
-  const onPipeline = activeTab === "pipeline";
+  const slugSafe = escapeHtml(p.slug)
+  const backHref = getProjectHash(p.slug)
+  const previewIframe = getAgentWorkspacePreviewIframeHTML()
+  const codePanel = getAgentCodeWorkspaceHTML(p)
+  const pipeline = getAgentPipelineSectionHTML(p)
+  const liveExtra = isProjectLiveUrl(p) ? `<p class="agent-live-link"><a href="${escapeHtml(p.subtitle.trim())}" target="_blank" rel="noopener noreferrer">실제 라이브 URL 열기 ↗</a></p>` : ""
+  const onPreview = activeTab === "preview"
+  const onCode = activeTab === "code"
+  const onPipeline = activeTab === "pipeline"
 
   return `
       <div class="agent-page">
@@ -1831,766 +1799,729 @@ function getProjectAgentInnerHTML(p: DemoProject, activeTab: AgentWorkspaceTab):
             </form>
           </aside>
         </div>
-      </div>`;
+      </div>`
 }
 
 function bindProjectAgentPage(p: DemoProject): void {
-  const form = document.getElementById("agentChatForm");
-  const input = document.getElementById("agentChatInput") as HTMLTextAreaElement | null;
-  const thread = document.getElementById("agentChatThread");
-  if (!form || !input || !thread) return;
+  const form = document.getElementById("agentChatForm")
+  const input = document.getElementById("agentChatInput") as HTMLTextAreaElement | null
+  const thread = document.getElementById("agentChatThread")
+  if (!form || !input || !thread) return
 
-  const codeFileMap = buildAgentCodeFileMap(p.slug);
-  const codeMetaEl = document.getElementById("agentCodeFileMeta");
-  const codeDiffEl = document.getElementById("agentCodeDiffBody");
-  const codePanelEl = document.getElementById("agentPanelCode");
+  const codeFileMap = buildAgentCodeFileMap(p.slug)
+  const codeMetaEl = document.getElementById("agentCodeFileMeta")
+  const codeDiffEl = document.getElementById("agentCodeDiffBody")
+  const codePanelEl = document.getElementById("agentPanelCode")
 
   const showAgentCodeFile = (fileId: string): void => {
-    const entry = codeFileMap[fileId];
-    if (!entry || !codeMetaEl || !codeDiffEl) return;
-    codeMetaEl.innerHTML = `<code>${escapeHtml(entry.path)}</code><span> · 데모 diff</span>`;
-    codeDiffEl.innerHTML = agentDiffToHtml(entry.diff);
+    const entry = codeFileMap[fileId]
+    if (!entry || !codeMetaEl || !codeDiffEl) return
+    codeMetaEl.innerHTML = `<code>${escapeHtml(entry.path)}</code><span> · 데모 diff</span>`
+    codeDiffEl.innerHTML = agentDiffToHtml(entry.diff)
     codePanelEl?.querySelectorAll<HTMLElement>(".agent-tree__row--file[data-agent-file]").forEach((row) => {
-      row.classList.toggle("agent-tree__row--active", row.dataset.agentFile === fileId);
-    });
+      row.classList.toggle("agent-tree__row--active", row.dataset.agentFile === fileId)
+    })
     codePanelEl?.querySelectorAll<HTMLButtonElement>(".agent-tree-tag[data-agent-file]").forEach((tag) => {
-      tag.classList.toggle("agent-tree-tag--active", tag.dataset.agentFile === fileId);
-    });
-  };
+      tag.classList.toggle("agent-tree-tag--active", tag.dataset.agentFile === fileId)
+    })
+  }
 
   codePanelEl?.addEventListener("click", (e) => {
-    const hit = (e.target as HTMLElement).closest("[data-agent-file]");
+    const hit = (e.target as HTMLElement).closest("[data-agent-file]")
     if (hit instanceof HTMLButtonElement) {
-      const fid = hit.dataset.agentFile;
-      if (fid) showAgentCodeFile(fid);
+      const fid = hit.dataset.agentFile
+      if (fid) showAgentCodeFile(fid)
     }
-  });
+  })
 
-  const treeTabButtons = codePanelEl?.querySelectorAll<HTMLButtonElement>("[data-agent-code-tree-tab]");
+  const treeTabButtons = codePanelEl?.querySelectorAll<HTMLButtonElement>("[data-agent-code-tree-tab]")
   treeTabButtons?.forEach((tab) => {
     tab.addEventListener("click", () => {
-      const id = tab.dataset.agentCodeTreeTab;
-      const root = codePanelEl;
-      if (!id || !root) return;
+      const id = tab.dataset.agentCodeTreeTab
+      const root = codePanelEl
+      if (!id || !root) return
       root.querySelectorAll<HTMLButtonElement>("[data-agent-code-tree-tab]").forEach((t) => {
-        const on = t.dataset.agentCodeTreeTab === id;
-        t.classList.toggle("agent-tree-tabs__btn--active", on);
-        t.setAttribute("aria-selected", String(on));
-      });
+        const on = t.dataset.agentCodeTreeTab === id
+        t.classList.toggle("agent-tree-tabs__btn--active", on)
+        t.setAttribute("aria-selected", String(on))
+      })
       root.querySelectorAll<HTMLElement>("[data-agent-code-tree-pane]").forEach((pane) => {
-        const on = pane.dataset.agentCodeTreePane === id;
-        pane.toggleAttribute("hidden", !on);
-      });
-    });
-  });
+        const on = pane.dataset.agentCodeTreePane === id
+        pane.toggleAttribute("hidden", !on)
+      })
+    })
+  })
 
   const applyAgentWorkspaceTab = (tab: AgentWorkspaceTab): void => {
     document.querySelectorAll<HTMLButtonElement>("[data-agent-tab]").forEach((t) => {
-      const on = t.dataset.agentTab === tab;
-      t.classList.toggle("agent-tab--active", on);
-      t.setAttribute("aria-selected", String(on));
-    });
+      const on = t.dataset.agentTab === tab
+      t.classList.toggle("agent-tab--active", on)
+      t.setAttribute("aria-selected", String(on))
+    })
     document.querySelectorAll<HTMLElement>("[data-agent-panel]").forEach((panel) => {
-      const on = panel.dataset.agentPanel === tab;
-      panel.toggleAttribute("hidden", !on);
-    });
-  };
+      const on = panel.dataset.agentPanel === tab
+      panel.toggleAttribute("hidden", !on)
+    })
+  }
 
   document.querySelectorAll<HTMLButtonElement>("[data-agent-tab]").forEach((tabBtn) => {
     tabBtn.addEventListener("click", () => {
-      const id = tabBtn.dataset.agentTab as AgentWorkspaceTab | undefined;
-      if (id !== "preview" && id !== "code" && id !== "pipeline") return;
-      applyAgentWorkspaceTab(id);
-      const nextHash = getProjectAgentHash(p.slug, id);
+      const id = tabBtn.dataset.agentTab as AgentWorkspaceTab | undefined
+      if (id !== "preview" && id !== "code" && id !== "pipeline") return
+      applyAgentWorkspaceTab(id)
+      const nextHash = getProjectAgentHash(p.slug, id)
       if (window.location.hash !== nextHash) {
-        history.pushState(null, "", nextHash);
+        history.pushState(null, "", nextHash)
       }
-    });
-  });
+    })
+  })
 
   document.querySelectorAll<HTMLButtonElement>(".agent-suggestion").forEach((chip) => {
     chip.addEventListener("click", () => {
-      const v = chip.getAttribute("data-agent-chip");
+      const v = chip.getAttribute("data-agent-chip")
       if (v) {
-        input.value = v;
-        input.focus();
+        input.value = v
+        input.focus()
       }
-    });
-  });
+    })
+  })
 
   document.getElementById("agentHelpBtn")?.addEventListener("click", () => {
-    window.alert(
-      "SYS.AI Agent에서는 자연어로 UI·카피·배포를 요청할 수 있습니다.\n\n미리보기: 생성 페이지 확인\nCode (Diff): 변경 파일 데모\nPipeline: CI/CD 단계 확인\n\n실제 제품에서는 이 화면이 저장소·호스팅과 실시간으로 연동됩니다.",
-    );
-  });
+    window.alert("SYS.AI Agent에서는 자연어로 UI·카피·배포를 요청할 수 있습니다.\n\n미리보기: 생성 페이지 확인\nCode (Diff): 변경 파일 데모\nPipeline: CI/CD 단계 확인\n\n실제 제품에서는 이 화면이 저장소·호스팅과 실시간으로 연동됩니다.")
+  })
 
   const demoReply = (userText: string): string => {
-    const short = userText.length > 160 ? `${userText.slice(0, 160)}…` : userText;
-    return `「${short}」 반영해 볼게요. ${p.slug} 기준으로 (1) 미리보기 HTML을 고치고 (2) Code 탭에 diff를 쌓은 뒤 (3) Pipeline에서 빌드·배포 단계로 넘깁니다. 데모라 이 브라우저 안에서만 메시지가 쌓입니다.`;
-  };
+    const short = userText.length > 160 ? `${userText.slice(0, 160)}…` : userText
+    return `「${short}」 반영해 볼게요. ${p.slug} 기준으로 (1) 미리보기 HTML을 고치고 (2) Code 탭에 diff를 쌓은 뒤 (3) Pipeline에서 빌드·배포 단계로 넘깁니다. 데모라 이 브라우저 안에서만 메시지가 쌓입니다.`
+  }
 
   const appendUser = (text: string): void => {
-    const wrap = document.createElement("div");
-    wrap.className = "agent-bubble agent-bubble--user";
-    wrap.innerHTML = `<div class="agent-bubble__body"></div>`;
-    wrap.querySelector(".agent-bubble__body")!.textContent = text;
-    thread.appendChild(wrap);
-  };
+    const wrap = document.createElement("div")
+    wrap.className = "agent-bubble agent-bubble--user"
+    wrap.innerHTML = `<div class="agent-bubble__body"></div>`
+    wrap.querySelector(".agent-bubble__body")!.textContent = text
+    thread.appendChild(wrap)
+  }
 
   const appendAssistant = (text: string): void => {
-    const wrap = document.createElement("div");
-    wrap.className = "agent-bubble agent-bubble--ai";
-    wrap.innerHTML = `<div class="agent-bubble__body"></div>`;
-    wrap.querySelector(".agent-bubble__body")!.textContent = text;
-    thread.appendChild(wrap);
-  };
+    const wrap = document.createElement("div")
+    wrap.className = "agent-bubble agent-bubble--ai"
+    wrap.innerHTML = `<div class="agent-bubble__body"></div>`
+    wrap.querySelector(".agent-bubble__body")!.textContent = text
+    thread.appendChild(wrap)
+  }
 
   const scrollThread = (): void => {
-    thread.scrollTop = thread.scrollHeight;
-  };
+    thread.scrollTop = thread.scrollHeight
+  }
 
   form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const text = input.value.trim();
-    if (!text) return;
-    input.value = "";
-    appendUser(text);
-    scrollThread();
+    e.preventDefault()
+    const text = input.value.trim()
+    if (!text) return
+    input.value = ""
+    appendUser(text)
+    scrollThread()
     window.setTimeout(() => {
-      appendAssistant(demoReply(text));
-      scrollThread();
-    }, 400);
-  });
+      appendAssistant(demoReply(text))
+      scrollThread()
+    }, 400)
+  })
 
   document.getElementById("agentPipelineLog")?.addEventListener("click", () => {
-    const slugLine = `workflow: ${p.slug} · preview-ci.yml (데모)`;
-    let body: string;
+    const slugLine = `workflow: ${p.slug} · preview-ci.yml (데모)`
+    let body: string
     if (p.status === "failed") {
-      body = `[00:08] checkout ref=preview\n[00:12] npm ci — 184 packages\n[00:41] npm run build\n[00:42] ✖ ${p.subtitle || "Exit code 1"}\n[00:42] 빌드 단계 실패 · 아티팩트 미생성`;
+      body = `[00:08] checkout ref=preview\n[00:12] npm ci — 184 packages\n[00:41] npm run build\n[00:42] ✖ ${p.subtitle || "Exit code 1"}\n[00:42] 빌드 단계 실패 · 아티팩트 미생성`
     } else if (p.status === "done") {
-      body = `[00:07] checkout\n[00:11] npm ci\n[00:38] npm run build — ok\n[00:39] upload artifact ${p.deployVersion > 0 ? `v${p.deployVersion}` : "build/"}\n[00:55] deploy pages — production\n[00:58] smoke https://… — 200 OK`;
+      body = `[00:07] checkout\n[00:11] npm ci\n[00:38] npm run build — ok\n[00:39] upload artifact ${p.deployVersion > 0 ? `v${p.deployVersion}` : "build/"}\n[00:55] deploy pages — production\n[00:58] smoke https://… — 200 OK`
     } else if (p.status === "deploying") {
-      body = `[00:06] checkout preview\n[00:10] npm ci\n[00:35] npm run build — ok\n[00:36] deploy preview — running\n[00:36] … Waiting for DNS propagation`;
+      body = `[00:06] checkout preview\n[00:10] npm ci\n[00:35] npm run build — ok\n[00:36] deploy preview — running\n[00:36] … Waiting for DNS propagation`
     } else {
-      body = `[—] 워크플로가 아직 트리거되지 않았습니다.\n[—] 첫 푸시 또는 “Open AI Agent”에서 생성된 커밋이 들어오면 파이프라인이 시작됩니다.`;
+      body = `[—] 워크플로가 아직 트리거되지 않았습니다.\n[—] 첫 푸시 또는 “Open AI Agent”에서 생성된 커밋이 들어오면 파이프라인이 시작됩니다.`
     }
-    window.alert(`${slugLine}\n\n${body}`);
-  });
+    window.alert(`${slugLine}\n\n${body}`)
+  })
 }
 
 function bindProjectListPage(openCreateFromRoute = false): void {
-  const zipModal = document.getElementById("projZipModal");
-  const zipFile = document.getElementById("projZipFile") as HTMLInputElement | null;
-  const zipFileName = document.getElementById("projZipFileName");
-  const zipDropzone = document.getElementById("projZipDropzone");
-  const zipSubmit = document.getElementById("projZipSubmit") as HTMLButtonElement | null;
-  let projZipPick: File | null = null;
+  const zipModal = document.getElementById("projZipModal")
+  const zipFile = document.getElementById("projZipFile") as HTMLInputElement | null
+  const zipFileName = document.getElementById("projZipFileName")
+  const zipDropzone = document.getElementById("projZipDropzone")
+  const zipSubmit = document.getElementById("projZipSubmit") as HTMLButtonElement | null
+  let projZipPick: File | null = null
 
   const formatImportBytes = (n: number): string => {
-    if (n < 1024) return `${n} B`;
-    if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
-    return `${(n / (1024 * 1024)).toFixed(1)} MB`;
-  };
+    if (n < 1024) return `${n} B`
+    if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`
+    return `${(n / (1024 * 1024)).toFixed(1)} MB`
+  }
 
-  const isZipFile = (f: File): boolean =>
-    f.name.toLowerCase().endsWith(".zip") ||
-    f.type === "application/zip" ||
-    f.type === "application/x-zip-compressed";
+  const isZipFile = (f: File): boolean => f.name.toLowerCase().endsWith(".zip") || f.type === "application/zip" || f.type === "application/x-zip-compressed"
 
   const setZipPick = (file: File | null): void => {
-    projZipPick = file;
-    if (zipFile && !file) zipFile.value = "";
+    projZipPick = file
+    if (zipFile && !file) zipFile.value = ""
     if (zipFileName) {
       if (file) {
-        zipFileName.textContent = `선택됨: ${file.name} (${formatImportBytes(file.size)})`;
-        zipFileName.hidden = false;
+        zipFileName.textContent = `선택됨: ${file.name} (${formatImportBytes(file.size)})`
+        zipFileName.hidden = false
       } else {
-        zipFileName.textContent = "";
-        zipFileName.hidden = true;
+        zipFileName.textContent = ""
+        zipFileName.hidden = true
       }
     }
     if (zipSubmit) {
-      if (file) zipSubmit.removeAttribute("disabled");
-      else zipSubmit.setAttribute("disabled", "");
+      if (file) zipSubmit.removeAttribute("disabled")
+      else zipSubmit.setAttribute("disabled", "")
     }
-    zipDropzone?.classList.toggle("proj-import-dropzone--has-file", Boolean(file));
-  };
+    zipDropzone?.classList.toggle("proj-import-dropzone--has-file", Boolean(file))
+  }
 
   const openProjZipModal = (): void => {
-    projZipPick = null;
-    if (zipFile) zipFile.value = "";
-    setZipPick(null);
-    if (zipModal) zipModal.hidden = false;
-  };
+    projZipPick = null
+    if (zipFile) zipFile.value = ""
+    setZipPick(null)
+    if (zipModal) zipModal.hidden = false
+  }
 
   const closeProjZipModal = (): void => {
-    if (zipModal) zipModal.hidden = true;
-    projZipPick = null;
-    if (zipFile) zipFile.value = "";
-    setZipPick(null);
-  };
+    if (zipModal) zipModal.hidden = true
+    projZipPick = null
+    if (zipFile) zipFile.value = ""
+    setZipPick(null)
+  }
 
   zipFile?.addEventListener("change", () => {
-    const f = zipFile.files?.[0] ?? null;
+    const f = zipFile.files?.[0] ?? null
     if (f && !isZipFile(f)) {
-      window.alert("ZIP 파일만 선택할 수 있습니다.");
-      zipFile.value = "";
-      setZipPick(null);
-      return;
+      window.alert("ZIP 파일만 선택할 수 있습니다.")
+      zipFile.value = ""
+      setZipPick(null)
+      return
     }
-    setZipPick(f);
-  });
+    setZipPick(f)
+  })
 
   zipDropzone?.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    zipDropzone.classList.add("proj-import-dropzone--drag");
-  });
+    e.preventDefault()
+    e.stopPropagation()
+    zipDropzone.classList.add("proj-import-dropzone--drag")
+  })
   zipDropzone?.addEventListener("dragleave", (e) => {
-    e.preventDefault();
-    zipDropzone.classList.remove("proj-import-dropzone--drag");
-  });
+    e.preventDefault()
+    zipDropzone.classList.remove("proj-import-dropzone--drag")
+  })
   zipDropzone?.addEventListener("drop", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    zipDropzone.classList.remove("proj-import-dropzone--drag");
-    const f = e.dataTransfer?.files?.[0];
-    if (!f) return;
+    e.preventDefault()
+    e.stopPropagation()
+    zipDropzone.classList.remove("proj-import-dropzone--drag")
+    const f = e.dataTransfer?.files?.[0]
+    if (!f) return
     if (!isZipFile(f)) {
-      window.alert("ZIP 파일만 놓을 수 있습니다.");
-      return;
+      window.alert("ZIP 파일만 놓을 수 있습니다.")
+      return
     }
-    setZipPick(f);
+    setZipPick(f)
     if (zipFile) {
-      const dt = new DataTransfer();
-      dt.items.add(f);
-      zipFile.files = dt.files;
+      const dt = new DataTransfer()
+      dt.items.add(f)
+      zipFile.files = dt.files
     }
-  });
+  })
 
-  document.getElementById("projBtnZip")?.addEventListener("click", openProjZipModal);
-  document.getElementById("projZipBackdrop")?.addEventListener("click", closeProjZipModal);
-  document.getElementById("projZipClose")?.addEventListener("click", closeProjZipModal);
-  document.getElementById("projZipCancel")?.addEventListener("click", closeProjZipModal);
+  document.getElementById("projBtnZip")?.addEventListener("click", openProjZipModal)
+  document.getElementById("projZipBackdrop")?.addEventListener("click", closeProjZipModal)
+  document.getElementById("projZipClose")?.addEventListener("click", closeProjZipModal)
+  document.getElementById("projZipCancel")?.addEventListener("click", closeProjZipModal)
   document.getElementById("projZipSubmit")?.addEventListener("click", () => {
-    if (!projZipPick) return;
-    window.alert(
-      `「${projZipPick.name}」 분석을 시작합니다. (데모)\n\n실제 제품에서는 업로드 → 트리 분석 → 미리보기 생성까지 서버에서 처리합니다.`,
-    );
-    closeProjZipModal();
-  });
+    if (!projZipPick) return
+    window.alert(`「${projZipPick.name}」 분석을 시작합니다. (데모)\n\n실제 제품에서는 업로드 → 트리 분석 → 미리보기 생성까지 서버에서 처리합니다.`)
+    closeProjZipModal()
+  })
 
-  const ghModal = document.getElementById("projGhModal");
-  const ghForm = document.getElementById("projGhForm") as HTMLFormElement | null;
-  const ghConnect = document.getElementById("projGhConnect");
-  const ghConnectBadge = document.getElementById("projGhConnectBadge");
+  const ghModal = document.getElementById("projGhModal")
+  const ghForm = document.getElementById("projGhForm") as HTMLFormElement | null
+  const ghConnect = document.getElementById("projGhConnect")
+  const ghConnectBadge = document.getElementById("projGhConnectBadge")
 
   const resetProjGhModal = (): void => {
-    ghForm?.reset();
-    const branchEl = document.getElementById("projGhBranch") as HTMLInputElement | null;
-    if (branchEl) branchEl.value = "main";
-    ghConnect?.removeAttribute("hidden");
-    ghConnectBadge?.setAttribute("hidden", "");
-  };
+    ghForm?.reset()
+    const branchEl = document.getElementById("projGhBranch") as HTMLInputElement | null
+    if (branchEl) branchEl.value = "main"
+    ghConnect?.removeAttribute("hidden")
+    ghConnectBadge?.setAttribute("hidden", "")
+  }
 
   const openProjGhModal = (): void => {
-    resetProjGhModal();
-    if (ghModal) ghModal.hidden = false;
-  };
+    resetProjGhModal()
+    if (ghModal) ghModal.hidden = false
+  }
 
   const closeProjGhModal = (): void => {
-    if (ghModal) ghModal.hidden = true;
-    resetProjGhModal();
-  };
+    if (ghModal) ghModal.hidden = true
+    resetProjGhModal()
+  }
 
-  document.getElementById("projBtnGh")?.addEventListener("click", openProjGhModal);
-  document.getElementById("projGhBackdrop")?.addEventListener("click", closeProjGhModal);
-  document.getElementById("projGhClose")?.addEventListener("click", closeProjGhModal);
-  document.getElementById("projGhCancel")?.addEventListener("click", closeProjGhModal);
+  document.getElementById("projBtnGh")?.addEventListener("click", openProjGhModal)
+  document.getElementById("projGhBackdrop")?.addEventListener("click", closeProjGhModal)
+  document.getElementById("projGhClose")?.addEventListener("click", closeProjGhModal)
+  document.getElementById("projGhCancel")?.addEventListener("click", closeProjGhModal)
   ghConnect?.addEventListener("click", () => {
-    ghConnect.setAttribute("hidden", "");
-    ghConnectBadge?.removeAttribute("hidden");
-  });
+    ghConnect.setAttribute("hidden", "")
+    ghConnectBadge?.removeAttribute("hidden")
+  })
   ghForm?.addEventListener("submit", (e) => {
-    e.preventDefault();
-    if (!ghForm) return;
-    const fd = new FormData(ghForm);
-    const repo = String(fd.get("repo") ?? "").trim();
-    const branch = String(fd.get("branch") ?? "").trim() || "main";
-    const path = String(fd.get("path") ?? "").trim();
+    e.preventDefault()
+    if (!ghForm) return
+    const fd = new FormData(ghForm)
+    const repo = String(fd.get("repo") ?? "").trim()
+    const branch = String(fd.get("branch") ?? "").trim() || "main"
+    const path = String(fd.get("path") ?? "").trim()
     try {
-      const u = new URL(repo);
+      const u = new URL(repo)
       if (!/github\.com$/i.test(u.hostname)) {
-        window.alert("github.com 저장소 URL만 지원합니다.");
-        return;
+        window.alert("github.com 저장소 URL만 지원합니다.")
+        return
       }
     } catch {
-      window.alert("올바른 저장소 URL을 입력해 주세요.");
-      return;
+      window.alert("올바른 저장소 URL을 입력해 주세요.")
+      return
     }
-    const pathLine = path ? `\n경로: ${path}` : "";
-    window.alert(
-      `저장소를 가져옵니다. (데모)\n\n${repo}\n브랜치: ${branch}${pathLine}\n\n실제 제품에서는 OAuth·클론·파이프라인이 이어집니다.`,
-    );
-    closeProjGhModal();
-  });
+    const pathLine = path ? `\n경로: ${path}` : ""
+    window.alert(`저장소를 가져옵니다. (데모)\n\n${repo}\n브랜치: ${branch}${pathLine}\n\n실제 제품에서는 OAuth·클론·파이프라인이 이어집니다.`)
+    closeProjGhModal()
+  })
 
-  const newModal = document.getElementById("projNewModal");
-  const newForm = document.getElementById("projNewForm") as HTMLFormElement | null;
-  const newNameInput = document.getElementById("projNewName") as HTMLInputElement | null;
-  const landingThemesEl = document.getElementById("projNewLandingThemes");
-  const themePreviewStage = document.getElementById("projThemePreviewStage");
-  const themePreviewLive = document.getElementById("projThemePreviewLive");
-  const projThemeGrid = document.getElementById("projThemeGrid");
+  const newModal = document.getElementById("projNewModal")
+  const newForm = document.getElementById("projNewForm") as HTMLFormElement | null
+  const newNameInput = document.getElementById("projNewName") as HTMLInputElement | null
+  const landingThemesEl = document.getElementById("projNewLandingThemes")
+  const themePreviewStage = document.getElementById("projThemePreviewStage")
+  const themePreviewLive = document.getElementById("projThemePreviewLive")
+  const projThemeGrid = document.getElementById("projThemeGrid")
 
-  let landingThemePreviewHover: string | null = null;
+  let landingThemePreviewHover: string | null = null
 
   const landingThemePreviewLiveLabels: Record<string, string> = {
     saas: "SaaS 프로덕트 테마 미리보기",
     local: "로컬 비즈니스 테마 미리보기",
-  };
+  }
 
   const refreshLandingThemePreview = (): void => {
-    if (!themePreviewStage || !newForm) return;
-    const checked =
-      newForm.querySelector<HTMLInputElement>('input[name="landingTheme"]:checked')?.value ?? "saas";
-    const show = landingThemePreviewHover ?? checked;
-    themePreviewStage.dataset.activePreview = show;
+    if (!themePreviewStage || !newForm) return
+    const checked = newForm.querySelector<HTMLInputElement>('input[name="landingTheme"]:checked')?.value ?? "saas"
+    const show = landingThemePreviewHover ?? checked
+    themePreviewStage.dataset.activePreview = show
     if (themePreviewLive) {
-      themePreviewLive.textContent = landingThemePreviewLiveLabels[show] ?? "";
+      themePreviewLive.textContent = landingThemePreviewLiveLabels[show] ?? ""
     }
-  };
+  }
 
   const syncProjNewLandingThemes = (): void => {
-    const checked = newForm?.querySelector<HTMLInputElement>(
-      'input[name="template"]:checked',
-    );
-    const show = checked?.value === "landing";
-    landingThemesEl?.toggleAttribute("hidden", !show);
-    if (!show) landingThemePreviewHover = null;
-    if (show) refreshLandingThemePreview();
-  };
+    const checked = newForm?.querySelector<HTMLInputElement>('input[name="template"]:checked')
+    const show = checked?.value === "landing"
+    landingThemesEl?.toggleAttribute("hidden", !show)
+    if (!show) landingThemePreviewHover = null
+    if (show) refreshLandingThemePreview()
+  }
 
   const getTemplateScrollStride = (): number => {
-    const first = document.querySelector<HTMLElement>(
-      "#projTemplateTrack .proj-template-card",
-    );
-    if (!first) return 172;
-    return first.offsetWidth + 12;
-  };
+    const first = document.querySelector<HTMLElement>("#projTemplateTrack .proj-template-card")
+    if (!first) return 172
+    return first.offsetWidth + 12
+  }
 
   const updateTemplateSliderNav = (): void => {
-    const vp = document.getElementById("projTemplateViewport");
-    const prev = document.getElementById("projTemplatePrev");
-    const next = document.getElementById("projTemplateNext");
-    if (!vp || !prev || !next) return;
-    const max = vp.scrollWidth - vp.clientWidth;
-    const left = vp.scrollLeft;
-    prev.toggleAttribute("disabled", left <= 1);
-    next.toggleAttribute("disabled", max <= 1 || left >= max - 1);
-  };
+    const vp = document.getElementById("projTemplateViewport")
+    const prev = document.getElementById("projTemplatePrev")
+    const next = document.getElementById("projTemplateNext")
+    if (!vp || !prev || !next) return
+    const max = vp.scrollWidth - vp.clientWidth
+    const left = vp.scrollLeft
+    prev.toggleAttribute("disabled", left <= 1)
+    next.toggleAttribute("disabled", max <= 1 || left >= max - 1)
+  }
 
   const scrollTemplateCardIntoView = (smooth: boolean): void => {
-    const checked = newForm?.querySelector<HTMLInputElement>(
-      'input[name="template"]:checked',
-    );
-    const card = checked?.closest(".proj-template-card") as HTMLElement | undefined;
-    if (!card) return;
+    const checked = newForm?.querySelector<HTMLInputElement>('input[name="template"]:checked')
+    const card = checked?.closest(".proj-template-card") as HTMLElement | undefined
+    if (!card) return
     card.scrollIntoView({
       behavior: smooth ? "smooth" : "auto",
       inline: "center",
       block: "nearest",
-    });
-    window.setTimeout(updateTemplateSliderNav, smooth ? 320 : 40);
-  };
+    })
+    window.setTimeout(updateTemplateSliderNav, smooth ? 320 : 40)
+  }
 
   const openNewModal = (): void => {
-    if (!newModal || !newForm) return;
-    landingThemePreviewHover = null;
-    newModal.hidden = false;
-    newForm.reset();
-    syncProjNewLandingThemes();
+    if (!newModal || !newForm) return
+    landingThemePreviewHover = null
+    newModal.hidden = false
+    newForm.reset()
+    syncProjNewLandingThemes()
     window.setTimeout(() => {
-      scrollTemplateCardIntoView(false);
-      newNameInput?.focus();
-    }, 30);
-  };
+      scrollTemplateCardIntoView(false)
+      newNameInput?.focus()
+    }, 30)
+  }
   const closeNewModal = (): void => {
-    dismissProjectsCreateModal();
-  };
+    dismissProjectsCreateModal()
+  }
 
   const pushCreateModalHash = (): void => {
-    const url = new URL(window.location.href);
+    const url = new URL(window.location.href)
     if (url.hash !== HASH_PROJECTS_CREATE) {
-      url.hash = HASH_PROJECTS_CREATE;
-      history.pushState(null, "", url.toString());
+      url.hash = HASH_PROJECTS_CREATE
+      history.pushState(null, "", url.toString())
     }
-  };
+  }
 
   document.getElementById("projBtnNew")?.addEventListener("click", () => {
-    pushCreateModalHash();
-    openNewModal();
-  });
+    pushCreateModalHash()
+    openNewModal()
+  })
   document.getElementById("projNewCancel")?.addEventListener("click", () => {
-    closeNewModal();
-  });
+    closeNewModal()
+  })
   document.getElementById("projNewClose")?.addEventListener("click", () => {
-    closeNewModal();
-  });
+    closeNewModal()
+  })
   document.getElementById("projNewBackdrop")?.addEventListener("click", () => {
-    closeNewModal();
-  });
+    closeNewModal()
+  })
   newForm?.addEventListener("change", (e) => {
-    const t = e.target as HTMLElement;
+    const t = e.target as HTMLElement
     if (t.matches('input[name="template"]')) {
-      syncProjNewLandingThemes();
-      scrollTemplateCardIntoView(true);
+      syncProjNewLandingThemes()
+      scrollTemplateCardIntoView(true)
     }
     if (t.matches('input[name="landingTheme"]')) {
-      landingThemePreviewHover = null;
-      refreshLandingThemePreview();
+      landingThemePreviewHover = null
+      refreshLandingThemePreview()
     }
-  });
+  })
 
   projThemeGrid?.addEventListener("mouseleave", () => {
-    landingThemePreviewHover = null;
-    refreshLandingThemePreview();
-  });
+    landingThemePreviewHover = null
+    refreshLandingThemePreview()
+  })
   projThemeGrid?.querySelectorAll(".proj-theme-card").forEach((card) => {
     card.addEventListener("mouseenter", () => {
-      const v = card.querySelector<HTMLInputElement>('input[name="landingTheme"]')?.value;
+      const v = card.querySelector<HTMLInputElement>('input[name="landingTheme"]')?.value
       if (v) {
-        landingThemePreviewHover = v;
-        refreshLandingThemePreview();
+        landingThemePreviewHover = v
+        refreshLandingThemePreview()
       }
-    });
-  });
+    })
+  })
   projThemeGrid?.addEventListener("focusin", (ev) => {
-    const el = ev.target as HTMLElement;
-    const c = el.closest(".proj-theme-card");
-    if (!c) return;
-    const v = c.querySelector<HTMLInputElement>('input[name="landingTheme"]')?.value;
+    const el = ev.target as HTMLElement
+    const c = el.closest(".proj-theme-card")
+    if (!c) return
+    const v = c.querySelector<HTMLInputElement>('input[name="landingTheme"]')?.value
     if (v) {
-      landingThemePreviewHover = v;
-      refreshLandingThemePreview();
+      landingThemePreviewHover = v
+      refreshLandingThemePreview()
     }
-  });
+  })
   projThemeGrid?.addEventListener("focusout", (ev) => {
-    const next = ev.relatedTarget as HTMLElement | null;
+    const next = ev.relatedTarget as HTMLElement | null
     if (!projThemeGrid?.contains(next)) {
-      landingThemePreviewHover = null;
-      refreshLandingThemePreview();
+      landingThemePreviewHover = null
+      refreshLandingThemePreview()
     }
-  });
+  })
 
   document.getElementById("projTemplatePrev")?.addEventListener("click", () => {
     document.getElementById("projTemplateViewport")?.scrollBy({
       left: -getTemplateScrollStride(),
       behavior: "smooth",
-    });
-  });
+    })
+  })
   document.getElementById("projTemplateNext")?.addEventListener("click", () => {
     document.getElementById("projTemplateViewport")?.scrollBy({
       left: getTemplateScrollStride(),
       behavior: "smooth",
-    });
-  });
-  document.getElementById("projTemplateViewport")?.addEventListener("scroll", updateTemplateSliderNav);
+    })
+  })
+  document.getElementById("projTemplateViewport")?.addEventListener("scroll", updateTemplateSliderNav)
   document.getElementById("projTemplateViewport")?.addEventListener("keydown", (e) => {
-    const vp = document.getElementById("projTemplateViewport");
-    if (!vp) return;
+    const vp = document.getElementById("projTemplateViewport")
+    if (!vp) return
     if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      vp.scrollBy({ left: -getTemplateScrollStride(), behavior: "smooth" });
+      e.preventDefault()
+      vp.scrollBy({ left: -getTemplateScrollStride(), behavior: "smooth" })
     } else if (e.key === "ArrowRight") {
-      e.preventDefault();
-      vp.scrollBy({ left: getTemplateScrollStride(), behavior: "smooth" });
+      e.preventDefault()
+      vp.scrollBy({ left: getTemplateScrollStride(), behavior: "smooth" })
     }
-  });
+  })
   if (!projTemplateSliderResizeListenerAttached) {
-    projTemplateSliderResizeListenerAttached = true;
-    window.addEventListener("resize", updateTemplateSliderNav);
+    projTemplateSliderResizeListenerAttached = true
+    window.addEventListener("resize", updateTemplateSliderNav)
   }
   newForm?.addEventListener("submit", (e) => {
-    e.preventDefault();
-    if (!newForm) return;
-    const fd = new FormData(newForm);
-    const name = String(fd.get("name") ?? "").trim();
-    const template = String(fd.get("template") ?? "landing");
-    const landingTheme = String(fd.get("landingTheme") ?? "saas");
+    e.preventDefault()
+    if (!newForm) return
+    const fd = new FormData(newForm)
+    const name = String(fd.get("name") ?? "").trim()
+    const template = String(fd.get("template") ?? "landing")
+    const landingTheme = String(fd.get("landingTheme") ?? "saas")
     if (!name) {
-      window.alert("프로젝트 이름을 입력해 주세요.");
-      newNameInput?.focus();
-      return;
+      window.alert("프로젝트 이름을 입력해 주세요.")
+      newNameInput?.focus()
+      return
     }
-    const templateLabel =
-      template === "portfolio"
-        ? "포트폴리오"
-        : template === "landing"
-          ? "랜딩 페이지"
-          : template === "business"
-            ? "비즈니스"
-            : template === "blog"
-              ? "블로그 · 문서"
-              : "빈 프로젝트";
-    const themeLine =
-      template === "landing"
-        ? `\n랜딩 테마: ${landingTheme === "local" ? "로컬 비즈니스" : "SaaS 프로덕트"}`
-        : "";
-    window.alert(
-      `「${name}」 프로젝트를 템플릿으로 생성합니다. (데모)\n\n템플릿: ${templateLabel}${themeLine}\n\n실제 제품에서는 저장소 생성 후 에이전트 화면으로 이동합니다.`,
-    );
-    closeNewModal();
-  });
+    const templateLabel = template === "portfolio" ? "포트폴리오" : template === "landing" ? "랜딩 페이지" : template === "business" ? "비즈니스" : template === "blog" ? "블로그 · 문서" : "빈 프로젝트"
+    const themeLine = template === "landing" ? `\n랜딩 테마: ${landingTheme === "local" ? "로컬 비즈니스" : "SaaS 프로덕트"}` : ""
+    window.alert(`「${name}」 프로젝트를 템플릿으로 생성합니다. (데모)\n\n템플릿: ${templateLabel}${themeLine}\n\n실제 제품에서는 저장소 생성 후 에이전트 화면으로 이동합니다.`)
+    closeNewModal()
+  })
 
   if (!projNewModalEscapeListenerAttached) {
-    projNewModalEscapeListenerAttached = true;
+    projNewModalEscapeListenerAttached = true
     document.addEventListener("keydown", (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      const mNew = document.getElementById("projNewModal");
+      if (e.key !== "Escape") return
+      const mNew = document.getElementById("projNewModal")
       if (mNew && !mNew.hidden) {
-        e.preventDefault();
-        dismissProjectsCreateModal();
-        return;
+        e.preventDefault()
+        dismissProjectsCreateModal()
+        return
       }
-      const mZip = document.getElementById("projZipModal");
+      const mZip = document.getElementById("projZipModal")
       if (mZip && !mZip.hidden) {
-        e.preventDefault();
-        closeProjZipModal();
-        return;
+        e.preventDefault()
+        closeProjZipModal()
+        return
       }
-      const mGh = document.getElementById("projGhModal");
+      const mGh = document.getElementById("projGhModal")
       if (mGh && !mGh.hidden) {
-        e.preventDefault();
-        closeProjGhModal();
-        return;
+        e.preventDefault()
+        closeProjGhModal()
+        return
       }
-    });
+    })
   }
 
-  syncProjNewLandingThemes();
-  refreshLandingThemePreview();
+  syncProjNewLandingThemes()
+  refreshLandingThemePreview()
 
   if (openCreateFromRoute) {
     window.setTimeout(() => {
-      openNewModal();
-    }, 0);
+      openNewModal()
+    }, 0)
   }
 
-  const grid = document.getElementById("projGrid");
+  const grid = document.getElementById("projGrid")
   grid?.addEventListener("click", (e) => {
-    const el = e.target as HTMLElement;
-    if (el.closest(".proj-card__live-url")) return;
-    const hit = el.closest(".proj-card__hit") as HTMLElement | null;
-    const nav = hit?.dataset.projectNav;
-    if (nav) window.location.hash = nav;
-  });
+    const el = e.target as HTMLElement
+    if (el.closest(".proj-card__live-url")) return
+    const hit = el.closest(".proj-card__hit") as HTMLElement | null
+    const nav = hit?.dataset.projectNav
+    if (nav) window.location.hash = nav
+  })
   grid?.addEventListener("keydown", (e) => {
-    if (e.key !== "Enter" && e.key !== " ") return;
-    const hit = (e.target as HTMLElement).closest(
-      ".proj-card__hit",
-    ) as HTMLElement | null;
-    const nav = hit?.dataset.projectNav;
+    if (e.key !== "Enter" && e.key !== " ") return
+    const hit = (e.target as HTMLElement).closest(".proj-card__hit") as HTMLElement | null
+    const nav = hit?.dataset.projectNav
     if (nav) {
-      e.preventDefault();
-      window.location.hash = nav;
+      e.preventDefault()
+      window.location.hash = nav
     }
-  });
+  })
 
   const setProjectListPage = (page: number): void => {
-    const nav = document.getElementById("projPagination");
-    if (!nav) return;
-    const clamped = Math.max(
-      1,
-      Math.min(PROJECT_LIST_PAGE_COUNT, Math.floor(page)),
-    );
+    const nav = document.getElementById("projPagination")
+    if (!nav) return
+    const clamped = Math.max(1, Math.min(PROJECT_LIST_PAGE_COUNT, Math.floor(page)))
     nav.querySelectorAll<HTMLButtonElement>("[data-proj-page]").forEach((b) => {
-      const n = Number(b.dataset.projPage);
-      const on = n === clamped;
-      b.classList.toggle("proj-pagination__btn--current", on);
-      if (on) b.setAttribute("aria-current", "page");
-      else b.removeAttribute("aria-current");
-    });
-    document
-      .getElementById("projPaginationPrev")
-      ?.toggleAttribute("disabled", clamped <= 1);
-    document
-      .getElementById("projPaginationNext")
-      ?.toggleAttribute("disabled", clamped >= PROJECT_LIST_PAGE_COUNT);
-    const st = document.getElementById("projPaginationStatus");
+      const n = Number(b.dataset.projPage)
+      const on = n === clamped
+      b.classList.toggle("proj-pagination__btn--current", on)
+      if (on) b.setAttribute("aria-current", "page")
+      else b.removeAttribute("aria-current")
+    })
+    document.getElementById("projPaginationPrev")?.toggleAttribute("disabled", clamped <= 1)
+    document.getElementById("projPaginationNext")?.toggleAttribute("disabled", clamped >= PROJECT_LIST_PAGE_COUNT)
+    const st = document.getElementById("projPaginationStatus")
     if (st) {
-      st.innerHTML = `<strong>${clamped}</strong> / ${PROJECT_LIST_PAGE_COUNT}`;
+      st.innerHTML = `<strong>${clamped}</strong> / ${PROJECT_LIST_PAGE_COUNT}`
     }
-  };
+  }
 
   document.getElementById("projPagination")?.addEventListener("click", (e) => {
-    const el = e.target as HTMLElement;
+    const el = e.target as HTMLElement
     if (el.closest("#projPaginationPrev")) {
-      const cur =
-        document.querySelector<HTMLButtonElement>(
-          ".proj-pagination__btn--current[data-proj-page]",
-        )?.dataset.projPage ?? "1";
-      setProjectListPage(Number(cur) - 1);
-      return;
+      const cur = document.querySelector<HTMLButtonElement>(".proj-pagination__btn--current[data-proj-page]")?.dataset.projPage ?? "1"
+      setProjectListPage(Number(cur) - 1)
+      return
     }
     if (el.closest("#projPaginationNext")) {
-      const cur =
-        document.querySelector<HTMLButtonElement>(
-          ".proj-pagination__btn--current[data-proj-page]",
-        )?.dataset.projPage ?? "1";
-      setProjectListPage(Number(cur) + 1);
-      return;
+      const cur = document.querySelector<HTMLButtonElement>(".proj-pagination__btn--current[data-proj-page]")?.dataset.projPage ?? "1"
+      setProjectListPage(Number(cur) + 1)
+      return
     }
-    const t = el.closest("[data-proj-page]");
+    const t = el.closest("[data-proj-page]")
     if (t instanceof HTMLButtonElement) {
-      setProjectListPage(Number(t.dataset.projPage));
+      setProjectListPage(Number(t.dataset.projPage))
     }
-  });
+  })
 }
 
 function bindProjectDetailPage(p: DemoProject): void {
-  const copyBtn = document.getElementById("projCopyUrl");
+  const copyBtn = document.getElementById("projCopyUrl")
   copyBtn?.addEventListener("click", async () => {
-    if (!isProjectLiveUrl(p)) return;
+    if (!isProjectLiveUrl(p)) return
     try {
-      await navigator.clipboard.writeText(p.subtitle);
-      copyBtn.textContent = "복사됨";
+      await navigator.clipboard.writeText(p.subtitle)
+      copyBtn.textContent = "복사됨"
       window.setTimeout(() => {
-        copyBtn.textContent = "복사";
-      }, 2000);
+        copyBtn.textContent = "복사"
+      }, 2000)
     } catch {
-      window.alert("클립보드 복사에 실패했습니다.");
+      window.alert("클립보드 복사에 실패했습니다.")
     }
-  });
+  })
 
   document.getElementById("projOpenAgent")?.addEventListener("click", () => {
-    window.location.hash = getProjectAgentHash(p.slug);
-  });
+    window.location.hash = getProjectAgentHash(p.slug)
+  })
 
-  const modal = document.getElementById("projRemoveModal");
+  const modal = document.getElementById("projRemoveModal")
   const showModal = (show: boolean): void => {
-    if (modal) modal.hidden = !show;
-  };
+    if (modal) modal.hidden = !show
+  }
 
-  document
-    .getElementById("projRemoveOpen")
-    ?.addEventListener("click", () => showModal(true));
-  document
-    .getElementById("projRemoveBackdrop")
-    ?.addEventListener("click", () => showModal(false));
-  document
-    .getElementById("projRemoveCancel")
-    ?.addEventListener("click", () => showModal(false));
-  document
-    .getElementById("projRemoveConfirm")
-    ?.addEventListener("click", () => {
-      showModal(false);
-      window.location.hash = HASH_PROJECTS;
-    });
+  document.getElementById("projRemoveOpen")?.addEventListener("click", () => showModal(true))
+  document.getElementById("projRemoveBackdrop")?.addEventListener("click", () => showModal(false))
+  document.getElementById("projRemoveCancel")?.addEventListener("click", () => showModal(false))
+  document.getElementById("projRemoveConfirm")?.addEventListener("click", () => {
+    showModal(false)
+    window.location.hash = HASH_PROJECTS
+  })
 }
 
 function mountLanding(): void {
-  document.body.classList.remove("app-view");
-  document.body.classList.remove("error-view");
-  root.innerHTML = getLandingHTML();
-  document.title = "Devely — AI 웹 제작 · 프롬프트부터 배포까지";
+  document.body.classList.remove("app-view")
+  document.body.classList.remove("error-view")
+  root.innerHTML = getLandingHTML()
+  document.title = "Devely — AI 웹 제작 · 프롬프트부터 배포까지"
 
   const goDashboard = (): void => {
-    window.location.hash = HASH_DASHBOARD;
-  };
-  document.getElementById("btnLogin")?.addEventListener("click", goDashboard);
-  document.getElementById("btnLoginMid")?.addEventListener("click", goDashboard);
+    window.location.hash = HASH_DASHBOARD
+  }
+  document.getElementById("btnLogin")?.addEventListener("click", goDashboard)
+  document.getElementById("btnLoginMid")?.addEventListener("click", goDashboard)
 
-  const form = root.querySelector<HTMLFormElement>("#promptForm");
-  const input = root.querySelector<HTMLInputElement>("#promptInput");
-  const statusEl = root.querySelector<HTMLParagraphElement>("#status");
+  const form = root.querySelector<HTMLFormElement>("#promptForm")
+  const input = root.querySelector<HTMLInputElement>("#promptInput")
+  const statusEl = root.querySelector<HTMLParagraphElement>("#status")
 
   if (form && input && statusEl) {
     form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const prompt = input.value.trim();
+      e.preventDefault()
+      const prompt = input.value.trim()
 
       if (!prompt) {
-        statusEl.textContent = "프롬프트를 입력해 주세요.";
-        return;
+        statusEl.textContent = "프롬프트를 입력해 주세요."
+        return
       }
 
-      statusEl.textContent = `“${prompt}”에 맞춰 생성 중... (데모)`;
-    });
+      statusEl.textContent = `“${prompt}”에 맞춰 생성 중... (데모)`
+    })
   }
 }
 
+function bindAppSidebarCollapse(): void {
+  const shell = root.querySelector<HTMLElement>(".app-shell:not(.app-shell--no-sidebar)")
+  const btn = shell?.querySelector<HTMLButtonElement>("[data-sidebar-toggle]")
+  if (!shell || !btn) return
+
+  btn.addEventListener("click", () => {
+    const collapsed = !shell.classList.contains("app-shell--sidebar-collapsed")
+    shell.classList.toggle("app-shell--sidebar-collapsed", collapsed)
+    writeSidebarCollapsed(collapsed)
+    const label = collapsed ? "사이드바 열기" : "사이드바 닫기"
+    btn.setAttribute("aria-expanded", collapsed ? "false" : "true")
+    btn.title = label
+    btn.setAttribute("aria-label", label)
+  })
+}
+
 function mountApp(): void {
-  document.body.classList.remove("error-view");
-  document.body.classList.add("app-view");
-  const route = parseAppRoute();
-  let inner: string;
-  let title: string;
-  let sidebar: "dashboard" | "projects" = "dashboard";
-  let mainExtraClass = "";
-  let omitSidebar = false;
+  document.body.classList.remove("error-view")
+  document.body.classList.add("app-view")
+  const route = parseAppRoute()
+  let inner: string
+  let title: string
+  let sidebar: "dashboard" | "projects" = "dashboard"
+  let mainExtraClass = ""
+  let omitSidebar = false
 
   if (route.kind === "notFound") {
-    omitSidebar = true;
-    mainExtraClass = "app-main--error";
-    inner = getHttpErrorPageHTML(404, true);
-    title = "404 — AI Web Builder";
-    sidebar = "dashboard";
+    omitSidebar = true
+    mainExtraClass = "app-main--error"
+    inner = getHttpErrorPageHTML(404, true)
+    title = "404 — AI Web Builder"
+    sidebar = "dashboard"
   } else if (route.kind === "projects") {
-    sidebar = "projects";
-    inner = getProjectsInnerHTML();
-    title = route.createModalOpen
-      ? "새 프로젝트 — AI Web Builder"
-      : "프로젝트 — AI Web Builder";
+    sidebar = "projects"
+    inner = getProjectsInnerHTML()
+    title = route.createModalOpen ? "새 프로젝트 — AI Web Builder" : "프로젝트 — AI Web Builder"
   } else if (route.kind === "projectAgent") {
-    sidebar = "projects";
-    const p = DEMO_PROJECTS.find((x) => x.slug === route.slug);
-    inner = p ? getProjectAgentInnerHTML(p, route.tab) : getProjectNotFoundInnerHTML();
-    title = p ? `${p.slug} · 에이전트 — AI Web Builder` : "프로젝트 — AI Web Builder";
+    sidebar = "projects"
+    const p = DEMO_PROJECTS.find((x) => x.slug === route.slug)
+    inner = p ? getProjectAgentInnerHTML(p, route.tab) : getProjectNotFoundInnerHTML()
+    title = p ? `${p.slug} · 에이전트 — AI Web Builder` : "프로젝트 — AI Web Builder"
     if (p) {
-      mainExtraClass = "app-main--agent";
-      omitSidebar = true;
+      mainExtraClass = "app-main--agent"
+      omitSidebar = true
     }
   } else if (route.kind === "project") {
-    sidebar = "projects";
-    const p = DEMO_PROJECTS.find((x) => x.slug === route.slug);
-    inner = p ? getProjectDetailInnerHTML(p) : getProjectNotFoundInnerHTML();
-    title = p ? `${p.slug} — AI Web Builder` : "프로젝트 — AI Web Builder";
+    sidebar = "projects"
+    const p = DEMO_PROJECTS.find((x) => x.slug === route.slug)
+    inner = p ? getProjectDetailInnerHTML(p) : getProjectNotFoundInnerHTML()
+    title = p ? `${p.slug} — AI Web Builder` : "프로젝트 — AI Web Builder"
   } else {
-    inner = DASHBOARD_INNER;
-    title = "대시보드 — AI Web Builder";
+    inner = DASHBOARD_INNER
+    title = "대시보드 — AI Web Builder"
   }
 
-  root.innerHTML = getAppLayoutHTML(sidebar, inner, mainExtraClass, omitSidebar);
-  document.title = title;
+  root.innerHTML = getAppLayoutHTML(sidebar, inner, mainExtraClass, omitSidebar, omitSidebar ? false : readSidebarCollapsed())
+  document.title = title
+
+  if (!omitSidebar) bindAppSidebarCollapse()
 
   if (route.kind === "notFound") {
     /* no-op */
   } else if (route.kind === "projects") {
-    bindProjectListPage(route.createModalOpen);
+    bindProjectListPage(route.createModalOpen)
   } else if (route.kind === "projectAgent") {
-    const proj = DEMO_PROJECTS.find((x) => x.slug === route.slug);
-    if (proj) bindProjectAgentPage(proj);
+    const proj = DEMO_PROJECTS.find((x) => x.slug === route.slug)
+    if (proj) bindProjectAgentPage(proj)
   } else if (route.kind === "project") {
-    const proj = DEMO_PROJECTS.find((x) => x.slug === route.slug);
-    if (proj) bindProjectDetailPage(proj);
+    const proj = DEMO_PROJECTS.find((x) => x.slug === route.slug)
+    if (proj) bindProjectDetailPage(proj)
   }
 }
 
 function renderRoute(): void {
-  document.body.classList.remove("error-view");
-  const standaloneErr = parseStandaloneErrorRoute();
+  document.body.classList.remove("error-view")
+  const standaloneErr = parseStandaloneErrorRoute()
   if (standaloneErr) {
-    mountStandaloneHttpError(standaloneErr);
-    return;
+    mountStandaloneHttpError(standaloneErr)
+    return
   }
   if (isAppRoute()) {
-    mountApp();
+    mountApp()
   } else {
-    mountLanding();
+    mountLanding()
   }
 }
 
-window.addEventListener("hashchange", renderRoute);
-window.addEventListener("popstate", renderRoute);
-renderRoute();
+window.addEventListener("hashchange", renderRoute)
+window.addEventListener("popstate", renderRoute)
+renderRoute()
