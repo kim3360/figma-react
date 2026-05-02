@@ -5161,18 +5161,19 @@ body.app-view {
   }
 }
 
-/* 프로젝트 · SYS.AI Agent (탭 + 프리뷰 + 사이드바) */
+/* 프로젝트 · SYS.AI Agent — 라이트: 아이콘 레일 + 채팅 + 미리보기 */
 .app-main--agent {
   max-width: none;
   display: flex;
   flex-direction: column;
   min-height: calc(100svh - 48px);
-  padding-bottom: 24px;
+  padding: 12px 16px 20px;
+  box-sizing: border-box;
 }
 
 .app-shell.app-shell--no-sidebar .app-main--agent {
   min-height: calc(100svh - 40px);
-  padding-bottom: 20px;
+  padding: 10px 14px 16px;
 }
 
 .agent-page {
@@ -5180,103 +5181,117 @@ body.app-view {
   flex-direction: column;
   flex: 1;
   min-height: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgba(15, 23, 42, 0.08),
+    0 18px 40px -20px rgba(15, 23, 42, 0.12);
 }
 
 .agent-shell {
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
-  gap: 0 20px;
+  grid-template-columns: 56px minmax(280px, 380px) minmax(0, 1fr);
+  grid-template-areas: "rail chat stage";
+  gap: 0;
   align-items: stretch;
 }
 
-.agent-main-col {
+.agent-rail {
+  grid-area: rail;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0 12px;
+  background: #f8fafc;
+  border-right: 1px solid #e2e8f0;
+  box-sizing: border-box;
+}
+
+.agent-rail__stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  padding: 8px 0 0;
+}
+
+.agent-rail__bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: auto;
+  padding-top: 12px;
+  width: 100%;
+}
+
+.agent-rail__btn,
+.agent-rail__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  text-decoration: none;
+  flex-shrink: 0;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.agent-rail__btn:hover,
+.agent-rail__link:hover {
+  color: #5b21b6;
+  background: rgba(124, 58, 237, 0.08);
+}
+
+.agent-rail__btn--active {
+  color: #5b21b6;
+  background: rgba(124, 58, 237, 0.14);
+}
+
+.agent-rail__btn:focus-visible,
+.agent-rail__link:focus-visible {
+  outline: 2px solid #a78bfa;
+  outline-offset: 2px;
+}
+
+.agent-rail__svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+.agent-stage {
+  grid-area: stage;
   display: flex;
   flex-direction: column;
   min-width: 0;
   min-height: 0;
   background: #fff;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 14px;
   overflow: hidden;
-  box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.04),
-    0 18px 44px -22px rgba(15, 23, 42, 0.14);
 }
 
-.agent-toolbar {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+.agent-stage__meta {
+  display: flex;
   align-items: center;
-  gap: 12px 16px;
-  padding: 12px 16px;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  padding: 10px 14px;
   border-bottom: 1px solid rgba(15, 23, 42, 0.06);
   background: #fafafa;
-}
-
-.agent-exit {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #475569;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.agent-exit:hover {
-  color: #0f172a;
-}
-
-.agent-exit__chev {
-  font-size: 18px;
-  line-height: 1;
-  opacity: 0.75;
-}
-
-.agent-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 4px;
-  background: #e2e8f0;
-  border-radius: 10px;
-  max-width: 100%;
-}
-
-.agent-tab {
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 8px 14px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: #64748b;
-  cursor: pointer;
-  transition:
-    background 0.15s ease,
-    color 0.15s ease,
-    box-shadow 0.15s ease;
-}
-
-.agent-tab:hover {
-  color: #334155;
-}
-
-.agent-tab--active {
-  background: #fff;
-  color: #0f172a;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
-}
-
-.agent-tab:focus-visible {
-  outline: 2px solid #7c3aed;
-  outline-offset: 2px;
 }
 
 .agent-branch-pill {
@@ -5377,8 +5392,199 @@ body.app-view {
 .agent-preview__frame--panel {
   flex: 1;
   min-height: 280px;
-  background: #e2e8f0;
+  background: #fff;
   position: relative;
+}
+
+/* 미리보기: Manus형 이중 툴바 + 흰 뷰포트 */
+.agent-preview-device {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: #fff;
+  border-radius: 0;
+}
+
+.agent-preview-device__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-shrink: 0;
+  padding: 0 10px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #ececee;
+  min-height: 40px;
+}
+
+.agent-preview-device__bar--sub {
+  background: #f3f4f6;
+  min-height: 36px;
+  border-bottom-color: #e5e7eb;
+}
+
+.agent-preview-device__cluster {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.agent-preview-device__cluster--end {
+  flex-shrink: 0;
+}
+
+.agent-preview-device__dots {
+  display: flex;
+  gap: 5px;
+  margin-right: 4px;
+}
+
+.agent-preview-device__dots span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #d1d5db;
+  border: 1px solid #c4c8ce;
+}
+
+.agent-preview-device__dots span:nth-child(1) {
+  background: #fecaca;
+  border-color: #fca5a5;
+}
+
+.agent-preview-device__dots span:nth-child(2) {
+  background: #fde68a;
+  border-color: #fcd34d;
+}
+
+.agent-preview-device__dots span:nth-child(3) {
+  background: #bbf7d0;
+  border-color: #86efac;
+}
+
+.agent-preview-device__seg {
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 6px;
+  background: #fff;
+  color: #111827;
+  cursor: default;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.agent-preview-device__seg--on {
+  background: #fff;
+}
+
+.agent-preview-device__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: #4b5563;
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease;
+}
+
+.agent-preview-device__icon:hover {
+  background: rgba(255, 255, 255, 0.7);
+  color: #111827;
+}
+
+.agent-preview-device__icon:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 1px;
+}
+
+.agent-preview-device__navpair {
+  display: inline-flex;
+  gap: 0;
+  margin-left: 2px;
+}
+
+.agent-preview-device__url {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  margin: 0 4px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.agent-preview-device__url-home {
+  display: flex;
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+.agent-preview-device__url-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agent-preview-device__ghost {
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #4b5563;
+  cursor: pointer;
+}
+
+.agent-preview-device__ghost:hover {
+  background: rgba(255, 255, 255, 0.65);
+  color: #111827;
+}
+
+.agent-preview-device__publish {
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 11px;
+  border: none;
+  border-radius: 8px;
+  background: #111827;
+  color: #fff;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+}
+
+.agent-preview-device__publish:hover {
+  background: #000;
+}
+
+.agent-preview-device__viewport {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  background: #fff;
 }
 
 .agent-preview__iframe {
@@ -5962,17 +6168,17 @@ body.app-view {
 }
 
 .agent-sidebar {
+  grid-area: chat;
   display: flex;
   flex-direction: column;
   min-height: 0;
   min-width: 0;
   background: #fff;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 14px;
+  border: none;
+  border-radius: 0;
+  border-right: 1px solid #e2e8f0;
   overflow: hidden;
-  box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.04),
-    0 18px 44px -22px rgba(15, 23, 42, 0.12);
+  box-shadow: none;
 }
 
 .agent-sidebar__head {
@@ -5982,8 +6188,8 @@ body.app-view {
   justify-content: space-between;
   gap: 12px;
   padding: 16px 16px 12px;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
-  background: linear-gradient(180deg, #fafafa 0%, #fff 100%);
+  border-bottom: 1px solid #e5e7eb;
+  background: #fff;
 }
 
 .agent-sidebar__title {
@@ -6013,8 +6219,7 @@ body.app-view {
 
 .agent-sidebar__thread {
   flex: 1;
-  min-height: 200px;
-  max-height: min(52vh, 520px);
+  min-height: 0;
   overflow-y: auto;
   padding: 14px 16px;
   display: flex;
@@ -6036,7 +6241,7 @@ body.app-view {
 
 .agent-bubble--ai .agent-bubble__body {
   background: #fff;
-  border: 1px solid rgba(15, 23, 42, 0.07);
+  border: 1px solid rgba(15, 23, 42, 0.08);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
@@ -6054,7 +6259,7 @@ body.app-view {
 .agent-sidebar__composer {
   flex-shrink: 0;
   padding: 12px 14px 14px;
-  border-top: 1px solid rgba(15, 23, 42, 0.06);
+  border-top: 1px solid #e5e7eb;
   background: #fff;
 }
 
@@ -6071,8 +6276,8 @@ body.app-view {
   font-weight: 600;
   padding: 8px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(15, 23, 42, 0.1);
-  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  background: #fff;
   color: #475569;
   cursor: pointer;
   transition:
@@ -6092,7 +6297,7 @@ body.app-view {
   align-items: flex-end;
   gap: 8px;
   padding: 4px 4px 4px 12px;
-  border: 1px solid rgba(15, 23, 42, 0.12);
+  border: 1px solid #e2e8f0;
   border-radius: 14px;
   background: #fafafa;
   transition:
@@ -6171,7 +6376,40 @@ body.app-view {
 @media (max-width: 1020px) {
   .agent-shell {
     grid-template-columns: 1fr;
-    gap: 16px;
+    grid-template-areas:
+      "rail"
+      "stage"
+      "chat";
+  }
+
+  .agent-rail {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .agent-rail__stack {
+    flex-direction: row;
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 0;
+    gap: 4px;
+    justify-content: flex-start;
+  }
+
+  .agent-rail__bottom {
+    flex-direction: row;
+    margin-top: 0;
+    padding-top: 0;
+    flex-shrink: 0;
+    gap: 4px;
   }
 
   .agent-preview__frame--panel {
@@ -6179,26 +6417,7 @@ body.app-view {
   }
 
   .agent-sidebar__thread {
-    max-height: 320px;
-  }
-
-  .agent-toolbar {
-    grid-template-columns: 1fr;
-    justify-items: stretch;
-  }
-
-  .agent-tabs {
-    order: 3;
-    grid-column: 1 / -1;
-  }
-
-  .agent-exit {
-    order: 1;
-  }
-
-  .agent-branch-pill {
-    order: 2;
-    justify-self: start;
+    max-height: min(42vh, 380px);
   }
 
   .agent-code-workspace {

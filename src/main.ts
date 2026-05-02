@@ -1454,18 +1454,76 @@ function getProjectNotFoundInnerHTML(): string {
       </div>`
 }
 
-/** 에이전트 화면 미리보기 탭 — 참고 UI와 동일한 데모 랜딩 */
+/** 에이전트 미리보기 iframe — 구축 중 화면(흰 배경 · 라인 일러스트) */
 function getAgentWorkspacePreviewIframeHTML(): string {
   const doc = `<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Preview</title><style>
 *{box-sizing:border-box}
-body{margin:0;min-height:100%;font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f8fafc;color:#0f172a;}
-.hero{min-height:100%;display:flex;align-items:center;justify-content:center;padding:3rem 1.5rem;text-align:center;}
-h1{font-size:clamp(1.35rem,3vw,1.85rem);font-weight:700;margin:0 0 1rem;letter-spacing:-.03em;line-height:1.3;}
-p{margin:0 auto 1.75rem;max-width:26rem;font-size:.9375rem;line-height:1.65;color:#64748b;}
-.cta{display:inline-block;padding:.7rem 1.5rem;border-radius:999px;background:#2563eb;color:#fff;font-weight:600;font-size:.9rem;box-shadow:0 4px 14px rgba(37,99,235,.22);}
-</style></head><body><div class="hero"><div><h1>비즈니스를 위한 완벽한 공간</h1><p>자연어로 요청한 수정사항이 실시간으로 여기에 반영됩니다.</p><span class="cta">자세히 알아보기</span></div></div></body></html>`
+body{margin:0;min-height:100%;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#fff;color:#111827;}
+main{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2.5rem 1.25rem 2rem;text-align:center;}
+.art{display:block;margin:0 auto 1.75rem;color:#cbd5e1}
+h1{font-size:clamp(1rem,2.5vw,1.2rem);font-weight:700;margin:0 0 .65rem;letter-spacing:-.02em;line-height:1.45;color:#111827;}
+p{margin:0 auto;max-width:22rem;font-size:.8125rem;line-height:1.65;color:#6b7280;}
+footer{margin-top:2.35rem;font-size:.75rem;color:#9ca3af;letter-spacing:.02em}
+footer strong{color:#374151;font-weight:600}
+</style></head><body><main>
+<svg class="art" width="132" height="108" viewBox="0 0 132 108" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<rect x="6" y="10" width="120" height="88" rx="8" stroke="currentColor" stroke-width="1.75"/>
+<path d="M6 26h120" stroke="currentColor" stroke-width="1.5"/>
+<circle cx="18" cy="18" r="2.25" fill="currentColor" opacity=".35"/>
+<circle cx="28" cy="18" r="2.25" fill="currentColor" opacity=".35"/>
+<circle cx="38" cy="18" r="2.25" fill="currentColor" opacity=".35"/>
+<rect x="22" y="40" width="88" height="9" rx="2" stroke="currentColor" stroke-width="1.25" fill="none" opacity=".55"/>
+<rect x="22" y="56" width="60" height="9" rx="2" stroke="currentColor" stroke-width="1.25" fill="none" opacity=".4"/>
+<rect x="22" y="72" width="76" height="9" rx="2" stroke="currentColor" stroke-width="1.25" fill="none" opacity=".35"/>
+</svg>
+<h1>Devely가 사이트를 구축 중입니다. 잠시 기다려 주세요!</h1>
+<p>앱을 다운로드하면 준비가 완료될 때 알림을 받을 수 있어요.</p>
+<footer>from <strong>Devely</strong></footer>
+</main></body></html>`
   const dataUrl = `data:text/html;charset=utf-8,${encodeURIComponent(doc)}`
   return `<iframe class="agent-preview__iframe" title="미리보기" src="${escapeHtml(dataUrl)}" sandbox="allow-scripts"></iframe>`
+}
+
+function getAgentPreviewDeviceHTML(iframeHtml: string): string {
+  const ic = (path: string, label: string) =>
+    `<button type="button" class="agent-preview-device__icon" title="${label}" aria-label="${label}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg></button>`
+  return `<div class="agent-preview-device">
+      <div class="agent-preview-device__bar agent-preview-device__bar--main">
+        <div class="agent-preview-device__cluster">
+          <span class="agent-preview-device__dots" aria-hidden="true"><span></span><span></span><span></span></span>
+          <button type="button" class="agent-preview-device__seg agent-preview-device__seg--on">미리보기</button>
+          ${ic("<polyline points=\"16 18 22 12 16 6\"/><polyline points=\"8 6 2 12 8 18\"/>", "코드 보기")}
+          ${ic("<path d=\"M23 4v6h-6\"/><path d=\"M20.49 15a9 9 0 1 1-2.12-9.36L23 10\"/>", "새로 고침")}
+          <span class="agent-preview-device__navpair">
+            ${ic("<path d=\"M15 18l-6-6 6-6\"/>", "뒤로")}
+            ${ic("<path d=\"M9 18l6-6-6-6\"/>", "앞으로")}
+          </span>
+        </div>
+        <div class="agent-preview-device__url" title="프리뷰 (데모)">
+          <span class="agent-preview-device__url-home" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+          <span class="agent-preview-device__url-text">/</span>
+        </div>
+        <div class="agent-preview-device__cluster agent-preview-device__cluster--end">
+          ${ic("<circle cx=\"12\" cy=\"12\" r=\"1\"/><circle cx=\"19\" cy=\"12\" r=\"1\"/><circle cx=\"5\" cy=\"12\" r=\"1\"/>", "메뉴")}
+          ${ic("<path d=\"M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22\"/>", "GitHub")}
+          <button type="button" class="agent-preview-device__ghost">Share</button>
+          <button type="button" class="agent-preview-device__publish">게시 <span aria-hidden="true">↑</span></button>
+        </div>
+      </div>
+      <div class="agent-preview-device__bar agent-preview-device__bar--sub">
+        <div class="agent-preview-device__cluster">
+          ${ic("<rect x=\"2\" y=\"3\" width=\"20\" height=\"14\" rx=\"2\"/><path d=\"M8 21h8\"/>", "데스크톱")}
+          ${ic("<rect x=\"5\" y=\"2\" width=\"14\" height=\"20\" rx=\"2\"/><path d=\"M12 18h.01\"/>", "모바일")}
+        </div>
+        <div class="agent-preview-device__cluster agent-preview-device__cluster--end">
+          <button type="button" class="agent-preview-device__ghost">편집</button>
+          ${ic("<path d=\"M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7\"/>", "전체 화면")}
+        </div>
+      </div>
+      <div class="agent-preview-device__viewport">
+        ${iframeHtml}
+      </div>
+    </div>`
 }
 
 interface AgentCodeFileEntry {
@@ -1726,6 +1784,7 @@ function getProjectAgentInnerHTML(p: DemoProject, activeTab: AgentWorkspaceTab):
   const slugSafe = escapeHtml(p.slug)
   const backHref = getProjectHash(p.slug)
   const previewIframe = getAgentWorkspacePreviewIframeHTML()
+  const previewDevice = getAgentPreviewDeviceHTML(previewIframe)
   const codePanel = getAgentCodeWorkspaceHTML(p)
   const pipeline = getAgentPipelineSectionHTML(p)
   const liveExtra = isProjectLiveUrl(p) ? `<p class="agent-live-link"><a href="${escapeHtml(p.subtitle.trim())}" target="_blank" rel="noopener noreferrer">실제 라이브 URL 열기 ↗</a></p>` : ""
@@ -1733,46 +1792,41 @@ function getProjectAgentInnerHTML(p: DemoProject, activeTab: AgentWorkspaceTab):
   const onCode = activeTab === "code"
   const onPipeline = activeTab === "pipeline"
 
+  const railSvg = (inner: string) => `<svg class="agent-rail__svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`
+
   return `
       <div class="agent-page">
         <div class="agent-shell">
-          <div class="agent-main-col">
-            <div class="agent-toolbar">
-              <a class="agent-exit" href="${backHref}">
-                <span class="agent-exit__chev" aria-hidden="true">‹</span>
-                나가기
+          <nav class="agent-rail" aria-label="작업 영역">
+            <a class="agent-rail__link" href="${backHref}" title="프로젝트로 나가기" aria-label="프로젝트로 나가기">
+              ${railSvg('<path d="M19 12H5M12 19l-7-7 7-7"/>')}
+            </a>
+            <div class="agent-rail__stack" role="tablist" aria-label="미리보기 · 코드 · 파이프라인">
+              <button type="button" class="agent-rail__btn${onPreview ? " agent-rail__btn--active" : ""}" role="tab" aria-selected="${onPreview}" aria-controls="agentPanelPreview" id="agentTabPreview" data-agent-tab="preview" title="미리보기">
+                ${railSvg('<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/>')}
+              </button>
+              <button type="button" class="agent-rail__btn${onCode ? " agent-rail__btn--active" : ""}" role="tab" aria-selected="${onCode}" aria-controls="agentPanelCode" id="agentTabCode" data-agent-tab="code" title="Code (Diff)">
+                ${railSvg('<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>')}
+              </button>
+              <button type="button" class="agent-rail__btn${onPipeline ? " agent-rail__btn--active" : ""}" role="tab" aria-selected="${onPipeline}" aria-controls="agentPanelPipeline" id="agentTabPipeline" data-agent-tab="pipeline" title="Pipeline">
+                ${railSvg('<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>')}
+              </button>
+              <button type="button" class="agent-rail__btn" id="agentRailFocusChat" title="메시지 입력으로 이동" aria-label="메시지 입력으로 이동">
+                ${railSvg('<circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>')}
+              </button>
+              <a class="agent-rail__link" href="${backHref}" title="프로젝트 개요" aria-label="프로젝트 개요">
+                ${railSvg('<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>')}
               </a>
-              <div class="agent-tabs" role="tablist" aria-label="작업 영역">
-                <button type="button" class="agent-tab${onPreview ? " agent-tab--active" : ""}" role="tab" aria-selected="${onPreview}" aria-controls="agentPanelPreview" id="agentTabPreview" data-agent-tab="preview">미리보기</button>
-                <button type="button" class="agent-tab${onCode ? " agent-tab--active" : ""}" role="tab" aria-selected="${onCode}" aria-controls="agentPanelCode" id="agentTabCode" data-agent-tab="code">Code (Diff)</button>
-                <button type="button" class="agent-tab${onPipeline ? " agent-tab--active" : ""}" role="tab" aria-selected="${onPipeline}" aria-controls="agentPanelPipeline" id="agentTabPipeline" data-agent-tab="pipeline">Pipeline</button>
-              </div>
-              <span class="agent-branch-pill">preview branch</span>
             </div>
-
-            <div class="agent-panels">
-              <div class="agent-panel" id="agentPanelPreview" role="tabpanel" aria-labelledby="agentTabPreview" data-agent-panel="preview"${onPreview ? "" : " hidden"}>
-                <div class="agent-browser-chrome">
-                  <div class="agent-browser-chrome__dots" aria-hidden="true">
-                    <span></span><span></span><span></span>
-                  </div>
-                  <div class="agent-browser-chrome__url" title="프리뷰 환경 (데모)">sys-ai-preview-env.local</div>
-                </div>
-                <div class="agent-preview__frame agent-preview__frame--panel">
-                  ${previewIframe}
-                </div>
-                ${liveExtra}
-              </div>
-              <div class="agent-panel" id="agentPanelCode" role="tabpanel" aria-labelledby="agentTabCode" data-agent-panel="code"${onCode ? "" : " hidden"}>
-                ${codePanel}
-              </div>
-              <div class="agent-panel agent-panel--scroll" id="agentPanelPipeline" role="tabpanel" aria-labelledby="agentTabPipeline" data-agent-panel="pipeline"${onPipeline ? "" : " hidden"}>
-                <div class="agent-panel__inner">
-                  ${pipeline}
-                </div>
-              </div>
+            <div class="agent-rail__bottom">
+              <a class="agent-rail__link" href="${HASH_DASHBOARD}" title="대시보드" aria-label="대시보드">
+                ${railSvg('<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>')}
+              </a>
+              <button type="button" class="agent-rail__btn" id="agentRailHelpBtn" title="도움말" aria-label="도움말">
+                ${railSvg('<circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>')}
+              </button>
             </div>
-          </div>
+          </nav>
 
           <aside class="agent-sidebar" aria-label="SYS.AI Agent">
             <header class="agent-sidebar__head">
@@ -1798,6 +1852,28 @@ function getProjectAgentInnerHTML(p: DemoProject, activeTab: AgentWorkspaceTab):
               </div>
             </form>
           </aside>
+
+          <div class="agent-stage">
+            <div class="agent-stage__meta">
+              <span class="agent-branch-pill">preview branch</span>
+            </div>
+            <div class="agent-panels">
+              <div class="agent-panel" id="agentPanelPreview" role="tabpanel" aria-labelledby="agentTabPreview" data-agent-panel="preview"${onPreview ? "" : " hidden"}>
+                <div class="agent-preview__frame agent-preview__frame--panel">
+                  ${previewDevice}
+                </div>
+                ${liveExtra}
+              </div>
+              <div class="agent-panel" id="agentPanelCode" role="tabpanel" aria-labelledby="agentTabCode" data-agent-panel="code"${onCode ? "" : " hidden"}>
+                ${codePanel}
+              </div>
+              <div class="agent-panel agent-panel--scroll" id="agentPanelPipeline" role="tabpanel" aria-labelledby="agentTabPipeline" data-agent-panel="pipeline"${onPipeline ? "" : " hidden"}>
+                <div class="agent-panel__inner">
+                  ${pipeline}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>`
 }
@@ -1855,7 +1931,7 @@ function bindProjectAgentPage(p: DemoProject): void {
   const applyAgentWorkspaceTab = (tab: AgentWorkspaceTab): void => {
     document.querySelectorAll<HTMLButtonElement>("[data-agent-tab]").forEach((t) => {
       const on = t.dataset.agentTab === tab
-      t.classList.toggle("agent-tab--active", on)
+      t.classList.toggle("agent-rail__btn--active", on)
       t.setAttribute("aria-selected", String(on))
     })
     document.querySelectorAll<HTMLElement>("[data-agent-panel]").forEach((panel) => {
@@ -1886,8 +1962,15 @@ function bindProjectAgentPage(p: DemoProject): void {
     })
   })
 
-  document.getElementById("agentHelpBtn")?.addEventListener("click", () => {
+  const showAgentHelp = (): void => {
     window.alert("SYS.AI Agent에서는 자연어로 UI·카피·배포를 요청할 수 있습니다.\n\n미리보기: 생성 페이지 확인\nCode (Diff): 변경 파일 데모\nPipeline: CI/CD 단계 확인\n\n실제 제품에서는 이 화면이 저장소·호스팅과 실시간으로 연동됩니다.")
+  }
+
+  document.getElementById("agentHelpBtn")?.addEventListener("click", showAgentHelp)
+  document.getElementById("agentRailHelpBtn")?.addEventListener("click", showAgentHelp)
+
+  document.getElementById("agentRailFocusChat")?.addEventListener("click", () => {
+    input.focus()
   })
 
   const demoReply = (userText: string): string => {
