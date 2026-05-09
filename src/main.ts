@@ -21,6 +21,36 @@ const HASH_PROJECTS = "#/app/projects"
 const HASH_PROJECTS_CREATE = "#/app/projects/create"
 
 const STORAGE_KEY_SIDEBAR_COLLAPSED = "devely.sidebar.collapsed"
+const SESSION_KEY_PENDING_PROMPT = "devely.pendingPrompt"
+
+function readPendingPrompt(): string {
+  try {
+    return sessionStorage.getItem(SESSION_KEY_PENDING_PROMPT) ?? ""
+  } catch {
+    return ""
+  }
+}
+
+function writePendingPrompt(text: string): void {
+  try {
+    if (text) sessionStorage.setItem(SESSION_KEY_PENDING_PROMPT, text)
+    else sessionStorage.removeItem(SESSION_KEY_PENDING_PROMPT)
+  } catch {
+    /* ignore */
+  }
+}
+
+function suggestProjectSlugFromPrompt(text: string): string {
+  const ascii = text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .slice(0, 40)
+  if (ascii.length >= 3) return ascii
+  return `task-${new Date().toISOString().slice(0, 10)}`
+}
 
 function readSidebarCollapsed(): boolean {
   try {
@@ -180,7 +210,7 @@ function getHttpErrorPageHTML(code: 404 | 400, embeddedInApp: boolean): string {
         <div class="err-page__embed-art">${hero}</div>
         <p class="err-page__lead err-page__lead--embed">${line1}<br />${line2}</p>
         <a class="err-page__cta-main" href="#/">메인 페이지로 이동</a>
-        <a class="err-page__cta-sub" href="${HASH_DASHBOARD}">대시보드로 이동</a>
+        <a class="err-page__cta-sub" href="${HASH_DASHBOARD}">작업으로 이동</a>
       </div>
     </div>`
   }
@@ -206,12 +236,12 @@ function getHttpErrorPageHTML(code: 404 | 400, embeddedInApp: boolean): string {
         <div class="err-page__hero-art">${hero}</div>
         <p class="err-page__lead">${line1}<br />${line2}</p>
         <a class="err-page__cta-main" href="#/">메인 페이지로 이동</a>
-        <a class="err-page__cta-sub" href="${HASH_DASHBOARD}">대시보드로 이동</a>
+        <a class="err-page__cta-sub" href="${HASH_DASHBOARD}">작업으로 이동</a>
       </main>
       <footer class="err-page__site-footer">
         <nav class="err-page__footer-grid" aria-label="바로가기">
           <a class="err-page__footer-cell err-page__footer-cell--active" href="#/">랜딩</a>
-          <a class="err-page__footer-cell" href="${HASH_DASHBOARD}">대시보드</a>
+          <a class="err-page__footer-cell" href="${HASH_DASHBOARD}">작업</a>
           <a class="err-page__footer-cell" href="${HASH_PROJECTS}">프로젝트</a>
           <a class="err-page__footer-cell" href="${HASH_DASHBOARD}">템플릿</a>
           <a class="err-page__footer-cell" href="#/">시작하기</a>
@@ -264,11 +294,11 @@ function getAppLayoutHTML(active: "dashboard" | "projects", mainInnerHTML: strin
         </button>
       </div>
       <nav class="app-sidebar__nav">
-        <a class="app-sidebar__link${dashActive}" href="${HASH_DASHBOARD}" title="대시보드">
+        <a class="app-sidebar__link${dashActive}" href="${HASH_DASHBOARD}" title="작업">
           <span class="app-sidebar__icon" aria-hidden="true">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
           </span>
-          <span class="app-sidebar__label-text">대시보드</span>
+          <span class="app-sidebar__label-text">작업</span>
         </a>
         <a class="app-sidebar__link${projActive}" href="${HASH_PROJECTS}" title="프로젝트">
           <span class="app-sidebar__icon" aria-hidden="true">
@@ -317,101 +347,122 @@ function getLandingHTML(): string {
   return LANDING_PAGE_HTML
 }
 
-const DASHBOARD_INNER = `
-      <div class="wb-topbar">
-        <div class="wb-topbar__search">
-          <span aria-hidden="true">⌕</span>
-          <input type="search" placeholder="사이트, 프롬프트, 도메인 검색..." aria-label="검색" />
-        </div>
-        <div class="wb-topbar__actions">
-          <button type="button" class="app-btn app-btn--ghost">템플릿 보기</button>
-          <button type="button" class="app-btn app-btn--primary">+ 새 사이트 생성</button>
-        </div>
-      </div>
+function getDashboardInnerHTML(): string {
+  const ic = (path: string, label: string, extra = "") =>
+    `<button type="button" class="db__icon-btn${extra ? ` ${extra}` : ""}" title="${label}" aria-label="${label}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg></button>`
 
-      <header class="wb-header">
-        <h1>안녕하세요, Devely 팀</h1>
-        <p>AI로 웹사이트를 생성하고, 수정하고, 배포까지 한 번에 관리하세요.</p>
-      </header>
+  const quick = (path: string, label: string) =>
+    `<button type="button" class="db__quick-btn" data-db-quick="${escapeHtml(label)}"><span class="db__quick-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg></span>${escapeHtml(label)}</button>`
 
-      <section class="wb-kpis">
-        <article class="wb-kpi">
-          <p class="wb-kpi__label">이번 주 생성</p>
-          <p class="wb-kpi__value">18개</p>
-          <p class="wb-kpi__meta">+5 지난주 대비</p>
-        </article>
-        <article class="wb-kpi">
-          <p class="wb-kpi__label">배포 완료</p>
-          <p class="wb-kpi__value">42개</p>
-          <p class="wb-kpi__meta">성공률 97.8%</p>
-        </article>
-        <article class="wb-kpi">
-          <p class="wb-kpi__label">활성 도메인</p>
-          <p class="wb-kpi__value">27개</p>
-          <p class="wb-kpi__meta">연결 필요 3개</p>
-        </article>
-        <article class="wb-kpi">
-          <p class="wb-kpi__label">팀 크레딧</p>
-          <p class="wb-kpi__value">1,240</p>
-          <p class="wb-kpi__meta">이번 달 잔여</p>
-        </article>
-      </section>
-
-      <div class="wb-grid wb-grid--hero">
-        <section class="wb-card">
-          <div class="wb-card__head">
-            <h2>AI 생성 파이프라인</h2>
-            <button type="button" class="app-btn app-btn--ghost app-btn--sm">상세</button>
+  return `
+      <div class="db">
+        <header class="db__topbar">
+          <button type="button" class="db__brand" id="dbBrandBtn">
+            <span class="db__brand-name">Devely 1.0 Lite</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="db__topbar-end">
+            ${ic('<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>', "알림")}
+            <span class="db__credits" title="잔여 크레딧">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15 8.5 22 9.3 17 14 18.5 21 12 17.5 5.5 21 7 14 2 9.3 9 8.5 12 2"/></svg>
+              <span class="db__credits-num">1,273</span>
+            </span>
+            <span class="db__avatar" aria-label="내 계정">T</span>
           </div>
-          <div class="wb-pipeline">
-            <article><strong>프롬프트 분석</strong><span>자연어 의도 파싱 · 브랜드 톤 추출</span></article>
-            <article><strong>레이아웃 조합</strong><span>섹션 자동 배치 · 반응형 컴포넌트</span></article>
-            <article><strong>콘텐츠/스타일 생성</strong><span>카피라이팅 · 컬러/타이포 시스템</span></article>
-            <article><strong>빌드/배포</strong><span>정적 빌드 · CDN 업로드 · 도메인 연결</span></article>
-          </div>
-        </section>
+        </header>
 
-        <section class="wb-card">
-          <div class="wb-card__head"><h2>생성 큐 상태</h2></div>
-          <ul class="wb-queue">
-            <li><span>브랜드 랜딩 리뉴얼</span><em class="is-run">빌드 중 72%</em></li>
-            <li><span>신제품 소개 페이지</span><em class="is-wait">대기 중</em></li>
-            <li><span>이벤트 캠페인 마이크로사이트</span><em class="is-ok">배포 완료</em></li>
-          </ul>
-        </section>
-      </div>
+        <main class="db__stage">
+          <div class="db__plan-toggle" role="tablist" aria-label="플랜 선택">
+            <button type="button" class="db__plan-tab" role="tab" aria-selected="false" data-db-plan="free">무료 플랜</button>
+            <span class="db__plan-divider" aria-hidden="true"></span>
+            <button type="button" class="db__plan-tab db__plan-tab--active" role="tab" aria-selected="true" data-db-plan="trial">무료 체험 시작</button>
+          </div>
 
-      <div class="wb-grid wb-grid--main">
-        <section class="wb-card">
-          <div class="wb-card__head"><h2>최근 생성 사이트</h2></div>
-          <div class="wb-table-wrap">
-            <table class="wb-table">
-              <thead>
-                <tr><th>사이트</th><th>타입</th><th>상태</th><th>수정</th><th></th></tr>
-              </thead>
-              <tbody>
-                <tr><td>cafe-launch-2026</td><td>랜딩</td><td><span class="wb-badge wb-badge--ok">배포됨</span></td><td>오늘 10:24</td><td><button type="button">열기</button></td></tr>
-                <tr><td>portfolio-minimal</td><td>포트폴리오</td><td><span class="wb-badge wb-badge--run">생성 중</span></td><td>오늘 09:42</td><td><button type="button">보기</button></td></tr>
-                <tr><td>saas-pricing-v3</td><td>비즈니스</td><td><span class="wb-badge wb-badge--wait">검수 대기</span></td><td>어제</td><td><button type="button">열기</button></td></tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
+          <h1 class="db__title">무엇을 도와드릴까요?</h1>
 
-        <section class="wb-card">
-          <div class="wb-card__head"><h2>빠른 실행</h2></div>
-          <div class="wb-actions">
-            <button type="button">프롬프트로 랜딩 만들기</button>
-            <button type="button">기존 URL 가져와 리디자인</button>
-            <button type="button">AI 카피 자동 생성</button>
-            <button type="button">도메인/SSL 연결</button>
+          <form class="db__compose" id="dbComposeForm" autocomplete="off">
+            <label class="agent-visually-hidden" for="dbComposeInput">프롬프트 입력</label>
+            <textarea id="dbComposeInput" class="db__compose-input" rows="2" placeholder="작업을 할당하거나 무엇이든 질문하세요"></textarea>
+            <div class="db__compose-bar">
+              <div class="db__compose-bar-side">
+                ${ic('<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>', "추가", "db__icon-btn--ghost")}
+                ${ic('<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>', "도구", "db__icon-btn--ghost")}
+                <button type="button" class="db__compose-pill" data-db-pill="cloud">
+                  <span class="db__compose-pill-icon" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
+                  <span>클라우드 컴퓨터</span>
+                  <span class="db__compose-pill-badge">새로운</span>
+                </button>
+              </div>
+              <div class="db__compose-bar-side db__compose-bar-side--end">
+                ${ic('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>', "대화 이력", "db__icon-btn--ghost")}
+                ${ic('<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>', "음성 입력", "db__icon-btn--ghost")}
+                <button type="submit" class="db__compose-send" id="dbComposeSend" aria-label="보내기">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                </button>
+              </div>
+            </div>
+          </form>
+
+          <div class="db__quick">
+            ${quick('<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>', "슬라이드 제작")}
+            ${quick('<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>', "웹사이트 구축")}
+            ${quick('<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="2" y1="20" x2="22" y2="20"/>', "데스크톱 앱 개발")}
+            ${quick('<circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c3.31 0 6-2.69 6-6 0-4.97-4.5-9-10-9z"/>', "디자인")}
+            <button type="button" class="db__quick-btn db__quick-btn--more">더보기</button>
           </div>
-          <div class="wb-note">
-            <strong>오늘 추천:</strong> "여름 프로모션용 카운트다운 랜딩" 템플릿으로 3분 내 초안 생성
-          </div>
-        </section>
+
+          <p class="db__hint">데모 입력입니다. 실제 채팅과 작업 큐는 GitHub·호스팅 연동 후 활성화됩니다.</p>
+        </main>
       </div>
 `
+}
+
+function bindDashboardPage(): void {
+  const form = document.getElementById("dbComposeForm") as HTMLFormElement | null
+  const input = document.getElementById("dbComposeInput") as HTMLTextAreaElement | null
+  if (!form || !input) return
+
+  const autosize = (): void => {
+    input.style.height = "auto"
+    input.style.height = `${Math.min(input.scrollHeight, 200)}px`
+  }
+  input.addEventListener("input", autosize)
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault()
+      form.requestSubmit()
+    }
+  })
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault()
+    const v = input.value.trim()
+    writePendingPrompt(v)
+    window.location.hash = HASH_PROJECTS_CREATE
+  })
+
+  document.querySelectorAll<HTMLButtonElement>("[data-db-quick]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const label = btn.dataset.dbQuick
+      if (!label) return
+      input.value = `${label}: `
+      autosize()
+      input.focus()
+      input.setSelectionRange(input.value.length, input.value.length)
+    })
+  })
+
+  document.querySelectorAll<HTMLButtonElement>("[data-db-plan]").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll<HTMLButtonElement>("[data-db-plan]").forEach((t) => {
+        const on = t === tab
+        t.classList.toggle("db__plan-tab--active", on)
+        t.setAttribute("aria-selected", String(on))
+      })
+    })
+  })
+}
 
 type DemoProjectStatus = "pre" | "deploying" | "done" | "failed"
 type DemoProjectKind = "landing" | "portfolio" | "business"
@@ -703,6 +754,10 @@ function getProjectsInnerHTML(): string {
               <p class="proj-modal__eyebrow">워크스페이스</p>
               <h2 id="projNewModalTitle" class="proj-modal__title proj-modal__title--new">새 프로젝트 생성</h2>
               <p class="proj-modal__lede">템플릿을 고르면 미리보기와 에이전트 대화까지 한 흐름으로 이어집니다.</p>
+              <div class="proj-modal__prompt" id="projNewPromptHint" hidden>
+                <span class="proj-modal__prompt-label" aria-hidden="true">프롬프트</span>
+                <span class="proj-modal__prompt-text" id="projNewPromptHintText"></span>
+              </div>
             </div>
             <button type="button" class="proj-modal__close" id="projNewClose" aria-label="닫기">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
@@ -1819,8 +1874,8 @@ function getProjectAgentInnerHTML(p: DemoProject, activeTab: AgentWorkspaceTab):
               </a>
             </div>
             <div class="agent-rail__bottom">
-              <a class="agent-rail__link" href="${HASH_DASHBOARD}" title="대시보드" aria-label="대시보드">
-                ${railSvg('<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>')}
+              <a class="agent-rail__link" href="${HASH_DASHBOARD}" title="작업" aria-label="작업">
+                ${railSvg('<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>')}
               </a>
               <button type="button" class="agent-rail__btn" id="agentRailHelpBtn" title="도움말" aria-label="도움말">
                 ${railSvg('<circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>')}
@@ -2239,15 +2294,35 @@ function bindProjectListPage(openCreateFromRoute = false): void {
     window.setTimeout(updateTemplateSliderNav, smooth ? 320 : 40)
   }
 
+  const applyPendingPromptToModal = (): void => {
+    const hint = document.getElementById("projNewPromptHint")
+    const hintText = document.getElementById("projNewPromptHintText")
+    const prompt = readPendingPrompt()
+    if (hint && hintText) {
+      if (prompt) {
+        hintText.textContent = prompt
+        hint.hidden = false
+      } else {
+        hintText.textContent = ""
+        hint.hidden = true
+      }
+    }
+    if (prompt && newNameInput && !newNameInput.value) {
+      newNameInput.value = suggestProjectSlugFromPrompt(prompt)
+    }
+  }
+
   const openNewModal = (): void => {
     if (!newModal || !newForm) return
     landingThemePreviewHover = null
     newModal.hidden = false
     newForm.reset()
     syncProjNewLandingThemes()
+    applyPendingPromptToModal()
     window.setTimeout(() => {
       scrollTemplateCardIntoView(false)
       newNameInput?.focus()
+      newNameInput?.select()
     }, 30)
   }
   const closeNewModal = (): void => {
@@ -2266,15 +2341,13 @@ function bindProjectListPage(openCreateFromRoute = false): void {
     pushCreateModalHash()
     openNewModal()
   })
-  document.getElementById("projNewCancel")?.addEventListener("click", () => {
+  const dismissCreateModal = (): void => {
+    writePendingPrompt("")
     closeNewModal()
-  })
-  document.getElementById("projNewClose")?.addEventListener("click", () => {
-    closeNewModal()
-  })
-  document.getElementById("projNewBackdrop")?.addEventListener("click", () => {
-    closeNewModal()
-  })
+  }
+  document.getElementById("projNewCancel")?.addEventListener("click", dismissCreateModal)
+  document.getElementById("projNewClose")?.addEventListener("click", dismissCreateModal)
+  document.getElementById("projNewBackdrop")?.addEventListener("click", dismissCreateModal)
   newForm?.addEventListener("change", (e) => {
     const t = e.target as HTMLElement
     if (t.matches('input[name="template"]')) {
@@ -2360,7 +2433,10 @@ function bindProjectListPage(openCreateFromRoute = false): void {
     }
     const templateLabel = template === "portfolio" ? "포트폴리오" : template === "landing" ? "랜딩 페이지" : template === "business" ? "비즈니스" : template === "blog" ? "블로그 · 문서" : "빈 프로젝트"
     const themeLine = template === "landing" ? `\n랜딩 테마: ${landingTheme === "local" ? "로컬 비즈니스" : "SaaS 프로덕트"}` : ""
-    window.alert(`「${name}」 프로젝트를 템플릿으로 생성합니다. (데모)\n\n템플릿: ${templateLabel}${themeLine}\n\n실제 제품에서는 저장소 생성 후 에이전트 화면으로 이동합니다.`)
+    const prompt = readPendingPrompt()
+    const promptLine = prompt ? `\n프롬프트: ${prompt}` : ""
+    window.alert(`「${name}」 프로젝트를 템플릿으로 생성합니다. (데모)\n\n템플릿: ${templateLabel}${themeLine}${promptLine}\n\n실제 제품에서는 저장소 생성 후 에이전트 화면으로 이동합니다.`)
+    writePendingPrompt("")
     closeNewModal()
   })
 
@@ -2569,8 +2645,9 @@ function mountApp(): void {
     inner = p ? getProjectDetailInnerHTML(p) : getProjectNotFoundInnerHTML()
     title = p ? `${p.slug} — AI Web Builder` : "프로젝트 — AI Web Builder"
   } else {
-    inner = DASHBOARD_INNER
-    title = "대시보드 — AI Web Builder"
+    inner = getDashboardInnerHTML()
+    mainExtraClass = "app-main--dashboard"
+    title = "작업 — AI Web Builder"
   }
 
   root.innerHTML = getAppLayoutHTML(sidebar, inner, mainExtraClass, omitSidebar, omitSidebar ? false : readSidebarCollapsed())
@@ -2588,6 +2665,8 @@ function mountApp(): void {
   } else if (route.kind === "project") {
     const proj = DEMO_PROJECTS.find((x) => x.slug === route.slug)
     if (proj) bindProjectDetailPage(proj)
+  } else if (route.kind === "dashboard") {
+    bindDashboardPage()
   }
 }
 
