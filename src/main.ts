@@ -468,6 +468,487 @@ function getAccountPanelHTML(): string {
     </section>`
 }
 
+function getBillingPanelHTML(): string {
+  const icoSpark = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.6 4.5L18 9l-4.4 1.5L12 15l-1.6-4.5L6 9l4.4-1.5z"/></svg>`
+  const icoMsg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>`
+  const icoTime = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>`
+
+  const progressRow = (icon: string, name: string, used: string, total: string, pct: number): string => `
+    <div class="set-progress-row">
+      <div class="set-progress-meta">
+        <span class="set-progress-name"><span class="set-progress-ico" aria-hidden="true">${icon}</span>${name}</span>
+        <span class="set-progress-value">${used} <span class="set-progress-total">/ ${total}</span></span>
+      </div>
+      <div class="set-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}">
+        <div class="set-progress__bar" style="width: ${pct}%"></div>
+      </div>
+    </div>`
+
+  const tableRow = (date: string, item: string, amount: string, status: "paid" | "pending"): string => `
+    <tr>
+      <td>${date}</td>
+      <td>${item}</td>
+      <td class="set-table__num">${amount}</td>
+      <td><span class="set-badge ${status === "paid" ? "set-badge--ok" : "set-badge--warn"}">${status === "paid" ? "결제 완료" : "결제 예정"}</span></td>
+    </tr>`
+
+  return `
+    <section class="settings-modal__panel" data-settings-panel="billing" hidden>
+      <header class="settings-modal__panel-head">
+        <h2 class="settings-modal__title">사용량 및 청구</h2>
+      </header>
+
+      <div class="settings-modal__section">
+        <p class="settings-modal__section-title">현재 플랜</p>
+        <div class="set-plan-card">
+          <div class="set-plan-card__main">
+            <p class="set-plan-card__tag">무료</p>
+            <p class="set-plan-card__price">₩0<span>/월</span></p>
+            <p class="set-plan-card__desc">월 1,000 크레딧 · 매일 300 리프레시 · 1개 프로젝트</p>
+          </div>
+          <button type="button" class="acc-panel__upgrade" data-acc-upgrade>Pro로 업그레이드</button>
+        </div>
+      </div>
+
+      <div class="settings-modal__section">
+        <p class="settings-modal__section-title">이번 달 사용량</p>
+        <div class="set-progress-stack">
+          ${progressRow(icoSpark, "크레딧", "640", "1,000", 64)}
+          ${progressRow(icoMsg, "메시지", "182", "500", 36)}
+          ${progressRow(icoTime, "에이전트 실행 시간", "1.2시간", "5시간", 24)}
+        </div>
+        <p class="set-progress-note">사용량은 매월 1일 00:00에 초기화됩니다.</p>
+      </div>
+
+      <div class="settings-modal__section">
+        <p class="settings-modal__section-title">결제 내역</p>
+        <div class="set-table-wrap">
+          <table class="set-table">
+            <thead>
+              <tr>
+                <th>날짜</th>
+                <th>항목</th>
+                <th>금액</th>
+                <th>상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${tableRow("2026.05.01", "Free 플랜 갱신", "₩0", "paid")}
+              ${tableRow("2026.04.01", "Free 플랜 갱신", "₩0", "paid")}
+              ${tableRow("2026.03.18", "크레딧 추가 구매 (500)", "₩4,900", "paid")}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>`
+}
+
+function getPersonalizationPanelHTML(): string {
+  const chip = (group: string, value: string, label: string, active = false): string =>
+    `<button type="button" class="set-chip${active ? " set-chip--active" : ""}" data-chip-group="${group}" data-chip-value="${value}">${label}</button>`
+
+  const toolRow = (key: string, name: string, desc: string, on: boolean): string => `
+    <label class="set-checkrow">
+      <input type="checkbox" class="set-checkrow__input" data-pref-tool="${key}" ${on ? "checked" : ""} />
+      <span class="set-checkrow__check" aria-hidden="true"></span>
+      <span class="set-checkrow__meta">
+        <span class="set-checkrow__name">${name}</span>
+        <span class="set-checkrow__desc">${desc}</span>
+      </span>
+    </label>`
+
+  return `
+    <section class="settings-modal__panel" data-settings-panel="personalization" hidden>
+      <header class="settings-modal__panel-head">
+        <h2 class="settings-modal__title">개인화</h2>
+      </header>
+
+      <div class="settings-modal__section">
+        <p class="settings-modal__section-title">표시 이름</p>
+        <div class="settings-modal__field">
+          <label class="settings-modal__label" for="prefDisplayName">에이전트가 사용자를 부를 때 사용할 이름</label>
+          <input id="prefDisplayName" class="acc-panel__input" type="text" value="taewoo" autocomplete="off" style="max-width:320px" />
+        </div>
+      </div>
+
+      <div class="settings-modal__section">
+        <p class="settings-modal__section-title">응답 스타일</p>
+        <div class="settings-modal__field">
+          <span class="settings-modal__label">응답 길이</span>
+          <div class="set-chips" data-chip-row="length">
+            ${chip("length", "short", "짧게")}
+            ${chip("length", "balanced", "보통", true)}
+            ${chip("length", "long", "길게")}
+          </div>
+        </div>
+        <div class="settings-modal__field">
+          <span class="settings-modal__label">톤</span>
+          <div class="set-chips" data-chip-row="tone">
+            ${chip("tone", "polite", "정중", true)}
+            ${chip("tone", "friendly", "친근")}
+            ${chip("tone", "expert", "전문가")}
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-modal__section">
+        <p class="settings-modal__section-title">자주 사용하는 도구</p>
+        <div class="set-checkrows">
+          ${toolRow("preview", "미리보기", "프로젝트를 자동으로 렌더링하고 변경을 즉시 반영합니다.", true)}
+          ${toolRow("code", "코드 편집기", "에이전트가 직접 코드를 수정할 수 있도록 허용합니다.", true)}
+          ${toolRow("browser", "클라우드 브라우저", "외부 URL을 가져와 컨텍스트로 사용합니다.", false)}
+          ${toolRow("shell", "셸 실행", "패키지 설치·빌드를 위한 셸을 실행합니다.", false)}
+        </div>
+      </div>
+    </section>`
+}
+
+function getMailPanelHTML(): string {
+  const icoG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>`
+
+  return `
+    <section class="settings-modal__panel" data-settings-panel="mail" hidden>
+      <header class="settings-modal__panel-head">
+        <h2 class="settings-modal__title">Mail Manus</h2>
+      </header>
+
+      <div class="settings-modal__section">
+        <p class="settings-modal__section-title">연결된 메일함</p>
+        <div class="set-list">
+          <div class="set-list__item">
+            <span class="set-list__icon set-list__icon--google" aria-hidden="true">${icoG}</span>
+            <div class="set-list__meta">
+              <p class="set-list__name">b01023320838@gmail.com</p>
+              <p class="set-list__desc">Gmail · 마지막 동기화 5분 전</p>
+            </div>
+            <button type="button" class="acc-panel__btn" data-mail-disconnect>연결 해제</button>
+          </div>
+        </div>
+        <button type="button" class="acc-panel__btn set-add-btn" data-mail-connect>+ 메일 계정 추가</button>
+      </div>
+
+      <div class="settings-modal__section">
+        <p class="settings-modal__section-title">자동 회신</p>
+        ${getToggleRowHTML("mailAutoReply", "자동 회신 초안 생성", "받은 메일을 읽고 답장 초안을 자동으로 작성합니다.", true)}
+        <div class="settings-modal__field">
+          <label class="settings-modal__label" for="mailTone">회신 톤</label>
+          <div class="settings-modal__select" style="max-width:240px">
+            <select id="mailTone" class="settings-modal__select-input">
+              <option>정중</option>
+              <option>친근</option>
+              <option>비즈니스</option>
+            </select>
+            <span class="settings-modal__select-chev" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-modal__section">
+        <p class="settings-modal__section-title">서명</p>
+        <textarea class="set-textarea" id="mailSignature" rows="3" placeholder="이메일 끝에 추가될 서명">감사합니다,
+taewoo kim</textarea>
+      </div>
+    </section>`
+}
+
+function getDataPanelHTML(): string {
+  const chip = (group: string, value: string, label: string, active = false): string =>
+    `<button type="button" class="set-chip${active ? " set-chip--active" : ""}" data-chip-group="${group}" data-chip-value="${value}">${label}</button>`
+
+  return `
+    <section class="settings-modal__panel" data-settings-panel="data" hidden>
+      <header class="settings-modal__panel-head">
+        <h2 class="settings-modal__title">데이터 제어</h2>
+      </header>
+
+      <div class="settings-modal__section">
+        <p class="settings-modal__section-title">학습 사용</p>
+        ${getToggleRowHTML("dataTrain", "대화로 모델 개선", "내 대화·피드백을 익명화하여 Devely 모델 학습에 사용합니다.", false)}
+        ${getToggleRowHTML("dataAnalytics", "익명 사용 통계", "버그 진단과 기능 개선을 위해 익명 이벤트를 수집합니다.", true)}
+      </div>
+
+      <div class="settings-modal__section">
+        <p class="settings-modal__section-title">대화 보존</p>
+        <div class="settings-modal__field">
+          <span class="settings-modal__label">보존 기간</span>
+          <div class="set-chips" data-chip-row="retention">
+            ${chip("retention", "30", "30일")}
+            ${chip("retention", "90", "90일", true)}
+            ${chip("retention", "forever", "무기한")}
+          </div>
+        </div>
+        <p class="set-progress-note">기간이 지나면 대화는 영구 삭제됩니다.</p>
+      </div>
+
+      <div class="settings-modal__section">
+        <p class="settings-modal__section-title">내 데이터</p>
+        <div class="set-list">
+          <div class="set-list__item">
+            <div class="set-list__meta">
+              <p class="set-list__name">데이터 내보내기</p>
+              <p class="set-list__desc">모든 대화·프로젝트·설정을 JSON으로 받습니다.</p>
+            </div>
+            <button type="button" class="acc-panel__btn" data-data-export>내보내기</button>
+          </div>
+          <div class="set-list__item set-list__item--danger">
+            <div class="set-list__meta">
+              <p class="set-list__name">모든 대화 삭제</p>
+              <p class="set-list__desc">계정은 유지하고 대화 내역만 영구 삭제합니다.</p>
+            </div>
+            <button type="button" class="acc-panel__btn acc-panel__btn--danger" data-data-purge>모두 삭제</button>
+          </div>
+        </div>
+      </div>
+    </section>`
+}
+
+function getComputerPanelHTML(): string {
+  const icoMac = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="16" x2="12" y2="20"/></svg>`
+  const icoIpad = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><line x1="12" y1="18" x2="12" y2="18.01"/></svg>`
+  const icoFolder = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`
+
+  return `
+    <section class="settings-modal__panel" data-settings-panel="computer" hidden>
+      <header class="settings-modal__panel-head">
+        <h2 class="settings-modal__title">My Computer</h2>
+      </header>
+
+      <div class="settings-modal__section">
+        <p class="settings-modal__section-title">연결된 기기</p>
+        <div class="set-list">
+          <div class="set-list__item">
+            <span class="set-list__icon" aria-hidden="true">${icoMac}</span>
+            <div class="set-list__meta">
+              <p class="set-list__name">gimtaeus-MacBook-Pro <span class="set-badge set-badge--ok">현재 기기</span></p>
+              <p class="set-list__desc">macOS 24.6 · 마지막 활동 방금 전</p>
+            </div>
+            <button type="button" class="acc-panel__btn" data-comp-disconnect>해제</button>
+          </div>
+          <div class="set-list__item">
+            <span class="set-list__icon" aria-hidden="true">${icoIpad}</span>
+            <div class="set-list__meta">
+              <p class="set-list__name">taewoo의 iPad</p>
+              <p class="set-list__desc">iPadOS 18 · 마지막 활동 2일 전</p>
+            </div>
+            <button type="button" class="acc-panel__btn" data-comp-disconnect>해제</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-modal__section">
+        <p class="settings-modal__section-title">파일 접근 권한</p>
+        ${getToggleRowHTML("compDocs", "문서", "문서 폴더의 파일을 읽고 첨부합니다.", true)}
+        ${getToggleRowHTML("compDownloads", "다운로드", "다운로드 폴더 접근을 허용합니다.", true)}
+        ${getToggleRowHTML("compDesktop", "데스크톱", "데스크톱 폴더에 직접 파일을 저장합니다.", false)}
+      </div>
+
+      <div class="settings-modal__section">
+        <p class="settings-modal__section-title">동기화 폴더</p>
+        <div class="set-row">
+          <span class="set-row__icon" aria-hidden="true">${icoFolder}</span>
+          <code class="set-row__code">~/Documents/Devely</code>
+          <button type="button" class="acc-panel__btn" data-comp-change-folder>변경</button>
+        </div>
+      </div>
+    </section>`
+}
+
+function getBrowserPanelHTML(): string {
+  const chip = (group: string, value: string, label: string, active = false): string =>
+    `<button type="button" class="set-chip${active ? " set-chip--active" : ""}" data-chip-group="${group}" data-chip-value="${value}">${label}</button>`
+  const icoGlobe = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3a13 13 0 0 1 0 18M12 3a13 13 0 0 0 0 18"/></svg>`
+
+  return `
+    <section class="settings-modal__panel" data-settings-panel="browser" hidden>
+      <header class="settings-modal__panel-head">
+        <h2 class="settings-modal__title">클라우드 브라우저</h2>
+      </header>
+
+      <div class="settings-modal__section">
+        <p class="settings-modal__section-title">활성 세션</p>
+        <div class="set-list">
+          <div class="set-list__item">
+            <span class="set-list__icon" aria-hidden="true">${icoGlobe}</span>
+            <div class="set-list__meta">
+              <p class="set-list__name">vercel.com</p>
+              <p class="set-list__desc">로그인 유지 · 마지막 활동 12분 전</p>
+            </div>
+            <button type="button" class="acc-panel__btn" data-browser-end>종료</button>
+          </div>
+          <div class="set-list__item">
+            <span class="set-list__icon" aria-hidden="true">${icoGlobe}</span>
+            <div class="set-list__meta">
+              <p class="set-list__name">notion.so</p>
+              <p class="set-list__desc">로그인 유지 · 마지막 활동 1시간 전</p>
+            </div>
+            <button type="button" class="acc-panel__btn" data-browser-end>종료</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-modal__section">
+        <p class="settings-modal__section-title">쿠키 / 캐시</p>
+        ${getToggleRowHTML("browserAutoClean", "세션 종료 시 자동 정리", "세션이 종료되면 쿠키·캐시를 모두 비웁니다.", true)}
+        <div class="settings-modal__field">
+          <label class="settings-modal__label" for="browserClean">정리 주기</label>
+          <div class="settings-modal__select" style="max-width:200px">
+            <select id="browserClean" class="settings-modal__select-input">
+              <option>매일</option>
+              <option>매주</option>
+              <option>매월</option>
+            </select>
+            <span class="settings-modal__select-chev" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-modal__section">
+        <p class="settings-modal__section-title">기본 엔진</p>
+        <div class="set-chips" data-chip-row="engine">
+          ${chip("engine", "chromium", "Chromium", true)}
+          ${chip("engine", "firefox", "Firefox")}
+          ${chip("engine", "webkit", "WebKit")}
+        </div>
+      </div>
+    </section>`
+}
+
+function getSkillsPanelHTML(): string {
+  const skillRow = (key: string, name: string, desc: string, on: boolean): string => `
+    <div class="set-list__item">
+      <div class="set-list__icon set-list__icon--accent" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="set-list__meta">
+        <p class="set-list__name">${name}</p>
+        <p class="set-list__desc">${desc}</p>
+      </div>
+      <button type="button" class="settings-modal__switch${on ? " settings-modal__switch--on" : ""}" data-settings-toggle="skill_${key}" aria-pressed="${on ? "true" : "false"}" aria-label="${name} 사용">
+        <span class="settings-modal__switch-thumb"></span>
+      </button>
+    </div>`
+
+  return `
+    <section class="settings-modal__panel" data-settings-panel="skills" hidden>
+      <header class="settings-modal__panel-head">
+        <h2 class="settings-modal__title">스킬</h2>
+        <button type="button" class="acc-panel__upgrade" data-skill-new>+ 새 스킬</button>
+      </header>
+
+      <div class="settings-modal__section">
+        <p class="settings-modal__section-title">활성화된 스킬</p>
+        <div class="set-list">
+          ${skillRow("vercelDeploy", "Vercel 배포", "main 브랜치 푸시를 감지해 자동으로 배포합니다.", true)}
+          ${skillRow("a11yReview", "접근성 리뷰", "WCAG 기준에 따라 페이지를 점검하고 보고서를 만듭니다.", true)}
+          ${skillRow("seoBrief", "SEO 브리프", "타깃 키워드 기반으로 메타데이터와 헤딩 트리를 추천합니다.", false)}
+          ${skillRow("designToken", "디자인 토큰 동기화", "Figma 변수와 코드 토큰을 양방향 동기화합니다.", false)}
+        </div>
+      </div>
+    </section>`
+}
+
+function getConnectorsPanelHTML(): string {
+  const card = (key: string, name: string, desc: string, icon: string, connected: boolean): string => `
+    <div class="set-card-tile${connected ? " set-card-tile--on" : ""}">
+      <div class="set-card-tile__head">
+        <span class="set-card-tile__icon" aria-hidden="true">${icon}</span>
+        ${connected ? `<span class="set-badge set-badge--ok">연결됨</span>` : ""}
+      </div>
+      <p class="set-card-tile__name">${name}</p>
+      <p class="set-card-tile__desc">${desc}</p>
+      <button type="button" class="acc-panel__btn set-card-tile__btn" data-connector="${key}">${connected ? "관리" : "연결"}</button>
+    </div>`
+
+  const icoSlack = `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="3" y="10" width="6" height="2.5" rx="1.25"/><rect x="10" y="3" width="2.5" height="6" rx="1.25"/><rect x="15" y="11.5" width="6" height="2.5" rx="1.25"/><rect x="11.5" y="15" width="2.5" height="6" rx="1.25"/></svg>`
+  const icoNotion = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9l6 6M9 15V9h6"/></svg>`
+  const icoGh = `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.113.825-.258.825-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.757-1.333-1.757-1.09-.745.083-.729.083-.729 1.205.084 1.84 1.236 1.84 1.236 1.07 1.835 2.807 1.305 3.492.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.225.694.825.576C20.565 21.795 24 17.31 24 12c0-6.63-5.37-12-12-12z"/></svg>`
+  const icoLinear = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M5 9l10 10M3 13l8 8M9 5l10 10M13 3l8 8"/></svg>`
+  const icoFigma = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M9 3h6v6H9z"/><path d="M9 9h6v6H9z"/><path d="M9 15h6"/><path d="M9 21h0a3 3 0 0 1 0-6h0"/></svg>`
+  const icoVercel = `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4l10 16H2L12 4z"/></svg>`
+
+  return `
+    <section class="settings-modal__panel" data-settings-panel="connectors" hidden>
+      <header class="settings-modal__panel-head">
+        <h2 class="settings-modal__title">커넥터</h2>
+      </header>
+
+      <div class="settings-modal__section">
+        <p class="settings-modal__section-title">팀 협업</p>
+        <div class="set-grid">
+          ${card("slack", "Slack", "에이전트 상태와 배포 결과를 채널로 전달합니다.", icoSlack, true)}
+          ${card("notion", "Notion", "워크스페이스의 페이지·DB를 컨텍스트로 사용합니다.", icoNotion, false)}
+          ${card("linear", "Linear", "이슈·프로젝트 진행 상황을 자동으로 갱신합니다.", icoLinear, false)}
+        </div>
+      </div>
+
+      <div class="settings-modal__section">
+        <p class="settings-modal__section-title">개발 / 디자인</p>
+        <div class="set-grid">
+          ${card("github", "GitHub", "저장소를 클론·푸시하고 PR 코멘트에 응답합니다.", icoGh, true)}
+          ${card("vercel", "Vercel", "프리뷰·프로덕션 배포 상태를 한 화면에서 봅니다.", icoVercel, true)}
+          ${card("figma", "Figma", "디자인 파일을 가져와 토큰·컴포넌트와 동기화합니다.", icoFigma, false)}
+        </div>
+      </div>
+    </section>`
+}
+
+function getIntegrationsPanelHTML(): string {
+  const card = (key: string, name: string, desc: string, status: "live" | "draft" | "off"): string => {
+    const badge =
+      status === "live" ? `<span class="set-badge set-badge--ok">실행 중</span>` : status === "draft" ? `<span class="set-badge set-badge--warn">초안</span>` : `<span class="set-badge set-badge--muted">중지</span>`
+    return `
+      <div class="set-list__item">
+        <div class="set-list__icon set-list__icon--accent" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a3 3 0 0 0 4.2 0l3-3a3 3 0 0 0-4.2-4.2l-1 1"/><path d="M14 11a3 3 0 0 0-4.2 0l-3 3a3 3 0 0 0 4.2 4.2l1-1"/></svg>
+        </div>
+        <div class="set-list__meta">
+          <p class="set-list__name">${name} ${badge}</p>
+          <p class="set-list__desc">${desc}</p>
+        </div>
+        <button type="button" class="acc-panel__btn" data-integration="${key}">관리</button>
+      </div>`
+  }
+
+  return `
+    <section class="settings-modal__panel" data-settings-panel="integrations" hidden>
+      <header class="settings-modal__panel-head">
+        <h2 class="settings-modal__title">통합</h2>
+        <button type="button" class="acc-panel__upgrade" data-integration-new>+ 새 워크플로</button>
+      </header>
+
+      <div class="settings-modal__section">
+        <p class="settings-modal__section-title">자동화</p>
+        <div class="set-list">
+          ${card("zapier-deploy", "Zapier · 배포 알림", "main 브랜치 머지 시 Slack과 메일로 알립니다.", "live")}
+          ${card("make-leads", "Make · 신규 리드 → Notion", "런딩에서 들어오는 폼 응답을 DB에 적재합니다.", "live")}
+          ${card("n8n-billing", "n8n · 청구서 정리", "결제 결과를 분류해 Google Sheet에 저장합니다.", "draft")}
+          ${card("pipedream-crm", "Pipedream · CRM 동기화", "고객 활동을 Salesforce에 동기화합니다.", "off")}
+        </div>
+      </div>
+
+      <div class="settings-modal__section">
+        <p class="settings-modal__section-title">웹훅</p>
+        <div class="set-row">
+          <code class="set-row__code">https://devely.app/hooks/u_310519...</code>
+          <button type="button" class="acc-panel__btn" data-int-rotate>키 재발급</button>
+        </div>
+      </div>
+    </section>`
+}
+
+function getToggleRowHTML(key: string, name: string, desc: string, on: boolean): string {
+  return `
+    <div class="settings-modal__toggle-row">
+      <div class="settings-modal__toggle-copy">
+        <p class="settings-modal__toggle-name">${name}</p>
+        <p class="settings-modal__toggle-desc">${desc}</p>
+      </div>
+      <button type="button" class="settings-modal__switch${on ? " settings-modal__switch--on" : ""}" data-settings-toggle="${key}" aria-pressed="${on ? "true" : "false"}" aria-label="${name}">
+        <span class="settings-modal__switch-thumb"></span>
+      </button>
+    </div>`
+}
+
 function getAppSettingsModalHTML(): string {
   const navItem = (tab: string, label: string, icon: string, active = false): string => `
     <button type="button" class="settings-modal__nav-item${active ? " settings-modal__nav-item--active" : ""}" data-settings-tab="${tab}">
@@ -505,17 +986,6 @@ function getAppSettingsModalHTML(): string {
         <span class="settings-modal__switch-thumb"></span>
       </button>
     </div>`
-
-  const placeholderPanel = (tab: string, title: string, desc: string): string => `
-    <section class="settings-modal__panel" data-settings-panel="${tab}" hidden>
-      <header class="settings-modal__panel-head">
-        <h2 class="settings-modal__title">${title}</h2>
-      </header>
-      <div class="settings-modal__placeholder">
-        <p>${desc}</p>
-        <p class="settings-modal__placeholder-sub">제품 연동 시 실제 옵션이 노출됩니다. (데모)</p>
-      </div>
-    </section>`
 
   return `
   <div id="appSettingsModal" class="settings-modal" hidden aria-hidden="true">
@@ -597,15 +1067,15 @@ function getAppSettingsModalHTML(): string {
           </div>
         </section>
         ${getAccountPanelHTML()}
-        ${placeholderPanel("billing", "사용량 및 청구", "현재 플랜, 사용량 통계, 청구서 내역을 확인합니다.")}
-        ${placeholderPanel("personalization", "개인화", "에이전트 톤, 응답 길이, 즐겨 쓰는 도구 등 개인 취향을 저장합니다.")}
-        ${placeholderPanel("mail", "Mail Manus", "에이전트가 메일 박스를 읽고 회신 초안을 만드는 기능을 설정합니다.")}
-        ${placeholderPanel("data", "데이터 제어", "학습 사용 동의, 대화 보존 기간, 내보내기/삭제 옵션을 관리합니다.")}
-        ${placeholderPanel("computer", "My Computer", "로컬 컴퓨터 연동, 파일 접근 권한, 동기화 폴더를 설정합니다.")}
-        ${placeholderPanel("browser", "클라우드 브라우저", "에이전트가 사용하는 가상 브라우저 세션과 쿠키를 관리합니다.")}
-        ${placeholderPanel("skills", "스킬", "사용자 정의 스킬을 등록하고 활성화 여부를 토글합니다.")}
-        ${placeholderPanel("connectors", "커넥터", "Slack, Notion, GitHub 등 외부 서비스 연결을 관리합니다.")}
-        ${placeholderPanel("integrations", "통합", "Zapier, Make 같은 자동화 도구와의 연동을 구성합니다.")}
+        ${getBillingPanelHTML()}
+        ${getPersonalizationPanelHTML()}
+        ${getMailPanelHTML()}
+        ${getDataPanelHTML()}
+        ${getComputerPanelHTML()}
+        ${getBrowserPanelHTML()}
+        ${getSkillsPanelHTML()}
+        ${getConnectorsPanelHTML()}
+        ${getIntegrationsPanelHTML()}
       </main>
     </div>
   </div>`
@@ -2970,6 +3440,47 @@ function bindAppSettingsModal(initialTab: string | null = null): void {
       btn.classList.toggle("settings-modal__switch--on", on)
       btn.setAttribute("aria-pressed", on ? "true" : "false")
     })
+  })
+
+  modal.querySelectorAll<HTMLButtonElement>("[data-chip-group]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const group = btn.dataset.chipGroup
+      if (!group) return
+      modal.querySelectorAll<HTMLButtonElement>(`[data-chip-group="${group}"]`).forEach((b) => {
+        b.classList.toggle("set-chip--active", b === btn)
+      })
+    })
+  })
+
+  modal.querySelectorAll<HTMLInputElement>(".set-checkrow__input").forEach((input) => {
+    const sync = (): void => {
+      input.closest(".set-checkrow")?.classList.toggle("set-checkrow--on", input.checked)
+    }
+    sync()
+    input.addEventListener("change", sync)
+  })
+
+  const wireDemo = (selector: string, msg: string): void => {
+    modal.querySelectorAll<HTMLButtonElement>(selector).forEach((b) => {
+      b.addEventListener("click", () => window.alert(msg))
+    })
+  }
+  wireDemo("[data-mail-connect]", "메일 계정 연결 흐름은 곧 제공됩니다. (데모)")
+  wireDemo("[data-mail-disconnect]", "이 메일 계정 연결을 해제했습니다. (데모)")
+  wireDemo("[data-data-export]", "데이터 내보내기를 준비합니다. 완료 시 메일로 알려드립니다. (데모)")
+  wireDemo("[data-comp-disconnect]", "이 기기 연결을 해제했습니다. (데모)")
+  wireDemo("[data-comp-change-folder]", "폴더 선택 다이얼로그는 곧 제공됩니다. (데모)")
+  wireDemo("[data-browser-end]", "이 세션을 종료했습니다. (데모)")
+  wireDemo("[data-skill-new]", "새 스킬 작성 화면은 곧 제공됩니다. (데모)")
+  wireDemo("[data-connector]", "이 커넥터의 상세 화면은 곧 제공됩니다. (데모)")
+  wireDemo("[data-integration]", "이 워크플로의 상세 화면은 곧 제공됩니다. (데모)")
+  wireDemo("[data-integration-new]", "새 워크플로 작성 화면은 곧 제공됩니다. (데모)")
+  wireDemo("[data-int-rotate]", "웹훅 키를 재발급했습니다. (데모)")
+
+  modal.querySelector<HTMLButtonElement>("[data-data-purge]")?.addEventListener("click", () => {
+    const ok = window.confirm("모든 대화 내역을 영구 삭제합니다. 계속하시겠습니까?")
+    if (!ok) return
+    window.alert("실제 제품에서는 비동기 잡으로 처리되며, 완료 시 알림이 전송됩니다. (데모)")
   })
 
   modal.querySelectorAll<HTMLButtonElement>("[data-acc-copy]").forEach((btn) => {
