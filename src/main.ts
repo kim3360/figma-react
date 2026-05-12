@@ -20,6 +20,32 @@ const HASH_PROJECTS = "#/app/projects"
 /** 프로젝트 목록에서 「새 프로젝트」모달 (프로젝트 slug로 `create`는 사용하지 않음) */
 const HASH_PROJECTS_CREATE = "#/app/projects/create"
 
+/** 설정 모달 탭 → URL 슬러그 매핑.  예) 계정 → `#/app/auth` */
+const SETTINGS_TAB_SLUGS: Record<string, string> = {
+  account: "auth",
+  general: "general",
+  billing: "billing",
+  personalization: "personalization",
+  mail: "mail",
+  data: "data",
+  computer: "computer",
+  browser: "browser",
+  skills: "skills",
+  connectors: "connectors",
+  integrations: "integrations",
+}
+const SETTINGS_SLUG_TO_TAB: Record<string, string> = Object.fromEntries(Object.entries(SETTINGS_TAB_SLUGS).map(([tab, slug]) => [slug, tab]))
+const SETTINGS_DEFAULT_TAB = "general"
+function getSettingsHashForTab(tab: string): string {
+  const slug = SETTINGS_TAB_SLUGS[tab]
+  return slug ? `${HASH_DASHBOARD}/${slug}` : HASH_DASHBOARD
+}
+function getSettingsTabForHash(hash: string): string | null {
+  const m = hash.match(/^#\/app\/([^/]+)$/)
+  if (!m) return null
+  return SETTINGS_SLUG_TO_TAB[m[1]] ?? null
+}
+
 const STORAGE_KEY_SIDEBAR_COLLAPSED = "devely.sidebar.collapsed"
 const SESSION_KEY_PENDING_PROMPT = "devely.pendingPrompt"
 
@@ -110,7 +136,7 @@ function isAppRoute(): boolean {
   return h === HASH_DASHBOARD || h === HASH_MAIN_ALT || h.startsWith("#/app/")
 }
 
-type AppRoute = { kind: "dashboard" } | { kind: "projects"; createModalOpen: boolean } | { kind: "project"; slug: string } | { kind: "projectAgent"; slug: string; tab: AgentWorkspaceTab } | { kind: "notFound" }
+type AppRoute = { kind: "dashboard" } | { kind: "projects"; createModalOpen: boolean } | { kind: "project"; slug: string } | { kind: "projectAgent"; slug: string; tab: AgentWorkspaceTab } | { kind: "settings"; tab: string } | { kind: "notFound" }
 
 function parseAppRoute(): AppRoute {
   const raw = window.location.hash
@@ -118,6 +144,11 @@ function parseAppRoute(): AppRoute {
 
   if (h === HASH_MAIN_ALT || h === HASH_DASHBOARD) {
     return { kind: "dashboard" }
+  }
+
+  const settingsTab = getSettingsTabForHash(h)
+  if (settingsTab) {
+    return { kind: "settings", tab: settingsTab }
   }
 
   if (raw.startsWith("#/app/") && !raw.startsWith("#/app/projects")) {
@@ -260,7 +291,7 @@ function mountStandaloneHttpError(code: 404 | 400): void {
   document.title = code === 404 ? "404 — 페이지 없음 — Devely" : "400 — 잘못된 요청 — Devely"
 }
 
-function getAppLayoutHTML(active: "dashboard" | "projects", mainInnerHTML: string, mainExtraClass = "", omitSidebar = false, sidebarCollapsed = false): string {
+function getAppLayoutHTML(active: "dashboard" | "projects" | "settings", mainInnerHTML: string, mainExtraClass = "", omitSidebar = false, sidebarCollapsed = false): string {
   const mainClasses = `app-main${mainExtraClass ? ` ${mainExtraClass}` : ""}${omitSidebar ? " app-main--full" : ""}`
   if (omitSidebar) {
     return `
@@ -272,6 +303,7 @@ function getAppLayoutHTML(active: "dashboard" | "projects", mainInnerHTML: strin
   }
   const dashActive = active === "dashboard" ? " app-sidebar__link--active" : ""
   const projActive = active === "projects" ? " app-sidebar__link--active" : ""
+  const settingsActive = active === "settings" ? " app-sidebar__link--active" : ""
   const shellCollapsedClass = sidebarCollapsed ? " app-shell--sidebar-collapsed" : ""
   const toggleExpanded = sidebarCollapsed ? "false" : "true"
   const toggleLabel = sidebarCollapsed ? "사이드바 열기" : "사이드바 닫기"
@@ -318,12 +350,12 @@ function getAppLayoutHTML(active: "dashboard" | "projects", mainInnerHTML: strin
           </span>
           <span class="app-sidebar__label-text">분석</span>
         </a>
-        <a class="app-sidebar__link" href="${HASH_DASHBOARD}" title="설정">
+        <button type="button" class="app-sidebar__link app-sidebar__link--button${settingsActive}" data-action="open-settings" title="설정">
           <span class="app-sidebar__icon" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
           </span>
           <span class="app-sidebar__label-text">설정</span>
-        </a>
+        </button>
       </nav>
       <div class="app-sidebar__section">
         <p class="app-sidebar__label">워크스페이스</p>
@@ -339,8 +371,244 @@ function getAppLayoutHTML(active: "dashboard" | "projects", mainInnerHTML: strin
     <div class="${mainClasses}">
       ${mainInnerHTML}
     </div>
+    ${omitSidebar ? "" : getAppSettingsModalHTML()}
   </div>
 `
+}
+
+function getAccountPanelHTML(): string {
+  const icoSpark = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.6 4.5L18 9l-4.4 1.5L12 15l-1.6-4.5L6 9l4.4-1.5z"/><path d="M19 16l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></svg>`
+  const icoCal = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>`
+  const icoHelpDot = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-2.5 2-2.5 3.5"/><line x1="12" y1="17" x2="12" y2="17.01"/></svg>`
+
+  return `
+    <section class="settings-modal__panel" data-settings-panel="account" hidden>
+      <header class="settings-modal__panel-head">
+        <h2 class="settings-modal__title">계정</h2>
+      </header>
+
+      <div class="acc-panel__name-row">
+        <span class="acc-panel__avatar acc-panel__avatar--lg" aria-hidden="true">t</span>
+        <div class="acc-panel__name-field">
+          <label class="acc-panel__label" for="accFullName">전체 이름</label>
+          <div class="acc-panel__input-wrap">
+            <input id="accFullName" class="acc-panel__input" type="text" value="taewoo kim" autocomplete="off" />
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-panel__plan">
+        <div class="acc-panel__plan-head">
+          <span class="acc-panel__plan-tag">무료</span>
+          <button type="button" class="acc-panel__upgrade" data-acc-upgrade>업그레이드</button>
+        </div>
+        <div class="acc-panel__plan-divider"></div>
+        <div class="acc-panel__plan-rows">
+          <div class="acc-panel__plan-row">
+            <div class="acc-panel__plan-left">
+              <span class="acc-panel__plan-icon" aria-hidden="true">${icoSpark}</span>
+              <div class="acc-panel__plan-text">
+                <p class="acc-panel__plan-name">크레딧<span class="acc-panel__help" title="현재 사용 가능한 크레딧 잔액입니다." aria-label="도움말">${icoHelpDot}</span></p>
+                <p class="acc-panel__plan-sub">무료 크레딧</p>
+              </div>
+            </div>
+            <div class="acc-panel__plan-right">
+              <p class="acc-panel__plan-value">1,000</p>
+              <p class="acc-panel__plan-value acc-panel__plan-value--sub">1,000</p>
+            </div>
+          </div>
+          <div class="acc-panel__plan-row">
+            <div class="acc-panel__plan-left">
+              <span class="acc-panel__plan-icon" aria-hidden="true">${icoCal}</span>
+              <div class="acc-panel__plan-text">
+                <p class="acc-panel__plan-name">매일 리프레시 크레딧<span class="acc-panel__help" title="매일 00:00에 자동으로 충전되는 크레딧입니다." aria-label="도움말">${icoHelpDot}</span></p>
+                <p class="acc-panel__plan-sub">매일 00:00에 300로 새로고침</p>
+              </div>
+            </div>
+            <div class="acc-panel__plan-right">
+              <p class="acc-panel__plan-value">300</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-panel__section">
+        <p class="acc-panel__section-title">개인 정보</p>
+        <div class="acc-panel__info-row">
+          <div class="acc-panel__info-block">
+            <p class="acc-panel__info-key">이메일</p>
+            <p class="acc-panel__info-val">b01023320838@gmail.com</p>
+          </div>
+        </div>
+        <div class="acc-panel__info-row">
+          <div class="acc-panel__info-block">
+            <p class="acc-panel__info-key">사용자 ID</p>
+            <p class="acc-panel__info-val" id="accUserId">310519663253788504</p>
+          </div>
+          <button type="button" class="acc-panel__copy" data-acc-copy="#accUserId">복사</button>
+        </div>
+      </div>
+
+      <div class="acc-panel__section">
+        <p class="acc-panel__section-title">계정 관리</p>
+        <div class="acc-panel__info-row">
+          <div class="acc-panel__info-block">
+            <p class="acc-panel__info-key">이 장치에서 로그아웃</p>
+          </div>
+          <button type="button" class="acc-panel__btn" data-acc-logout>로그아웃</button>
+        </div>
+        <div class="acc-panel__info-row">
+          <div class="acc-panel__info-block">
+            <p class="acc-panel__info-key">계정 삭제</p>
+            <p class="acc-panel__info-desc">이 작업은 계정 및 모든 데이터를 삭제합니다.</p>
+          </div>
+          <button type="button" class="acc-panel__btn acc-panel__btn--danger" data-acc-delete>계정 삭제</button>
+        </div>
+      </div>
+    </section>`
+}
+
+function getAppSettingsModalHTML(): string {
+  const navItem = (tab: string, label: string, icon: string, active = false): string => `
+    <button type="button" class="settings-modal__nav-item${active ? " settings-modal__nav-item--active" : ""}" data-settings-tab="${tab}">
+      <span class="settings-modal__nav-icon" aria-hidden="true">${icon}</span>
+      <span class="settings-modal__nav-text">${label}</span>
+    </button>`
+
+  const icoUser = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`
+  const icoGeneral = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="13" y2="6"/><circle cx="17" cy="6" r="2"/><line x1="4" y1="12" x2="9" y2="12"/><circle cx="13" cy="12" r="2"/><line x1="17" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="15" y2="18"/><circle cx="19" cy="18" r="2"/></svg>`
+  const icoBilling = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l1.6 4.5L18 8l-3.4 3 1 5L12 13.8 8.4 16l1-5L6 8l4.4-1.5L12 2z"/></svg>`
+  const icoPersonal = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="7" height="7" rx="1"/><rect x="14" y="4" width="7" height="7" rx="1"/><rect x="3" y="13" width="7" height="7" rx="1"/><rect x="14" y="13" width="7" height="7" rx="1"/></svg>`
+  const icoMail = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>`
+  const icoData = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>`
+  const icoMyComputer = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="16" x2="12" y2="20"/></svg>`
+  const icoCloud = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><circle cx="6.5" cy="7" r="0.6" fill="currentColor"/><circle cx="8.5" cy="7" r="0.6" fill="currentColor"/></svg>`
+  const icoSkills = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="18" r="2.5"/><line x1="8.5" y1="6" x2="15.5" y2="6"/><line x1="8.5" y1="18" x2="15.5" y2="18"/><line x1="6" y1="8.5" x2="6" y2="15.5"/><line x1="18" y1="8.5" x2="18" y2="15.5"/></svg>`
+  const icoConnectors = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h4v4H7zM13 13h4v4h-4z"/><path d="M11 9h2v4"/><circle cx="5" cy="9" r="1.5"/><circle cx="19" cy="15" r="1.5"/></svg>`
+  const icoIntegration = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a3 3 0 0 0 4.2 0l3-3a3 3 0 0 0-4.2-4.2l-1 1"/><path d="M14 11a3 3 0 0 0-4.2 0l-3 3a3 3 0 0 0 4.2 4.2l1-1"/></svg>`
+  const icoHelp = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-2.5 2-2.5 3.5"/><line x1="12" y1="17" x2="12" y2="17.01"/></svg>`
+  const icoExt = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M9 7h8v8"/></svg>`
+  const icoChevDown = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`
+  const icoSwap = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 4 18 9"/><polyline points="6 15 12 20 18 15"/></svg>`
+  const icoSun = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="3" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="21"/><line x1="3" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="21" y2="12"/><line x1="5.5" y1="5.5" x2="6.9" y2="6.9"/><line x1="17.1" y1="17.1" x2="18.5" y2="18.5"/><line x1="5.5" y1="18.5" x2="6.9" y2="17.1"/><line x1="17.1" y1="6.9" x2="18.5" y2="5.5"/></svg>`
+  const icoMoon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`
+  const icoAuto = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" stroke="none"/></svg>`
+  const icoClose = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>`
+
+  const toggleRow = (key: string, name: string, desc: string, on: boolean): string => `
+    <div class="settings-modal__toggle-row">
+      <div class="settings-modal__toggle-copy">
+        <p class="settings-modal__toggle-name">${name}</p>
+        <p class="settings-modal__toggle-desc">${desc}</p>
+      </div>
+      <button type="button" class="settings-modal__switch${on ? " settings-modal__switch--on" : ""}" data-settings-toggle="${key}" aria-pressed="${on ? "true" : "false"}" aria-label="${name}">
+        <span class="settings-modal__switch-thumb"></span>
+      </button>
+    </div>`
+
+  const placeholderPanel = (tab: string, title: string, desc: string): string => `
+    <section class="settings-modal__panel" data-settings-panel="${tab}" hidden>
+      <header class="settings-modal__panel-head">
+        <h2 class="settings-modal__title">${title}</h2>
+      </header>
+      <div class="settings-modal__placeholder">
+        <p>${desc}</p>
+        <p class="settings-modal__placeholder-sub">제품 연동 시 실제 옵션이 노출됩니다. (데모)</p>
+      </div>
+    </section>`
+
+  return `
+  <div id="appSettingsModal" class="settings-modal" hidden aria-hidden="true">
+    <div class="settings-modal__backdrop" data-settings-close tabindex="-1"></div>
+    <div class="settings-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
+      <button type="button" class="settings-modal__close" data-settings-close aria-label="설정 닫기" title="닫기">${icoClose}</button>
+      <aside class="settings-modal__nav-col">
+        <div class="settings-modal__profile">
+          <span class="settings-modal__avatar" aria-hidden="true">t</span>
+          <div class="settings-modal__profile-text">
+            <p class="settings-modal__profile-name">taewoo kim</p>
+            <p class="settings-modal__profile-plan">개인</p>
+          </div>
+          <button type="button" class="settings-modal__profile-switch" aria-label="계정 전환">${icoSwap}</button>
+        </div>
+        <nav class="settings-modal__nav-list" aria-label="설정 탭">
+          <p class="settings-modal__nav-heading">계정</p>
+          ${navItem("account", "계정", icoUser)}
+          ${navItem("general", "일반", icoGeneral, true)}
+          ${navItem("billing", "사용량 및 청구", icoBilling)}
+          ${navItem("personalization", "개인화", icoPersonal)}
+          <p class="settings-modal__nav-heading">기능</p>
+          ${navItem("mail", "Mail Manus", icoMail)}
+          ${navItem("data", "데이터 제어", icoData)}
+          ${navItem("computer", "My Computer", icoMyComputer)}
+          ${navItem("browser", "클라우드 브라우저", icoCloud)}
+          ${navItem("skills", "스킬", icoSkills)}
+          ${navItem("connectors", "커넥터", icoConnectors)}
+          ${navItem("integrations", "통합", icoIntegration)}
+        </nav>
+        <a class="settings-modal__help" href="#" data-settings-help>
+          <span class="settings-modal__nav-icon" aria-hidden="true">${icoHelp}</span>
+          <span class="settings-modal__nav-text">도움 받기</span>
+          <span class="settings-modal__help-ext" aria-hidden="true">${icoExt}</span>
+        </a>
+      </aside>
+      <main class="settings-modal__content">
+        <section class="settings-modal__panel settings-modal__panel--active" data-settings-panel="general">
+          <header class="settings-modal__panel-head">
+            <h2 id="settingsModalTitle" class="settings-modal__title">일반</h2>
+          </header>
+          <div class="settings-modal__section">
+            <p class="settings-modal__section-title">외관</p>
+            <div class="settings-modal__field">
+              <label class="settings-modal__label" for="settingsLang">언어</label>
+              <div class="settings-modal__select">
+                <select id="settingsLang" class="settings-modal__select-input">
+                  <option>한국어</option>
+                  <option>English</option>
+                  <option>日本語</option>
+                </select>
+                <span class="settings-modal__select-chev" aria-hidden="true">${icoChevDown}</span>
+              </div>
+            </div>
+            <div class="settings-modal__field">
+              <span class="settings-modal__label">테마</span>
+              <div class="settings-modal__themes" role="radiogroup" aria-label="테마">
+                <button type="button" class="settings-modal__theme-btn settings-modal__theme-btn--active" data-settings-theme="light" aria-pressed="true">
+                  <span class="settings-modal__theme-icon" aria-hidden="true">${icoSun}</span>
+                  <span>라이트</span>
+                </button>
+                <button type="button" class="settings-modal__theme-btn" data-settings-theme="dark" aria-pressed="false">
+                  <span class="settings-modal__theme-icon" aria-hidden="true">${icoMoon}</span>
+                  <span>다크</span>
+                </button>
+                <button type="button" class="settings-modal__theme-btn" data-settings-theme="auto" aria-pressed="false">
+                  <span class="settings-modal__theme-icon" aria-hidden="true">${icoAuto}</span>
+                  <span>자동</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="settings-modal__divider"></div>
+          <div class="settings-modal__section">
+            <p class="settings-modal__section-title">통신 설정</p>
+            ${toggleRow("productUpdates", "제품 업데이트 받기", "기능 릴리스와 성공 사례를 먼저 접하고 워크플로를 최적화하세요.", true)}
+            ${toggleRow("queueStartEmail", "내 대기 중인 작업이 시작되면 이메일을 보내주세요", "이 옵션을 활성화하면, 작업이 대기 상태를 마치고 처리 시작 시점에 이메일을 적시에 보내드립니다.", true)}
+            ${toggleRow("marketingShare", "Devely에 대한 광고", "활성화되면, 우리는 귀하의 개인 정보를 수집하여 Devely에 대한 광고를 다른 앱, 웹사이트 및 플랫폼에서 표시하기 위해 마케팅 업체와 공유할 수 있습니다.", true)}
+          </div>
+        </section>
+        ${getAccountPanelHTML()}
+        ${placeholderPanel("billing", "사용량 및 청구", "현재 플랜, 사용량 통계, 청구서 내역을 확인합니다.")}
+        ${placeholderPanel("personalization", "개인화", "에이전트 톤, 응답 길이, 즐겨 쓰는 도구 등 개인 취향을 저장합니다.")}
+        ${placeholderPanel("mail", "Mail Manus", "에이전트가 메일 박스를 읽고 회신 초안을 만드는 기능을 설정합니다.")}
+        ${placeholderPanel("data", "데이터 제어", "학습 사용 동의, 대화 보존 기간, 내보내기/삭제 옵션을 관리합니다.")}
+        ${placeholderPanel("computer", "My Computer", "로컬 컴퓨터 연동, 파일 접근 권한, 동기화 폴더를 설정합니다.")}
+        ${placeholderPanel("browser", "클라우드 브라우저", "에이전트가 사용하는 가상 브라우저 세션과 쿠키를 관리합니다.")}
+        ${placeholderPanel("skills", "스킬", "사용자 정의 스킬을 등록하고 활성화 여부를 토글합니다.")}
+        ${placeholderPanel("connectors", "커넥터", "Slack, Notion, GitHub 등 외부 서비스 연결을 관리합니다.")}
+        ${placeholderPanel("integrations", "통합", "Zapier, Make 같은 자동화 도구와의 연동을 구성합니다.")}
+      </main>
+    </div>
+  </div>`
 }
 
 function getLandingHTML(): string {
@@ -348,11 +616,9 @@ function getLandingHTML(): string {
 }
 
 function getDashboardInnerHTML(): string {
-  const ic = (path: string, label: string, extra = "") =>
-    `<button type="button" class="db__icon-btn${extra ? ` ${extra}` : ""}" title="${label}" aria-label="${label}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg></button>`
+  const ic = (path: string, label: string, extra = "") => `<button type="button" class="db__icon-btn${extra ? ` ${extra}` : ""}" title="${label}" aria-label="${label}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg></button>`
 
-  const quick = (path: string, label: string) =>
-    `<button type="button" class="db__quick-btn" data-db-quick="${escapeHtml(label)}"><span class="db__quick-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg></span>${escapeHtml(label)}</button>`
+  const quick = (path: string, label: string) => `<button type="button" class="db__quick-btn" data-db-quick="${escapeHtml(label)}"><span class="db__quick-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg></span>${escapeHtml(label)}</button>`
 
   return `
       <div class="db">
@@ -1540,18 +1806,17 @@ footer strong{color:#374151;font-weight:600}
 }
 
 function getAgentPreviewDeviceHTML(iframeHtml: string): string {
-  const ic = (path: string, label: string) =>
-    `<button type="button" class="agent-preview-device__icon" title="${label}" aria-label="${label}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg></button>`
+  const ic = (path: string, label: string) => `<button type="button" class="agent-preview-device__icon" title="${label}" aria-label="${label}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg></button>`
   return `<div class="agent-preview-device">
       <div class="agent-preview-device__bar agent-preview-device__bar--main">
         <div class="agent-preview-device__cluster">
           <span class="agent-preview-device__dots" aria-hidden="true"><span></span><span></span><span></span></span>
           <button type="button" class="agent-preview-device__seg agent-preview-device__seg--on">미리보기</button>
-          ${ic("<polyline points=\"16 18 22 12 16 6\"/><polyline points=\"8 6 2 12 8 18\"/>", "코드 보기")}
-          ${ic("<path d=\"M23 4v6h-6\"/><path d=\"M20.49 15a9 9 0 1 1-2.12-9.36L23 10\"/>", "새로 고침")}
+          ${ic('<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>', "코드 보기")}
+          ${ic('<path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>', "새로 고침")}
           <span class="agent-preview-device__navpair">
-            ${ic("<path d=\"M15 18l-6-6 6-6\"/>", "뒤로")}
-            ${ic("<path d=\"M9 18l6-6-6-6\"/>", "앞으로")}
+            ${ic('<path d="M15 18l-6-6 6-6"/>', "뒤로")}
+            ${ic('<path d="M9 18l6-6-6-6"/>', "앞으로")}
           </span>
         </div>
         <div class="agent-preview-device__url" title="프리뷰 (데모)">
@@ -1559,20 +1824,20 @@ function getAgentPreviewDeviceHTML(iframeHtml: string): string {
           <span class="agent-preview-device__url-text">/</span>
         </div>
         <div class="agent-preview-device__cluster agent-preview-device__cluster--end">
-          ${ic("<circle cx=\"12\" cy=\"12\" r=\"1\"/><circle cx=\"19\" cy=\"12\" r=\"1\"/><circle cx=\"5\" cy=\"12\" r=\"1\"/>", "메뉴")}
-          ${ic("<path d=\"M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22\"/>", "GitHub")}
+          ${ic('<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>', "메뉴")}
+          ${ic('<path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>', "GitHub")}
           <button type="button" class="agent-preview-device__ghost">Share</button>
           <button type="button" class="agent-preview-device__publish">게시 <span aria-hidden="true">↑</span></button>
         </div>
       </div>
       <div class="agent-preview-device__bar agent-preview-device__bar--sub">
         <div class="agent-preview-device__cluster">
-          ${ic("<rect x=\"2\" y=\"3\" width=\"20\" height=\"14\" rx=\"2\"/><path d=\"M8 21h8\"/>", "데스크톱")}
-          ${ic("<rect x=\"5\" y=\"2\" width=\"14\" height=\"20\" rx=\"2\"/><path d=\"M12 18h.01\"/>", "모바일")}
+          ${ic('<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/>', "데스크톱")}
+          ${ic('<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/>', "모바일")}
         </div>
         <div class="agent-preview-device__cluster agent-preview-device__cluster--end">
           <button type="button" class="agent-preview-device__ghost">편집</button>
-          ${ic("<path d=\"M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7\"/>", "전체 화면")}
+          ${ic('<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>', "전체 화면")}
         </div>
       </div>
       <div class="agent-preview-device__viewport">
@@ -2610,13 +2875,179 @@ function bindAppSidebarCollapse(): void {
   })
 }
 
+function bindAppSettingsModal(initialTab: string | null = null): void {
+  const modal = document.getElementById("appSettingsModal")
+  const opener = root.querySelector<HTMLButtonElement>('[data-action="open-settings"]')
+  if (!modal || !opener) return
+
+  const dialog = modal.querySelector<HTMLElement>(".settings-modal__dialog")
+  const focusables = (): HTMLElement[] => Array.from(modal.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), select, [tabindex]:not([tabindex="-1"])')).filter((el) => !el.hasAttribute("hidden") && el.offsetParent !== null)
+
+  let lastFocus: HTMLElement | null = null
+  let preOpenHash = ""
+
+  const setTab = (tab: string, opts: { syncHash?: boolean } = {}): void => {
+    const targetTab = SETTINGS_TAB_SLUGS[tab] ? tab : SETTINGS_DEFAULT_TAB
+    modal.querySelectorAll<HTMLButtonElement>("[data-settings-tab]").forEach((b) => {
+      const isActive = b.dataset.settingsTab === targetTab
+      b.classList.toggle("settings-modal__nav-item--active", isActive)
+    })
+    modal.querySelectorAll<HTMLElement>("[data-settings-panel]").forEach((p) => {
+      const isActive = p.dataset.settingsPanel === targetTab
+      p.classList.toggle("settings-modal__panel--active", isActive)
+      if (isActive) p.removeAttribute("hidden")
+      else p.setAttribute("hidden", "")
+    })
+    if (opts.syncHash !== false) {
+      const nextHash = getSettingsHashForTab(targetTab)
+      if (window.location.hash !== nextHash) {
+        replaceLocationHashNoNavigate(nextHash)
+      }
+    }
+  }
+
+  const openModal = (tab: string = SETTINGS_DEFAULT_TAB, opts: { syncHash?: boolean } = {}): void => {
+    if (modal.hidden) {
+      lastFocus = (document.activeElement as HTMLElement) ?? null
+      const curHash = window.location.hash
+      preOpenHash = getSettingsTabForHash(curHash) ? HASH_DASHBOARD : curHash || HASH_DASHBOARD
+    }
+    modal.hidden = false
+    modal.setAttribute("aria-hidden", "false")
+    document.body.classList.add("settings-modal-open")
+    setTab(tab, opts)
+    requestAnimationFrame(() => {
+      const first = dialog?.querySelector<HTMLElement>(".settings-modal__nav-item--active")
+      first?.focus()
+    })
+  }
+
+  const closeModal = (): void => {
+    modal.hidden = true
+    modal.setAttribute("aria-hidden", "true")
+    document.body.classList.remove("settings-modal-open")
+    const target = preOpenHash || HASH_DASHBOARD
+    if (window.location.hash !== target) {
+      replaceLocationHashNoNavigate(target)
+    }
+    lastFocus?.focus?.()
+    lastFocus = null
+  }
+
+  opener.addEventListener("click", (e) => {
+    e.preventDefault()
+    const currentTab = getSettingsTabForHash(window.location.hash)
+    openModal(currentTab ?? SETTINGS_DEFAULT_TAB)
+  })
+
+  modal.querySelectorAll<HTMLElement>("[data-settings-close]").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      e.preventDefault()
+      closeModal()
+    })
+  })
+
+  modal.querySelectorAll<HTMLButtonElement>("[data-settings-tab]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const tab = btn.dataset.settingsTab
+      if (tab) setTab(tab)
+    })
+  })
+
+  modal.querySelectorAll<HTMLButtonElement>("[data-settings-theme]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      modal.querySelectorAll<HTMLButtonElement>("[data-settings-theme]").forEach((b) => {
+        const on = b === btn
+        b.classList.toggle("settings-modal__theme-btn--active", on)
+        b.setAttribute("aria-pressed", on ? "true" : "false")
+      })
+    })
+  })
+
+  modal.querySelectorAll<HTMLButtonElement>("[data-settings-toggle]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const on = !btn.classList.contains("settings-modal__switch--on")
+      btn.classList.toggle("settings-modal__switch--on", on)
+      btn.setAttribute("aria-pressed", on ? "true" : "false")
+    })
+  })
+
+  modal.querySelectorAll<HTMLButtonElement>("[data-acc-copy]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const sel = btn.dataset.accCopy
+      if (!sel) return
+      const target = modal.querySelector(sel)
+      const text = target?.textContent?.trim() ?? ""
+      if (!text) return
+      const original = btn.textContent ?? "복사"
+      try {
+        await navigator.clipboard.writeText(text)
+        btn.textContent = "복사됨"
+      } catch {
+        btn.textContent = "실패"
+      }
+      window.setTimeout(() => {
+        btn.textContent = original
+      }, 1500)
+    })
+  })
+
+  modal.querySelector<HTMLButtonElement>("[data-acc-upgrade]")?.addEventListener("click", () => {
+    window.alert("Pro 플랜 업그레이드 흐름은 곧 제공됩니다. (데모)")
+  })
+  modal.querySelector<HTMLButtonElement>("[data-acc-logout]")?.addEventListener("click", () => {
+    const ok = window.confirm("이 장치에서 로그아웃하시겠습니까?")
+    if (!ok) return
+    closeModal()
+    window.location.hash = "#/"
+  })
+  modal.querySelector<HTMLButtonElement>("[data-acc-delete]")?.addEventListener("click", () => {
+    const ok = window.confirm("계정을 삭제하면 모든 데이터가 영구 삭제됩니다. 계속하시겠습니까?")
+    if (!ok) return
+    window.alert("실제 제품에서는 추가 인증 후 처리됩니다. (데모)")
+  })
+
+  const helpLink = modal.querySelector<HTMLAnchorElement>("[data-settings-help]")
+  helpLink?.addEventListener("click", (e) => {
+    e.preventDefault()
+    window.alert("도움말 센터는 곧 연결됩니다. (데모)")
+  })
+
+  document.addEventListener("keydown", (e) => {
+    if (modal.hidden) return
+    if (e.key === "Escape") {
+      e.preventDefault()
+      closeModal()
+      return
+    }
+    if (e.key === "Tab") {
+      const items = focusables()
+      if (items.length === 0) return
+      const first = items[0]
+      const last = items[items.length - 1]
+      const active = document.activeElement as HTMLElement | null
+      if (e.shiftKey && active === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+  })
+
+  if (initialTab) {
+    openModal(initialTab, { syncHash: false })
+  }
+}
+
 function mountApp(): void {
   document.body.classList.remove("error-view")
   document.body.classList.add("app-view")
   const route = parseAppRoute()
   let inner: string
   let title: string
-  let sidebar: "dashboard" | "projects" = "dashboard"
+  let sidebar: "dashboard" | "projects" | "settings" = "dashboard"
   let mainExtraClass = ""
   let omitSidebar = false
 
@@ -2644,6 +3075,11 @@ function mountApp(): void {
     const p = DEMO_PROJECTS.find((x) => x.slug === route.slug)
     inner = p ? getProjectDetailInnerHTML(p) : getProjectNotFoundInnerHTML()
     title = p ? `${p.slug} — AI Web Builder` : "프로젝트 — AI Web Builder"
+  } else if (route.kind === "settings") {
+    sidebar = "settings"
+    inner = getDashboardInnerHTML()
+    mainExtraClass = "app-main--dashboard"
+    title = "설정 — AI Web Builder"
   } else {
     inner = getDashboardInnerHTML()
     mainExtraClass = "app-main--dashboard"
@@ -2653,7 +3089,10 @@ function mountApp(): void {
   root.innerHTML = getAppLayoutHTML(sidebar, inner, mainExtraClass, omitSidebar, omitSidebar ? false : readSidebarCollapsed())
   document.title = title
 
-  if (!omitSidebar) bindAppSidebarCollapse()
+  if (!omitSidebar) {
+    bindAppSidebarCollapse()
+    bindAppSettingsModal(route.kind === "settings" ? route.tab : null)
+  }
 
   if (route.kind === "notFound") {
     /* no-op */
@@ -2665,7 +3104,7 @@ function mountApp(): void {
   } else if (route.kind === "project") {
     const proj = DEMO_PROJECTS.find((x) => x.slug === route.slug)
     if (proj) bindProjectDetailPage(proj)
-  } else if (route.kind === "dashboard") {
+  } else if (route.kind === "dashboard" || route.kind === "settings") {
     bindDashboardPage()
   }
 }
