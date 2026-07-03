@@ -1,6 +1,9 @@
+import { useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 
 function StartNowSection() {
+  const navigate = useNavigate();
+
   return (
     <section className="relative py-12 w-full overflow-visible bg-[linear-gradient(90deg,#9360E369_41%,#F8FAFC_70%,#FFFFFF_100%)] flex justify-center">
       <div
@@ -12,10 +15,10 @@ function StartNowSection() {
           <p className="typo-b2-md text-[#64748B]">
             데모에서는 대시보드·프로젝트 목록·에이전트 화면까지 연결해
             <br />
-            두었습니다. 로그인 없이 해시만으로 이동해 볼 수 있어요.
+            두었습니다. 로그인 없이 바로 이동해 볼 수 있어요.
           </p>
         </div>
-        <Button className="rounded-xl">
+        <Button className="rounded-xl" onClick={() => navigate({ to: '/home' })}>
           <p className="typo-b1-eb">무료로 시작하기</p>
         </Button>
       </div>

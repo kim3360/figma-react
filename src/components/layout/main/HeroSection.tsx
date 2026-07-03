@@ -1,32 +1,14 @@
 import { useNavigate } from '@tanstack/react-router';
-import { useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import githubIcon from '@/assets/icons/github.svg';
 import heroSectionImage from '@/assets/images/heroSection_img.svg';
 import heroSectionBgImage from '@/assets/images/heroSection_bg_img.svg';
-import { useGitHubLogin } from '@/hooks/useGitHubLogin';
-import { useIsLoggedIn } from '@/hooks/useIsLoggedIn';
 
 const headlineGradientBg =
   'bg-[linear-gradient(90deg,#6D28D9_0%,#7C3AED_42%,#A855F7_100%)] bg-clip-text text-transparent';
 
 function HeroSection() {
-  const {
-    startGitHubLogin,
-    isLoading: isLoggingIn,
-    errorMessage: loginErrorMessage,
-  } = useGitHubLogin();
-  const [isLoggedIn] = useIsLoggedIn();
   const navigate = useNavigate();
-
-  const handleGitHubLogin = useCallback(() => {
-    if (isLoggingIn) return;
-    if (isLoggedIn) {
-      void navigate({ to: '/home' });
-      return;
-    }
-    void startGitHubLogin();
-  }, [isLoggingIn, isLoggedIn, navigate, startGitHubLogin]);
 
   return (
     <section className="relative w-full">
@@ -61,22 +43,14 @@ function HeroSection() {
             type="button"
             variant="outline"
             size="sm"
-            disabled={isLoggingIn}
-            onClick={handleGitHubLogin}
-            className="border-[#767676] py-2.5 text-md font-semibold rounded-2xl w-[578px] disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={() => navigate({ to: '/home' })}
+            className="border-[#767676] py-2.5 text-md font-semibold rounded-2xl w-[578px]"
           >
             <div className="flex items-center gap-4.5">
-              {!isLoggedIn ? (
-                <img src={githubIcon} alt="GitHub" className="h-[38px] w-[38px]" />
-              ) : null}
-              {isLoggingIn
-                ? '연결 중...'
-                : isLoggedIn
-                  ? '워크스페이스 이동하기'
-                  : 'GitHub로 연결하기'}
+              <img src={githubIcon} alt="" aria-hidden className="h-[38px] w-[38px]" />
+              워크스페이스로 이동하기
             </div>
           </Button>
-          {loginErrorMessage ? <p className="text-sm text-red-600">{loginErrorMessage}</p> : null}
           <div className="flex items-center gap-2.5">
             <Button variant="outline" size="xs" className="rounded-full px-4">
               <p className="font-semibold">

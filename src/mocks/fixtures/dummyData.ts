@@ -25,8 +25,6 @@ import type {
   PostTrashConversationRestoreResType,
 } from '@/types/chat.type';
 import type { GetUserMeResType } from '@/types/user.type';
-import type { GitHubCallbackResult } from '@/types/auth.type';
-import type { ApiResponse } from '@/types/response.type';
 import { readStoredUser } from '@/lib/userStorage';
 
 const ISO_NOW = '2026-07-03T06:00:00.000Z';
@@ -122,41 +120,6 @@ export function dummyGetUserInfo(): GetUserMeResType {
     message: '',
     data: user,
   };
-}
-
-export function dummyGetGitHubAuthUrl(): ApiResponse<{ url: string; state?: string }> {
-  return {
-    status: 200,
-    code: '',
-    message: '',
-    data: { url: '', state: 'dummy-state' },
-  };
-}
-
-export function dummyCompleteGitHubCallback(): ApiResponse<GitHubCallbackResult> {
-  return {
-    status: 200,
-    code: '',
-    message: '',
-    data: {
-      accessToken: 'dummy-access-token',
-      refreshToken: 'dummy-refresh-token',
-      githubAppInstalled: true,
-    },
-  };
-}
-
-export function dummyGetGitHubAppInstallUrl(): ApiResponse<{ url: string }> {
-  return {
-    status: 200,
-    code: '',
-    message: '',
-    data: { url: '#' },
-  };
-}
-
-export async function dummyLogout(): Promise<ApiResponse<void>> {
-  return { status: 200, code: '', message: '' };
 }
 
 export function dummyGetGithubRepositoryList(): GetGithubRepositoryListResType {

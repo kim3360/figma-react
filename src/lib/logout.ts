@@ -1,11 +1,6 @@
-import { logout } from '@/api/auth';
 import { clearAppLocalStorage } from '@/lib/clearAppStorage';
 
-/** POST /auth/logout 호출 후 로컬스토리지 전체 삭제 */
+/** 로컬 스토리지를 비우고 홈으로 이동할 때 사용 */
 export async function logoutSession() {
-  try {
-    await logout();
-  } finally {
-    clearAppLocalStorage();
-  }
+  clearAppLocalStorage();
 }

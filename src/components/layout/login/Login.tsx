@@ -1,8 +1,8 @@
+import { useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
-import { useGitHubLogin } from '@/hooks/useGitHubLogin';
 
 function LoginPage() {
-  const { startGitHubLogin, isLoading, errorMessage } = useGitHubLogin();
+  const navigate = useNavigate();
 
   return (
     <main className="mx-auto grid min-h-screen w-full max-w-6xl gap-8 px-6 py-14 text-left">
@@ -15,10 +15,9 @@ function LoginPage() {
           자연어 요청만으로 웹서비스를 만들고 수정하고 배포까지 이어지는 경험을 제공합니다.
         </p>
         <div className="flex flex-wrap gap-3">
-          <Button type="button" size="lg" disabled={isLoading} onClick={startGitHubLogin}>
-            {isLoading ? 'GitHub 로그인 준비 중...' : 'GitHub로 로그인'}
+          <Button type="button" size="lg" onClick={() => navigate({ to: '/home' })}>
+            시작하기
           </Button>
-          {errorMessage ? <p className="text-sm text-red-600">{errorMessage}</p> : null}
         </div>
       </header>
     </main>

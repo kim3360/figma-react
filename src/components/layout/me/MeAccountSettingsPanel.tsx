@@ -10,7 +10,6 @@ import {
   MeAccountSettingsSkeleton,
 } from '@/components/layout/me/MeAccountSettings.shared';
 import { formatDisplayName } from '@/components/layout/me/MeSettingsSidebar';
-import { useIsLoggedIn } from '@/hooks/useIsLoggedIn';
 import { logoutSession } from '@/lib/logout';
 
 const DEMO_CREDIT_TOTAL = 1000;
@@ -22,7 +21,6 @@ function MeAccountSettingsPanel() {
   const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle');
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [, syncAuthState] = useIsLoggedIn();
   const { data: userResponse, isLoading } = useUserInfoQuery('me-account-settings');
 
   const user = userResponse?.data;
@@ -51,10 +49,9 @@ function MeAccountSettingsPanel() {
       await logoutSession();
     } finally {
       setIsLoggingOut(false);
-      syncAuthState();
       void navigate({ to: '/', replace: true });
     }
-  }, [isLoggingOut, navigate, syncAuthState]);
+  }, [isLoggingOut, navigate]);
 
   useEffect(() => {
     if (copyState !== 'copied') return;

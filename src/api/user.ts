@@ -24,12 +24,10 @@ async function fetchAndPersistUserInfo() {
 function useUserInfoQuery(queryKey: unknown) {
   if (!queryKey) throw new Error('queryKey is required');
 
-  const hasAccessToken = typeof window !== 'undefined' && !!localStorage.getItem('accessToken');
-
   return useQuery({
     queryKey: ['user-info', queryKey],
     queryFn: fetchAndPersistUserInfo,
-    enabled: hasAccessToken,
+    enabled: true,
     placeholderData: () => {
       const user = readStoredUser();
       if (!user) return undefined;

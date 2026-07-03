@@ -1,6 +1,5 @@
 import { createRootRoute, Outlet, useRouterState } from '@tanstack/react-router';
 import AppRouterEffects from '@/components/auth/AppRouterEffects';
-import GitHubAppInstallPromptDialog from '@/components/auth/GitHubAppInstallPromptDialog';
 import NotFoundPage from '@/components/layout/NotFoundPage';
 import AppSidebar from '@/components/common/AppSidebar';
 
@@ -16,7 +15,6 @@ function RootComponent() {
   return (
     <>
       <AppRouterEffects />
-      <GitHubAppInstallPromptDialog />
 
       {!showAppChrome ? (
         <div className="min-h-screen w-full bg-[#f8fafc] text-[#0f172a]">

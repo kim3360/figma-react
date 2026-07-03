@@ -1,12 +1,5 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
-import { ExternalLink } from 'lucide-react';
-import { fetchGitHubAppInstallUrl } from '@/api/auth';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { useProjectListQuery } from '@/api/projects';
-import {
-  GITHUB_APP_INSTALL_POPUP_NAME,
-  GITHUB_APP_INSTALL_SUCCESS_MESSAGE,
-  GITHUB_OAUTH_POPUP_FEATURES,
-} from '@/constants/githubOAuth';
 import { formatProjectDisplayName } from '@/components/layout/project/agentChat.utils';
 import type { DeployStatus } from '@/types/common.enum';
 import { cn } from '@/lib/utils';
@@ -69,38 +62,9 @@ function HomeProjectListPopover({
 
   const errorMessage = error instanceof Error ? error.message : '';
 
-  const [isInstallLoading, setIsInstallLoading] = useState(false);
-
   const handleSelect = (project: ProjectListItem) => {
     onSelect?.(project);
     onOpenChange(false);
-  };
-
-  const handleAppInstallMessage = useCallback(
-    (event: MessageEvent) => {
-      if (event.origin !== window.location.origin) return;
-      if (event.data?.type !== GITHUB_APP_INSTALL_SUCCESS_MESSAGE) return;
-      void refetch();
-    },
-    [refetch],
-  );
-
-  useEffect(() => {
-    window.addEventListener('message', handleAppInstallMessage);
-    return () => window.removeEventListener('message', handleAppInstallMessage);
-  }, [handleAppInstallMessage]);
-
-  const handleGrantPermission = async () => {
-    setIsInstallLoading(true);
-    try {
-      const result = await fetchGitHubAppInstallUrl();
-      if (!result?.data?.url) return;
-
-      const popup = window.open(result.data.url, GITHUB_APP_INSTALL_POPUP_NAME, GITHUB_OAUTH_POPUP_FEATURES);
-      if (!popup) throw new Error('팝업이 차단되었습니다. 팝업 허용 후 다시 시도해 주세요.');
-    } finally {
-      setIsInstallLoading(false);
-    }
   };
 
   useEffect(() => {
@@ -205,15 +169,6 @@ function HomeProjectListPopover({
                   className="block w-full py-1.5 text-center text-[12px] font-medium text-[#7c3aed] hover:underline"
                 >
                   다시 불러오기
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void handleGrantPermission()}
-                  disabled={isInstallLoading}
-                  className="mt-1 flex w-full items-center justify-center gap-1.5 rounded-lg border border-[#e2e8f0] py-2 text-[12px] font-medium text-[#475569] transition hover:bg-[#f8fafc] disabled:opacity-50"
-                >
-                  <ExternalLink size={12} />
-                  {isInstallLoading ? '로딩 중...' : 'GitHub 저장소 권한 설정'}
                 </button>
               </div>
             ) : null}
