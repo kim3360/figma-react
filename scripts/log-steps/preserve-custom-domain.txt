@@ -1,0 +1,25 @@
+##[group]Run mkdir -p ./dist
+mkdir -p ./dist
+CNAME="todo.qeploy.com"
+if [ -n "$CNAME" ]; then
+printf '%s\n' "$CNAME" > ./dist/CNAME
+echo "GitHub Pages custom domain CNAME 파일 생성 완료"
+exit 0
+fi
+if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+if git fetch origin gh-pages --depth=1; then
+if git show FETCH_HEAD:CNAME > /tmp/dvely-cname 2>/dev/null; then
+cp /tmp/dvely-cname ./dist/CNAME
+echo "기존 CNAME 파일 보존 완료"
+else
+echo "기존 CNAME 파일 없음"
+fi
+else
+echo "gh-pages 브랜치 fetch 실패"
+fi
+else
+echo "gh-pages 브랜치 없음"
+fi
+shell: /usr/bin/bash -e {0}
+##[endgroup]
+GitHub Pages custom domain CNAME 파일 생성 완료

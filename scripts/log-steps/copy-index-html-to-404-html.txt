@@ -1,0 +1,4 @@
+##[group]Run [ -f ./dist/index.html ] && cp ./dist/index.html ./dist/404.html || true
+[ -f ./dist/index.html ] && cp ./dist/index.html ./dist/404.html || true
+shell: /usr/bin/bash -e {0}
+##[endgroup]

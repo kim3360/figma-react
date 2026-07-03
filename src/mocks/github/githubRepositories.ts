@@ -1,0 +1,58 @@
+import type { GithubRepository } from '@/types/projects.type';
+
+export const mockGithubRepositories: GithubRepository[] = [
+  {
+    fullName: 'dvely-team/crimson-landing',
+    name: 'crimson-landing',
+    owner: 'dvely-team',
+    description: 'Crimson 템플릿 기반 랜딩페이지',
+    visibility: 'PRIVATE',
+    defaultBranch: 'main',
+    updatedAt: '2026-05-20T09:30:00Z',
+  },
+  {
+    fullName: 'dvely-team/portfolio-studio',
+    name: 'portfolio-studio',
+    owner: 'dvely-team',
+    description: '디자이너 포트폴리오 사이트',
+    visibility: 'PUBLIC',
+    defaultBranch: 'main',
+    updatedAt: '2026-05-18T14:12:00Z',
+  },
+  {
+    fullName: 'acme-corp/marketing-site',
+    name: 'marketing-site',
+    owner: 'acme-corp',
+    description: 'B2B SaaS 마케팅 홈페이지',
+    visibility: 'PRIVATE',
+    defaultBranch: 'develop',
+    updatedAt: '2026-05-15T11:00:00Z',
+  },
+  {
+    fullName: 'acme-corp/docs',
+    name: 'docs',
+    owner: 'acme-corp',
+    description: '제품 문서 및 API 가이드',
+    visibility: 'PUBLIC',
+    defaultBranch: 'main',
+    updatedAt: '2026-05-10T08:45:00Z',
+  },
+  {
+    fullName: 'kimtaewoo/cafe-landing',
+    name: 'cafe-landing',
+    owner: 'kimtaewoo',
+    description: '카페 브랜드 원페이지',
+    visibility: 'PUBLIC',
+    defaultBranch: 'main',
+    updatedAt: '2026-05-08T16:20:00Z',
+  },
+  {
+    fullName: 'kimtaewoo/church-worship',
+    name: 'church-worship',
+    owner: 'kimtaewoo',
+    description: '교회 예배·사역 소개 사이트',
+    visibility: 'PRIVATE',
+    defaultBranch: 'main',
+    updatedAt: '2026-05-01T10:00:00Z',
+  },
+];

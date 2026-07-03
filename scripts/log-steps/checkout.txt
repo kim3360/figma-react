@@ -1,0 +1,29 @@
+##[group]Run actions/checkout@v4
+with:
+ref: v1
+repository: dldnsgkr/my-todo-app
+token: ***
+ssh-strict: true
+ssh-user: git
+persist-credentials: true
+clean: true
+sparse-checkout-cone-mode: true
+fetch-depth: 1
+fetch-tags: false
+show-progress: true
+lfs: false
+submodules: false
+set-safe-directory: true
+##[endgroup]
+Syncing repository: dldnsgkr/my-todo-app
+##[group]Getting Git version info
+Working directory is '/home/runner/work/my-todo-app/my-todo-app'
+[command]/usr/bin/git version
+git version 2.54.0
+##[endgroup]
+##[group]Checking out the ref
+[command]/usr/bin/git checkout --progress --force refs/tags/v1
+HEAD is now at 4258a26 Initial commit: React + Vite todo app
+##[endgroup]
+[command]/usr/bin/git log -1 --format=%H
+4258a2631a67bbcc7870f6857bed4ea8f0503191

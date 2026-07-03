@@ -1,0 +1,182 @@
+@import 'tailwindcss';
+
+@import 'tw-animate-css';
+@import 'pretendard/dist/web/static/pretendard.css';
+
+@theme inline {
+  --color-primary: #7c3aed;
+  --color-primary-foreground: #0b0c12;
+}
+
+html,
+body {
+  font-family:
+    'Pretendard',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+  background-color: #fafafb;
+  color: #0b0c12;
+}
+
+@layer utilities {
+  .typo-h1-bd {
+    font-size: 56px;
+    line-height: 120%;
+    letter-spacing: 0;
+    font-weight: 700;
+  }
+  .typo-h2-bd {
+    font-size: 40px;
+    line-height: 150%;
+    letter-spacing: 0;
+    font-weight: 700;
+  }
+  .typo-h3-md {
+    font-size: 36px;
+    line-height: 150%;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+  .typo-h4-bd {
+    font-size: 30px;
+    line-height: 150%;
+    letter-spacing: 0;
+    font-weight: 700;
+  }
+  .typo-h4-sb {
+    font-size: 30px;
+    line-height: 150%;
+    letter-spacing: 0;
+    font-weight: 600;
+  }
+  .typo-h5-sb {
+    font-size: 24px;
+    line-height: 150%;
+    letter-spacing: 0;
+    font-weight: 600;
+  }
+  .typo-h5-md {
+    font-size: 24px;
+    line-height: 150%;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+  .typo-h5-rg {
+    font-size: 24px;
+    line-height: 150%;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+
+  .typo-b0-bd {
+    font-size: 20px;
+    line-height: 150%;
+    letter-spacing: 0;
+    font-weight: 700;
+  }
+  .typo-b0-sb {
+    font-size: 20px;
+    line-height: 150%;
+    letter-spacing: 0;
+    font-weight: 600;
+  }
+  .typo-b0-md {
+    font-size: 20px;
+    line-height: 150%;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+  .typo-b0-rg {
+    font-size: 20px;
+    line-height: 150%;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+  .typo-b1-eb {
+    font-size: 18px;
+    line-height: 150%;
+    letter-spacing: 0;
+    font-weight: 800;
+  }
+  .typo-b1-sb {
+    font-size: 18px;
+    line-height: 150%;
+    letter-spacing: 0;
+    font-weight: 600;
+  }
+  .typo-b1-md {
+    font-size: 18px;
+    line-height: 150%;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+  .typo-b1-rg {
+    font-size: 18px;
+    line-height: 150%;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+  .typo-b2-md {
+    font-size: 16px;
+    line-height: 150%;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+  .typo-b2-rg {
+    font-size: 16px;
+    line-height: 150%;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+  .typo-b3-sb {
+    font-size: 15px;
+    line-height: 150%;
+    letter-spacing: 0;
+    font-weight: 600;
+  }
+  .typo-b3-rg {
+    font-size: 15px;
+    line-height: 150%;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+  .typo-b4-sb {
+    font-size: 14px;
+    line-height: 150%;
+    letter-spacing: 0;
+    font-weight: 600;
+  }
+  .typo-b5-sb {
+    font-size: 13px;
+    line-height: 150%;
+    letter-spacing: 0;
+    font-weight: 600;
+  }
+  .typo-b5-rg {
+    font-size: 13px;
+    line-height: 150%;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+
+  .typo-c1-rg {
+    font-size: 10px;
+    line-height: 150%;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+  .typo-c2-bd {
+    font-size: 7px;
+    line-height: 150%;
+    letter-spacing: 0;
+    font-weight: 700;
+  }
+  .typo-c2-md {
+    font-size: 7px;
+    line-height: 150%;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+}

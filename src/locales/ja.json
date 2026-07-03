@@ -1,0 +1,162 @@
+{
+  "common": {
+    "close": "閉じる",
+    "settings": "設定"
+  },
+  "notifications": {
+    "title": "お知らせ",
+    "tabs": {
+      "all": "すべて",
+      "updates": "更新",
+      "messages": "メッセージ"
+    },
+    "empty": "新しいお知らせはありません。"
+  },
+  "me": {
+    "profileType": "個人",
+    "help": "ヘルプ",
+    "closeSettings": "設定を閉じる",
+    "nav": {
+      "groups": {
+        "account": "アカウント",
+        "features": "機能"
+      },
+      "items": {
+        "account": "アカウント",
+        "general": "一般",
+        "billing": "使用量と請求",
+        "personalization": "パーソナライズ",
+        "mail": "Mail",
+        "data-control": "データ管理",
+        "my-computer": "My Computer",
+        "cloud-browser": "クラウドブラウザ",
+        "skills": "スキル",
+        "connectors": "コネクター",
+        "integrations": "連携"
+      }
+    },
+    "placeholder": {
+      "description": "この設定画面は準備中です。まもなくさらに多くのオプションを提供します。"
+    },
+    "account": {
+      "fullName": "氏名",
+      "plan": {
+        "free": "無料",
+        "upgrade": "アップグレード"
+      },
+      "credits": {
+        "title": "クレジット",
+        "value": "{{used}} / {{total}}",
+        "help": "クレジットについて"
+      },
+      "dailyRefresh": {
+        "title": "毎日リフレッシュクレジット",
+        "description": "毎日00:00に300に更新",
+        "help": "毎日リフレッシュクレジットについて"
+      },
+      "personalInfo": "個人情報",
+      "email": "メール",
+      "userId": "ユーザーID",
+      "copy": "コピー",
+      "copied": "コピーしました",
+      "management": "アカウント管理",
+      "logout": {
+        "title": "このデバイスからログアウト",
+        "action": "ログアウト",
+        "pending": "ログアウト中..."
+      }
+    },
+    "general": {
+      "appearance": "外観",
+      "language": "言語",
+      "languages": {
+        "ko": "한국어",
+        "en": "English",
+        "ja": "日本語"
+      },
+      "theme": "テーマ",
+      "themes": {
+        "light": "ライト",
+        "dark": "ダーク",
+        "auto": "自動"
+      },
+      "communications": "通信設定",
+      "productUpdates": {
+        "title": "製品アップデートを受け取る",
+        "description": "新機能と改善をいち早く確認できます。",
+        "toggleLabel": "製品アップデートを受け取る"
+      },
+      "pendingTaskEmail": {
+        "title": "保留中のタスクが開始されたらメールを送る",
+        "description": "タスクが開始されたときにメールでお知らせします。",
+        "toggleLabel": "保留タスク開始メール通知"
+      },
+      "marketingAds": {
+        "title": "Develyに関する広告",
+        "description": "マーケティング目的でのデータ収集・共有に同意します。",
+        "toggleLabel": "Devely広告を受け取る"
+      }
+    }
+  },
+  "help": {
+    "title": "ヘルプセンター",
+    "description": "Develyの使い方とよくある質問を確認できます。",
+    "searchPlaceholder": "ヘルプを検索",
+    "quickLinks": {
+      "title": "クイックリンク",
+      "items": {
+        "gettingStarted": {
+          "title": "はじめに",
+          "description": "ホームでプロンプトを入力して最初のプロジェクトを作成しましょう。"
+        },
+        "projects": {
+          "title": "プロジェクト管理",
+          "description": "プロジェクト一覧で作成・編集・デプロイ状況を確認できます。"
+        },
+        "github": {
+          "title": "GitHub連携",
+          "description": "GitHub Appの権限を許可するとリポジトリを接続してコードを同期できます。"
+        },
+        "account": {
+          "title": "アカウントと設定",
+          "description": "プロフィール、言語、テーマなどのアカウント設定を変更できます。"
+        }
+      }
+    },
+    "faq": {
+      "title": "よくある質問",
+      "empty": "検索結果がありません。別のキーワードでお試しください。",
+      "items": {
+        "createProject": {
+          "question": "プロジェクトはどうやって作りますか？",
+          "answer": "ホーム画面で作りたいウェブサイトを説明するプロンプトを入力するか、テンプレートから新規プロジェクトを開始できます。"
+        },
+        "githubPermission": {
+          "question": "GitHubリポジトリが表示されません。",
+          "answer": "GitHub Appのインストールとリポジトリへのアクセス権限が必要です。案内に従って権限を許可し、一覧を更新してください。"
+        },
+        "agentChat": {
+          "question": "エージェントと会話すると何が変わりますか？",
+          "answer": "エージェントに依頼するとコード、レイアウト、コンテンツが自動で更新されます。変更はプロジェクトのコードタブで確認できます。"
+        },
+        "credits": {
+          "question": "クレジットはどのように使われますか？",
+          "answer": "エージェント作業と生成リクエストにクレジットが消費されます。設定 > アカウントで使用量を確認でき、毎日一定量が更新されます。"
+        },
+        "restoreTrash": {
+          "question": "削除した会話を復元できますか？",
+          "answer": "ゴミ箱メニューから削除したエージェント会話を確認して復元できます。"
+        },
+        "changeLanguage": {
+          "question": "言語はどこで変更できますか？",
+          "answer": "設定 > 一般 > 言語で韓国語、English、日本語から選択できます。"
+        }
+      }
+    },
+    "contact": {
+      "title": "さらにサポートが必要ですか？",
+      "description": "お問い合わせ内容をお送りいただければ、チームが確認してご返信します。",
+      "action": "メールで問い合わせ"
+    }
+  }
+}

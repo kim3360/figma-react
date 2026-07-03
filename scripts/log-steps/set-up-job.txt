@@ -1,0 +1,33 @@
+Current runner version: '2.334.0'
+##[group]Runner Image Provisioner
+Hosted Compute Agent
+Version: 20260520.533
+Commit: 189110e25284a9812c124fd27b339e2fb4f2f9db
+Build Date: 2026-05-20T17:44:04Z
+Worker ID: {1b4e4570-c627-402c-a2c2-7556c7fb1d13}
+Azure Region: westus
+##[endgroup]
+##[group]Operating System
+Ubuntu
+24.04.4
+LTS
+##[endgroup]
+##[group]Runner Image
+Image: ubuntu-24.04
+Version: 20260525.161.1
+Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260525.161/images/ubuntu/Ubuntu2404-Readme.md
+Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260525.161
+##[endgroup]
+##[group]GITHUB_TOKEN Permissions
+Contents: write
+Metadata: read
+Pages: write
+##[endgroup]
+Secret source: Actions
+Prepare workflow directory
+Prepare all required actions
+Getting action download info
+Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+Download action repository 'peaceiris/actions-gh-pages@v4' (SHA:84c30a85c19949d7eee79c4ff27748b70285e453)
+Complete job name: deploy

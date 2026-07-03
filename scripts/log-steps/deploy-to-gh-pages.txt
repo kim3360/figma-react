@@ -1,0 +1,75 @@
+##[group]Run peaceiris/actions-gh-pages@v4
+with:
+github_token: ***
+publish_dir: ./dist
+publish_branch: gh-pages
+allow_empty_commit: false
+keep_files: false
+force_orphan: false
+enable_jekyll: false
+disable_nojekyll: false
+exclude_assets: .github
+##[endgroup]
+[INFO] Usage https://github.com/peaceiris/actions-gh-pages#readme
+##[group]Dump inputs
+[INFO] GithubToken: true
+[INFO] PublishBranch: gh-pages
+[INFO] PublishDir: ./dist
+[INFO] DestinationDir:
+[INFO] ExternalRepository:
+[INFO] AllowEmptyCommit: false
+[INFO] KeepFiles: false
+[INFO] ForceOrphan: false
+[INFO] UserName:
+[INFO] UserEmail:
+[INFO] CommitMessage:
+[INFO] FullCommitMessage:
+[INFO] TagName:
+[INFO] TagMessage:
+[INFO] EnableJekyll (DisableNoJekyll): false
+[INFO] CNAME:
+[INFO] ExcludeAssets .github
+
+##[endgroup]
+##[group]Setup auth token
+[INFO] setup GITHUB_TOKEN
+##[endgroup]
+##[group]Prepare publishing assets
+[INFO] ForceOrphan: false
+[command]/usr/bin/git clone --depth=1 --single-branch --branch gh-pages ***github.com/dldnsgkr/my-todo-app.git /home/runner/actions_github_pages_1780339460774
+Cloning into '/home/runner/actions_github_pages_1780339460774'...
+[INFO] clean up /home/runner/actions_github_pages_1780339460774
+[INFO] chdir /home/runner/actions_github_pages_1780339460774
+[command]/usr/bin/git rm -r --ignore-unmatch *
+rm '.nojekyll'
+rm '404.html'
+rm 'CNAME'
+rm 'assets/index-CBa4jA0h.js'
+rm 'assets/index-V-a_CfBc.css'
+rm 'favicon.svg'
+rm 'icons.svg'
+rm 'index.html'
+[INFO] chdir /home/runner/actions_github_pages_1780339460774
+[INFO] prepare publishing assets
+[INFO] copy /home/runner/work/my-todo-app/my-todo-app/dist to /home/runner/actions_github_pages_1780339460774
+[INFO] delete excluded assets
+[INFO] Created /home/runner/actions_github_pages_1780339460774/.nojekyll
+##[endgroup]
+##[group]Setup Git config
+[command]/usr/bin/git remote rm origin
+[command]/usr/bin/git remote add origin ***github.com/dldnsgkr/my-todo-app.git
+[command]/usr/bin/git add --all
+[command]/usr/bin/git config user.name dldnsgkr
+[command]/usr/bin/git config user.email dldnsgkr@users.noreply.github.com
+##[endgroup]
+##[group]Create a commit
+[command]/usr/bin/git commit -m deploy: 86360b8d65ea027ec862cc0bac0849ca9c8f3192
+On branch gh-pages
+nothing to commit, working tree clean
+[INFO] skip commit
+##[endgroup]
+##[group]Push the commit or tag
+[command]/usr/bin/git push origin gh-pages
+Everything up-to-date
+##[endgroup]
+[INFO] Action successfully completed

@@ -1,0 +1,27 @@
+##[group]Run actions/setup-node@v4
+with:
+node-version: 20
+cache: npm
+always-auth: false
+check-latest: false
+token: ***
+##[endgroup]
+Attempting to download 20...
+Acquiring 20.20.2 - x64 from https://github.com/actions/node-versions/releases/download/20.20.2-23521894959/node-20.20.2-linux-x64.tar.gz
+Extracting ...
+[command]/usr/bin/tar xz --strip 1 --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/2a96bbf4-a98a-44d9-90e9-326e3e5c6f7e -f /home/runner/work/_temp/00e893f6-a705-4825-ab29-fa6473e86b6c
+Adding to the cache ...
+##[group]Environment details
+node: v20.20.2
+npm: 10.8.2
+yarn: 1.22.22
+##[endgroup]
+[command]/opt/hostedtoolcache/node/20.20.2/x64/bin/npm config get cache
+/home/runner/.npm
+Cache hit for: node-cache-Linux-x64-npm-d46723e3ebf496e7f4d84b82a47ff597f340c9595dda5eadfc9777450acceb9d
+Received 4194304 of 35134472 (11.9%), 4.0 MBs/sec
+Received 35134472 of 35134472 (100.0%), 23.7 MBs/sec
+Cache Size: ~34 MB (35134472 B)
+[command]/usr/bin/tar -xf /home/runner/work/_temp/8822f244-4324-47fa-8dcb-dd5f76c7f1ec/cache.tzst -P -C /home/runner/work/my-todo-app/my-todo-app --use-compress-program unzstd
+Cache restored successfully
+Cache restored from key: node-cache-Linux-x64-npm-d46723e3ebf496e7f4d84b82a47ff597f340c9595dda5eadfc9777450acceb9d

@@ -1,0 +1,162 @@
+{
+  "common": {
+    "close": "Close",
+    "settings": "Settings"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "tabs": {
+      "all": "All",
+      "updates": "Updates",
+      "messages": "Messages"
+    },
+    "empty": "No new notifications."
+  },
+  "me": {
+    "profileType": "Personal",
+    "help": "Get help",
+    "closeSettings": "Close settings",
+    "nav": {
+      "groups": {
+        "account": "Account",
+        "features": "Features"
+      },
+      "items": {
+        "account": "Account",
+        "general": "General",
+        "billing": "Usage & billing",
+        "personalization": "Personalization",
+        "mail": "Mail",
+        "data-control": "Data control",
+        "my-computer": "My Computer",
+        "cloud-browser": "Cloud browser",
+        "skills": "Skills",
+        "connectors": "Connectors",
+        "integrations": "Integrations"
+      }
+    },
+    "placeholder": {
+      "description": "This settings screen is coming soon. More options will be available shortly."
+    },
+    "account": {
+      "fullName": "Full name",
+      "plan": {
+        "free": "Free",
+        "upgrade": "Upgrade"
+      },
+      "credits": {
+        "title": "Credits",
+        "value": "{{used}} / {{total}}",
+        "help": "About credits"
+      },
+      "dailyRefresh": {
+        "title": "Daily refresh credits",
+        "description": "Refreshes to 300 every day at 00:00",
+        "help": "About daily refresh credits"
+      },
+      "personalInfo": "Personal information",
+      "email": "Email",
+      "userId": "User ID",
+      "copy": "Copy",
+      "copied": "Copied",
+      "management": "Account management",
+      "logout": {
+        "title": "Log out from this device",
+        "action": "Log out",
+        "pending": "Logging out..."
+      }
+    },
+    "general": {
+      "appearance": "Appearance",
+      "language": "Language",
+      "languages": {
+        "ko": "한국어",
+        "en": "English",
+        "ja": "日本語"
+      },
+      "theme": "Theme",
+      "themes": {
+        "light": "Light",
+        "dark": "Dark",
+        "auto": "Auto"
+      },
+      "communications": "Communication settings",
+      "productUpdates": {
+        "title": "Receive product updates",
+        "description": "Be the first to know about new features and improvements.",
+        "toggleLabel": "Receive product updates"
+      },
+      "pendingTaskEmail": {
+        "title": "Email me when my pending tasks start",
+        "description": "We'll notify you by email when a task begins.",
+        "toggleLabel": "Pending task start email notification"
+      },
+      "marketingAds": {
+        "title": "Ads about Devely",
+        "description": "I agree to the collection and sharing of data for marketing purposes.",
+        "toggleLabel": "Receive Devely marketing ads"
+      }
+    }
+  },
+  "help": {
+    "title": "Help center",
+    "description": "Learn how to use Devely and find answers to common questions.",
+    "searchPlaceholder": "Search for help",
+    "quickLinks": {
+      "title": "Quick links",
+      "items": {
+        "gettingStarted": {
+          "title": "Getting started",
+          "description": "Enter a prompt on the home page to create your first project."
+        },
+        "projects": {
+          "title": "Project management",
+          "description": "View, edit, and track deployment status from the projects page."
+        },
+        "github": {
+          "title": "GitHub integration",
+          "description": "Grant GitHub App permissions to connect repositories and sync code."
+        },
+        "account": {
+          "title": "Account & settings",
+          "description": "Update your profile, language, theme, and other account preferences."
+        }
+      }
+    },
+    "faq": {
+      "title": "Frequently asked questions",
+      "empty": "No results found. Try a different keyword.",
+      "items": {
+        "createProject": {
+          "question": "How do I create a project?",
+          "answer": "Describe the website you want on the home page, or start from a template to create a new project."
+        },
+        "githubPermission": {
+          "question": "Why can't I see my GitHub repositories?",
+          "answer": "You need to install the GitHub App and grant repository access. Follow the prompts, then refresh the list."
+        },
+        "agentChat": {
+          "question": "What happens when I chat with the agent?",
+          "answer": "The agent can update code, layout, and content automatically. Review changes in the project code tab."
+        },
+        "credits": {
+          "question": "How are credits used?",
+          "answer": "Credits are consumed by agent tasks and generation requests. Check usage in Settings > Account. A daily amount refreshes each day."
+        },
+        "restoreTrash": {
+          "question": "Can I restore deleted conversations?",
+          "answer": "Yes. Open Trash to review deleted agent conversations and restore them."
+        },
+        "changeLanguage": {
+          "question": "Where can I change the language?",
+          "answer": "Go to Settings > General > Language and choose Korean, English, or Japanese."
+        }
+      }
+    },
+    "contact": {
+      "title": "Still need help?",
+      "description": "Send us a message and our team will get back to you.",
+      "action": "Email support"
+    }
+  }
+}

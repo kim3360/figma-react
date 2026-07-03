@@ -1,0 +1,1037 @@
+{
+  "meta": {
+    "generatedAt": "2026-06-01T19:25:38.556Z",
+    "runId": "26774725583",
+    "workflow": "Dvely Deploy to GitHub Pages",
+    "repository": "dldnsgkr/my-todo-app",
+    "branch": "main",
+    "trigger": "workflow_dispatch",
+    "status": "success",
+    "startedAt": "2026-06-01T18:43:57Z",
+    "duration": "28s"
+  },
+  "jobs": [
+    {
+      "name": "deploy",
+      "result": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "result": "success",
+          "startedAt": "2026-06-01T18:44:07Z",
+          "completedAt": "2026-06-01T18:44:09Z",
+          "lines": [
+            {
+              "timestamp": "2026-06-01T18:44:07.000Z",
+              "message": "Current runner version: '2.334.0'"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:07.062Z",
+              "message": "##[group]Runner Image Provisioner"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:07.125Z",
+              "message": "Hosted Compute Agent"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:07.187Z",
+              "message": "Version: 20260520.533"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:07.250Z",
+              "message": "Commit: 189110e25284a9812c124fd27b339e2fb4f2f9db"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:07.312Z",
+              "message": "Build Date: 2026-05-20T17:44:04Z"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:07.375Z",
+              "message": "Worker ID: {1b4e4570-c627-402c-a2c2-7556c7fb1d13}"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:07.437Z",
+              "message": "Azure Region: westus"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:07.500Z",
+              "message": "##[endgroup]"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:07.562Z",
+              "message": "##[group]Operating System"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:07.625Z",
+              "message": "Ubuntu"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:07.687Z",
+              "message": "24.04.4"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:07.750Z",
+              "message": "LTS"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:07.812Z",
+              "message": "##[endgroup]"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:07.875Z",
+              "message": "##[group]Runner Image"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:07.937Z",
+              "message": "Image: ubuntu-24.04"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:08.000Z",
+              "message": "Version: 20260525.161.1"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:08.062Z",
+              "message": "Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260525.161/images/ubuntu/Ubuntu2404-Readme.md"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:08.125Z",
+              "message": "Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260525.161"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:08.187Z",
+              "message": "##[endgroup]"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:08.250Z",
+              "message": "##[group]GITHUB_TOKEN Permissions"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:08.312Z",
+              "message": "Contents: write"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:08.375Z",
+              "message": "Metadata: read"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:08.437Z",
+              "message": "Pages: write"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:08.500Z",
+              "message": "##[endgroup]"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:08.562Z",
+              "message": "Secret source: Actions"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:08.625Z",
+              "message": "Prepare workflow directory"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:08.687Z",
+              "message": "Prepare all required actions"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:08.750Z",
+              "message": "Getting action download info"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:08.812Z",
+              "message": "Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:08.875Z",
+              "message": "Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:08.937Z",
+              "message": "Download action repository 'peaceiris/actions-gh-pages@v4' (SHA:84c30a85c19949d7eee79c4ff27748b70285e453)"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.000Z",
+              "message": "Complete job name: deploy"
+            }
+          ]
+        },
+        {
+          "name": "Checkout",
+          "result": "success",
+          "startedAt": "2026-06-01T18:44:09Z",
+          "completedAt": "2026-06-01T18:44:10Z",
+          "lines": [
+            {
+              "timestamp": "2026-06-01T18:44:09.000Z",
+              "message": "##[group]Run actions/checkout@v4"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.035Z",
+              "message": "with:"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.071Z",
+              "message": "ref: v1"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.107Z",
+              "message": "repository: dldnsgkr/my-todo-app"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.142Z",
+              "message": "token: ***"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.178Z",
+              "message": "ssh-strict: true"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.214Z",
+              "message": "ssh-user: git"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.250Z",
+              "message": "persist-credentials: true"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.285Z",
+              "message": "clean: true"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.321Z",
+              "message": "sparse-checkout-cone-mode: true"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.357Z",
+              "message": "fetch-depth: 1"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.392Z",
+              "message": "fetch-tags: false"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.428Z",
+              "message": "show-progress: true"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.464Z",
+              "message": "lfs: false"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.500Z",
+              "message": "submodules: false"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.535Z",
+              "message": "set-safe-directory: true"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.571Z",
+              "message": "##[endgroup]"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.607Z",
+              "message": "Syncing repository: dldnsgkr/my-todo-app"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.642Z",
+              "message": "##[group]Getting Git version info"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.678Z",
+              "message": "Working directory is '/home/runner/work/my-todo-app/my-todo-app'"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.714Z",
+              "message": "[command]/usr/bin/git version"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.750Z",
+              "message": "git version 2.54.0"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.785Z",
+              "message": "##[endgroup]"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.821Z",
+              "message": "##[group]Checking out the ref"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.857Z",
+              "message": "[command]/usr/bin/git checkout --progress --force refs/tags/v1"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.892Z",
+              "message": "HEAD is now at 4258a26 Initial commit: React + Vite todo app"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.928Z",
+              "message": "##[endgroup]"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:09.964Z",
+              "message": "[command]/usr/bin/git log -1 --format=%H"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:10.000Z",
+              "message": "4258a2631a67bbcc7870f6857bed4ea8f0503191"
+            }
+          ]
+        },
+        {
+          "name": "Setup Node.js",
+          "result": "success",
+          "startedAt": "2026-06-01T18:44:10Z",
+          "completedAt": "2026-06-01T18:44:17Z",
+          "lines": [
+            {
+              "timestamp": "2026-06-01T18:44:10.000Z",
+              "message": "##[group]Run actions/setup-node@v4"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:10.269Z",
+              "message": "with:"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:10.538Z",
+              "message": "node-version: 20"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:10.807Z",
+              "message": "cache: npm"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:11.076Z",
+              "message": "always-auth: false"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:11.346Z",
+              "message": "check-latest: false"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:11.615Z",
+              "message": "token: ***"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:11.884Z",
+              "message": "##[endgroup]"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:12.153Z",
+              "message": "Attempting to download 20..."
+            },
+            {
+              "timestamp": "2026-06-01T18:44:12.423Z",
+              "message": "Acquiring 20.20.2 - x64 from https://github.com/actions/node-versions/releases/download/20.20.2-23521894959/node-20.20.2-linux-x64.tar.gz"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:12.692Z",
+              "message": "Extracting ..."
+            },
+            {
+              "timestamp": "2026-06-01T18:44:12.961Z",
+              "message": "[command]/usr/bin/tar xz --strip 1 --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/2a96bbf4-a98a-44d9-90e9-326e3e5c6f7e -f /home/runner/work/_temp/00e893f6-a705-4825-ab29-fa6473e86b6c"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:13.230Z",
+              "message": "Adding to the cache ..."
+            },
+            {
+              "timestamp": "2026-06-01T18:44:13.500Z",
+              "message": "##[group]Environment details"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:13.769Z",
+              "message": "node: v20.20.2"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:14.038Z",
+              "message": "npm: 10.8.2"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:14.307Z",
+              "message": "yarn: 1.22.22"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:14.576Z",
+              "message": "##[endgroup]"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:14.846Z",
+              "message": "[command]/opt/hostedtoolcache/node/20.20.2/x64/bin/npm config get cache"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:15.115Z",
+              "message": "/home/runner/.npm"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:15.384Z",
+              "message": "Cache hit for: node-cache-Linux-x64-npm-d46723e3ebf496e7f4d84b82a47ff597f340c9595dda5eadfc9777450acceb9d"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:15.653Z",
+              "message": "Received 4194304 of 35134472 (11.9%), 4.0 MBs/sec"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:15.923Z",
+              "message": "Received 35134472 of 35134472 (100.0%), 23.7 MBs/sec"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:16.192Z",
+              "message": "Cache Size: ~34 MB (35134472 B)"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:16.461Z",
+              "message": "[command]/usr/bin/tar -xf /home/runner/work/_temp/8822f244-4324-47fa-8dcb-dd5f76c7f1ec/cache.tzst -P -C /home/runner/work/my-todo-app/my-todo-app --use-compress-program unzstd"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:16.730Z",
+              "message": "Cache restored successfully"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:17.000Z",
+              "message": "Cache restored from key: node-cache-Linux-x64-npm-d46723e3ebf496e7f4d84b82a47ff597f340c9595dda5eadfc9777450acceb9d"
+            }
+          ]
+        },
+        {
+          "name": "Resolve base path",
+          "result": "success",
+          "startedAt": "2026-06-01T18:44:17Z",
+          "completedAt": "2026-06-01T18:44:18Z",
+          "lines": [
+            {
+              "timestamp": "2026-06-01T18:44:17.000Z",
+              "message": "##[group]Run REPO=\"my-todo-app\""
+            },
+            {
+              "timestamp": "2026-06-01T18:44:17.166Z",
+              "message": "REPO=\"my-todo-app\""
+            },
+            {
+              "timestamp": "2026-06-01T18:44:17.333Z",
+              "message": "OWNER=\"dldnsgkr\""
+            },
+            {
+              "timestamp": "2026-06-01T18:44:17.500Z",
+              "message": "echo \"path=/${REPO}/\" >> $GITHUB_OUTPUT"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:17.666Z",
+              "message": "echo \"base=/${REPO}\" >> $GITHUB_OUTPUT"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:17.833Z",
+              "message": "shell: /usr/bin/bash -e {0}"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:18.000Z",
+              "message": "##[endgroup]"
+            }
+          ]
+        },
+        {
+          "name": "Install dependencies",
+          "result": "success",
+          "startedAt": "2026-06-01T18:44:18Z",
+          "completedAt": "2026-06-01T18:44:19Z",
+          "lines": [
+            {
+              "timestamp": "2026-06-01T18:44:18.000Z",
+              "message": "##[group]Run npm install"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:18.142Z",
+              "message": "npm install"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:18.285Z",
+              "message": "shell: /usr/bin/bash -e {0}"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:18.428Z",
+              "message": "##[endgroup]"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:18.571Z",
+              "message": "added 137 packages, and audited 138 packages in 2s"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:18.714Z",
+              "message": "32 packages are looking for funding"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:18.857Z",
+              "message": "run `npm fund` for details"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:19.000Z",
+              "message": "found 0 vulnerabilities"
+            }
+          ]
+        },
+        {
+          "name": "Build",
+          "result": "success",
+          "startedAt": "2026-06-01T18:44:19Z",
+          "completedAt": "2026-06-01T18:44:20Z",
+          "lines": [
+            {
+              "timestamp": "2026-06-01T18:44:19.000Z",
+              "message": "##[group]Run npx vite build --base=/"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:19.071Z",
+              "message": "npx vite build --base=/"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:19.142Z",
+              "message": "shell: /usr/bin/bash -e {0}"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:19.214Z",
+              "message": "env:"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:19.285Z",
+              "message": "BASE_PATH: /"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:19.357Z",
+              "message": "PUBLIC_URL: /"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:19.428Z",
+              "message": "##[endgroup]"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:19.500Z",
+              "message": "vite v8.0.16 building client environment for production..."
+            },
+            {
+              "timestamp": "2026-06-01T18:44:19.571Z",
+              "message": "transforming...✓ 17 modules transformed."
+            },
+            {
+              "timestamp": "2026-06-01T18:44:19.642Z",
+              "message": "rendering chunks..."
+            },
+            {
+              "timestamp": "2026-06-01T18:44:19.714Z",
+              "message": "computing gzip size..."
+            },
+            {
+              "timestamp": "2026-06-01T18:44:19.785Z",
+              "message": "dist/index.html                   0.46 kB │ gzip:  0.29 kB"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:19.857Z",
+              "message": "dist/assets/index-V-a_CfBc.css    1.93 kB │ gzip:  0.83 kB"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:19.928Z",
+              "message": "dist/assets/index-CBa4jA0h.js   191.79 kB │ gzip: 60.66 kB"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "✓ built in 119ms"
+            }
+          ]
+        },
+        {
+          "name": "Copy index.html to 404.html",
+          "result": "success",
+          "startedAt": "2026-06-01T18:44:20Z",
+          "completedAt": "2026-06-01T18:44:20Z",
+          "lines": [
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "##[group]Run [ -f ./dist/index.html ] && cp ./dist/index.html ./dist/404.html || true"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "[ -f ./dist/index.html ] && cp ./dist/index.html ./dist/404.html || true"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "shell: /usr/bin/bash -e {0}"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.001Z",
+              "message": "##[endgroup]"
+            }
+          ]
+        },
+        {
+          "name": "Preserve custom domain",
+          "result": "success",
+          "startedAt": "2026-06-01T18:44:20Z",
+          "completedAt": "2026-06-01T18:44:20Z",
+          "lines": [
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "##[group]Run mkdir -p ./dist"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "mkdir -p ./dist"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "CNAME=\"todo.qeploy.com\""
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "if [ -n \"$CNAME\" ]; then"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "printf '%s\\n' \"$CNAME\" > ./dist/CNAME"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "echo \"GitHub Pages custom domain CNAME 파일 생성 완료\""
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "exit 0"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "fi"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "if git fetch origin gh-pages --depth=1; then"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "if git show FETCH_HEAD:CNAME > /tmp/dvely-cname 2>/dev/null; then"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "cp /tmp/dvely-cname ./dist/CNAME"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "echo \"기존 CNAME 파일 보존 완료\""
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "else"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "echo \"기존 CNAME 파일 없음\""
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "fi"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "else"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "echo \"gh-pages 브랜치 fetch 실패\""
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "fi"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "else"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "echo \"gh-pages 브랜치 없음\""
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "fi"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "shell: /usr/bin/bash -e {0}"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "##[endgroup]"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.001Z",
+              "message": "GitHub Pages custom domain CNAME 파일 생성 완료"
+            }
+          ]
+        },
+        {
+          "name": "Deploy to gh-pages",
+          "result": "success",
+          "startedAt": "2026-06-01T18:44:20Z",
+          "completedAt": "2026-06-01T18:44:21Z",
+          "lines": [
+            {
+              "timestamp": "2026-06-01T18:44:20.000Z",
+              "message": "##[group]Run peaceiris/actions-gh-pages@v4"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.013Z",
+              "message": "with:"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.027Z",
+              "message": "github_token: ***"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.041Z",
+              "message": "publish_dir: ./dist"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.054Z",
+              "message": "publish_branch: gh-pages"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.068Z",
+              "message": "allow_empty_commit: false"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.082Z",
+              "message": "keep_files: false"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.095Z",
+              "message": "force_orphan: false"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.109Z",
+              "message": "enable_jekyll: false"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.123Z",
+              "message": "disable_nojekyll: false"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.136Z",
+              "message": "exclude_assets: .github"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.150Z",
+              "message": "##[endgroup]"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.164Z",
+              "message": "[INFO] Usage https://github.com/peaceiris/actions-gh-pages#readme"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.178Z",
+              "message": "##[group]Dump inputs"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.191Z",
+              "message": "[INFO] GithubToken: true"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.205Z",
+              "message": "[INFO] PublishBranch: gh-pages"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.219Z",
+              "message": "[INFO] PublishDir: ./dist"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.232Z",
+              "message": "[INFO] DestinationDir:"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.246Z",
+              "message": "[INFO] ExternalRepository:"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.260Z",
+              "message": "[INFO] AllowEmptyCommit: false"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.273Z",
+              "message": "[INFO] KeepFiles: false"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.287Z",
+              "message": "[INFO] ForceOrphan: false"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.301Z",
+              "message": "[INFO] UserName:"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.315Z",
+              "message": "[INFO] UserEmail:"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.328Z",
+              "message": "[INFO] CommitMessage:"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.342Z",
+              "message": "[INFO] FullCommitMessage:"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.356Z",
+              "message": "[INFO] TagName:"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.369Z",
+              "message": "[INFO] TagMessage:"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.383Z",
+              "message": "[INFO] EnableJekyll (DisableNoJekyll): false"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.397Z",
+              "message": "[INFO] CNAME:"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.410Z",
+              "message": "[INFO] ExcludeAssets .github"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.424Z",
+              "message": "##[endgroup]"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.438Z",
+              "message": "##[group]Setup auth token"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.452Z",
+              "message": "[INFO] setup GITHUB_TOKEN"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.465Z",
+              "message": "##[endgroup]"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.479Z",
+              "message": "##[group]Prepare publishing assets"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.493Z",
+              "message": "[INFO] ForceOrphan: false"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.506Z",
+              "message": "[command]/usr/bin/git clone --depth=1 --single-branch --branch gh-pages ***github.com/dldnsgkr/my-todo-app.git /home/runner/actions_github_pages_1780339460774"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.520Z",
+              "message": "Cloning into '/home/runner/actions_github_pages_1780339460774'..."
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.534Z",
+              "message": "[INFO] clean up /home/runner/actions_github_pages_1780339460774"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.547Z",
+              "message": "[INFO] chdir /home/runner/actions_github_pages_1780339460774"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.561Z",
+              "message": "[command]/usr/bin/git rm -r --ignore-unmatch *"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.575Z",
+              "message": "rm '.nojekyll'"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.589Z",
+              "message": "rm '404.html'"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.602Z",
+              "message": "rm 'CNAME'"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.616Z",
+              "message": "rm 'assets/index-CBa4jA0h.js'"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.630Z",
+              "message": "rm 'assets/index-V-a_CfBc.css'"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.643Z",
+              "message": "rm 'favicon.svg'"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.657Z",
+              "message": "rm 'icons.svg'"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.671Z",
+              "message": "rm 'index.html'"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.684Z",
+              "message": "[INFO] chdir /home/runner/actions_github_pages_1780339460774"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.698Z",
+              "message": "[INFO] prepare publishing assets"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.712Z",
+              "message": "[INFO] copy /home/runner/work/my-todo-app/my-todo-app/dist to /home/runner/actions_github_pages_1780339460774"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.726Z",
+              "message": "[INFO] delete excluded assets"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.739Z",
+              "message": "[INFO] Created /home/runner/actions_github_pages_1780339460774/.nojekyll"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.753Z",
+              "message": "##[endgroup]"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.767Z",
+              "message": "##[group]Setup Git config"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.780Z",
+              "message": "[command]/usr/bin/git remote rm origin"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.794Z",
+              "message": "[command]/usr/bin/git remote add origin ***github.com/dldnsgkr/my-todo-app.git"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.808Z",
+              "message": "[command]/usr/bin/git add --all"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.821Z",
+              "message": "[command]/usr/bin/git config user.name dldnsgkr"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.835Z",
+              "message": "[command]/usr/bin/git config user.email dldnsgkr@users.noreply.github.com"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.849Z",
+              "message": "##[endgroup]"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.863Z",
+              "message": "##[group]Create a commit"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.876Z",
+              "message": "[command]/usr/bin/git commit -m deploy: 86360b8d65ea027ec862cc0bac0849ca9c8f3192"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.890Z",
+              "message": "On branch gh-pages"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.904Z",
+              "message": "nothing to commit, working tree clean"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.917Z",
+              "message": "[INFO] skip commit"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.931Z",
+              "message": "##[endgroup]"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.945Z",
+              "message": "##[group]Push the commit or tag"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.958Z",
+              "message": "[command]/usr/bin/git push origin gh-pages"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.972Z",
+              "message": "Everything up-to-date"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:20.986Z",
+              "message": "##[endgroup]"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:21.000Z",
+              "message": "[INFO] Action successfully completed"
+            }
+          ]
+        },
+        {
+          "name": "Post Setup Node.js",
+          "result": "success",
+          "startedAt": "2026-06-01T18:44:21Z",
+          "completedAt": "2026-06-01T18:44:21Z",
+          "lines": [
+            {
+              "timestamp": "2026-06-01T18:44:21.000Z",
+              "message": "Post job cleanup."
+            },
+            {
+              "timestamp": "2026-06-01T18:44:21.001Z",
+              "message": "Cache hit occurred on the primary key node-cache-Linux-x64-npm-d46723e3ebf496e7f4d84b82a47ff597f340c9595dda5eadfc9777450acceb9d, not saving cache."
+            }
+          ]
+        },
+        {
+          "name": "Post Checkout",
+          "result": "success",
+          "startedAt": "2026-06-01T18:44:21Z",
+          "completedAt": "2026-06-01T18:44:22Z",
+          "lines": [
+            {
+              "timestamp": "2026-06-01T18:44:21.000Z",
+              "message": "Post job cleanup."
+            },
+            {
+              "timestamp": "2026-06-01T18:44:21.250Z",
+              "message": "[command]/usr/bin/git version"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:21.500Z",
+              "message": "git version 2.54.0"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:21.750Z",
+              "message": "[command]/usr/bin/git config --local --name-only --get-regexp http\\.https\\:\\/\\/github\\.com\\/\\.extraheader"
+            },
+            {
+              "timestamp": "2026-06-01T18:44:22.000Z",
+              "message": "[command]/usr/bin/git submodule foreach --recursive sh -c \"git config --local --name-only --get-regexp 'http\\.https\\:\\/\\/github\\.com\\/\\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+            }
+          ]
+        },
+        {
+          "name": "Complete job",
+          "result": "success",
+          "startedAt": "2026-06-01T18:44:22Z",
+          "completedAt": "2026-06-01T18:44:22Z",
+          "lines": [
+            {
+              "timestamp": "2026-06-01T18:44:22Z",
+              "message": "Complete job completed"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

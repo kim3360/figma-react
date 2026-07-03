@@ -1,0 +1,11 @@
+##[group]Run npm install
+npm install
+shell: /usr/bin/bash -e {0}
+##[endgroup]
+
+added 137 packages, and audited 138 packages in 2s
+
+32 packages are looking for funding
+run `npm fund` for details
+
+found 0 vulnerabilities

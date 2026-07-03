@@ -1,0 +1,7 @@
+##[group]Run REPO="my-todo-app"
+REPO="my-todo-app"
+OWNER="dldnsgkr"
+echo "path=/${REPO}/" >> $GITHUB_OUTPUT
+echo "base=/${REPO}" >> $GITHUB_OUTPUT
+shell: /usr/bin/bash -e {0}
+##[endgroup]
