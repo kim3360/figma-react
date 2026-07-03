@@ -4,7 +4,6 @@ import { GitBranch } from 'lucide-react';
 import { fetchAndPersistUserInfo } from '@/api/user';
 import { fetchGitHubAppInstallUrl } from '@/api/auth';
 import { GITHUB_APP_INSTALL_REQUIRED_EVENT } from '@/constants/authEvents';
-import { isDemoMode } from '@/lib/demoMode';
 import {
   GITHUB_APP_INSTALL_POPUP_NAME,
   GITHUB_APP_INSTALL_SUCCESS_MESSAGE,
@@ -17,7 +16,6 @@ function GitHubAppInstallPromptDialog() {
 
   // 앱 마운트 시 체크 — 이미 로그인된 상태(새로고침 등)에서도 감지
   useEffect(() => {
-    if (isDemoMode()) return;
     if (!localStorage.getItem('accessToken')) return;
 
     void fetchAndPersistUserInfo().then((response) => {
@@ -29,7 +27,6 @@ function GitHubAppInstallPromptDialog() {
 
   // OAuth 로그인 직후 이벤트 수신
   useEffect(() => {
-    if (isDemoMode()) return;
     const handleRequired = () => setOpen(true);
     window.addEventListener(GITHUB_APP_INSTALL_REQUIRED_EVENT, handleRequired);
     return () => window.removeEventListener(GITHUB_APP_INSTALL_REQUIRED_EVENT, handleRequired);

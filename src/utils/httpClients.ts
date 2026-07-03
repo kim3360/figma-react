@@ -6,7 +6,6 @@ import axios, {
 } from 'axios';
 import { dispatchAuthRedirectHome } from '@/constants/authEvents';
 import { clearAppLocalStorage } from '@/lib/clearAppStorage';
-import { isDemoMode } from '@/lib/demoMode';
 
 type TokenPair = {
   value: string;
@@ -63,10 +62,6 @@ class Http {
   }
 
   private goLogin(reason: string) {
-    if (isDemoMode()) {
-      console.log('[AUTH_FLOW] demo mode — skip redirect:', reason);
-      return;
-    }
     console.log('[AUTH_FLOW] goLogin:', reason);
     this.clearTokens();
     dispatchAuthRedirectHome();
