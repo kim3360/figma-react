@@ -3,7 +3,7 @@ import HomeTemplateCard, {
   type HomeTemplateCardData,
 } from '@/components/layout/home/HomeTemplateCard';
 import HomeAddTemplateCard from '@/components/layout/home/HomeAddTemplateCard';
-import Filter, { FilterSelect } from '@/components/ui/filter';
+import Filter, { FilterSelect } from '@/components/ui/Filter';
 import { homeTemplates } from '@/mocks/home/homeTemplates';
 import { cn } from '@/lib/utils';
 

@@ -3,7 +3,7 @@ import { LayoutGrid, List, Plus } from 'lucide-react';
 import ProjectCard from './ProjectCard';
 import ProjectNavLink from '@/components/layout/project/ProjectNavLink';
 import ProjectCreateDialog from './ProjectCreateDialog';
-import { FilterSelect } from '@/components/ui/filter';
+import { FilterSelect } from '@/components/ui/Filter';
 import { useProjectListQuery } from '@/api/projects';
 import { formatProjectDisplayName } from '@/components/layout/project/agentChat.utils';
 import { hasProjectTemplate, templateTypeToPreviewVariant } from '@/lib/projectTemplate';
