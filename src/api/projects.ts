@@ -1,6 +1,8 @@
 import Http from '@/utils/httpClients';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { errorResponse, succesResponse } from '@/utils/response';
+import { isDemoMode } from '@/lib/demoMode';
+import * as demoApi from '@/mocks/fixtures/demoApi';
 import {
   deleteProjectParamsSchema,
   getProjectDetailParamsSchema,
@@ -41,6 +43,10 @@ const defaultQueryOptions = {
 
 /** GitHub 저장소 목록 조회 API GET */
 async function getGithubRepositoryList() {
+  if (isDemoMode()) {
+    return [];
+  }
+
   return Http.instance
     .get<GetGithubRepositoryListResType>(`${endpoint}/github/repositories`)
     .then((response) => {
@@ -52,6 +58,10 @@ async function getGithubRepositoryList() {
 
 /** 프로젝트 목록 조회 API GET */
 async function getProjectList() {
+  if (isDemoMode()) {
+    return demoApi.demoGetProjectList();
+  }
+
   return Http.instance
     .get<GetProjectListResType>(endpoint)
     .then((response) => {
@@ -65,6 +75,10 @@ async function getProjectList() {
 async function getProjectDetail(projectId: number) {
   const { projectId: id } = getProjectDetailParamsSchema.parse({ projectId });
 
+  if (isDemoMode()) {
+    return demoApi.demoGetProjectDetail(id);
+  }
+
   return Http.instance
     .get<GetProjectDetailResType>(`${endpoint}/${id}`)
     .then((response) => {
@@ -75,6 +89,10 @@ async function getProjectDetail(projectId: number) {
 }
 
 async function getProjectDetailBundle(projectId: number) {
+  if (isDemoMode()) {
+    return demoApi.demoGetProjectDetailBundle(projectId);
+  }
+
   const [projectResult, overviewResult, commitsResult, activityLogsResult, repositoryHealthResult] =
     await Promise.allSettled([
       getProjectDetail(projectId),
@@ -102,6 +120,10 @@ async function getProjectDetailBundle(projectId: number) {
 async function postProjectCreate(params: PostProjectCreateReqType) {
   const payload = postProjectCreateReqSchema.parse(params);
 
+  if (isDemoMode()) {
+    return demoApi.demoPostProjectCreate(payload);
+  }
+
   return Http.instance
     .post<PostProjectCreateResType>(endpoint, payload)
     .then((response) => {
@@ -114,6 +136,10 @@ async function postProjectCreate(params: PostProjectCreateReqType) {
 /** 프로젝트 활동 로그 조회 API GET */
 async function getProjectActivityLogList(projectId: number) {
   const { projectId: id } = getProjectDetailParamsSchema.parse({ projectId });
+
+  if (isDemoMode()) {
+    return demoApi.demoGetProjectActivityLogList();
+  }
 
   return Http.instance
     .get<GetProjectActivityLogListResType>(`${endpoint}/${id}/activity-logs`)
@@ -128,6 +154,10 @@ async function getProjectActivityLogList(projectId: number) {
 async function getProjectCommitList(projectId: number) {
   const { projectId: id } = getProjectDetailParamsSchema.parse({ projectId });
 
+  if (isDemoMode()) {
+    return demoApi.demoGetProjectCommitList();
+  }
+
   return Http.instance
     .get<GetProjectCommitListResType>(`${endpoint}/${id}/commits`)
     .then((response) => {
@@ -141,6 +171,10 @@ async function getProjectCommitList(projectId: number) {
 async function getProjectOverview(projectId: number) {
   const { projectId: id } = getProjectDetailParamsSchema.parse({ projectId });
 
+  if (isDemoMode()) {
+    return demoApi.demoGetProjectOverview(id);
+  }
+
   return Http.instance
     .get<GetProjectOverviewResType>(`${endpoint}/${id}/overview`)
     .then((response) => {
@@ -153,6 +187,10 @@ async function getProjectOverview(projectId: number) {
 /** 프로젝트 저장소 health 확인 API GET */
 async function getProjectRepositoryHealth(projectId: number) {
   const { projectId: id } = getProjectDetailParamsSchema.parse({ projectId });
+
+  if (isDemoMode()) {
+    return demoApi.demoGetProjectRepositoryHealth();
+  }
 
   return Http.instance
     .get<GetProjectRepositoryHealthResType>(`${endpoint}/${id}/repository-health`)

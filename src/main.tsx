@@ -5,9 +5,12 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { RouterProvider } from '@tanstack/react-router';
 import './index.css';
 import '@/lib/i18n';
+import { initDemoSession } from '@/lib/demoMode';
 import { router } from './router';
 
 const queryClient = new QueryClient();
+
+initDemoSession();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

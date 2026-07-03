@@ -3,6 +3,8 @@ import { errorResponse, succesResponse } from '@/utils/response';
 import { getUserMeResSchema, userSchema, type GetUserMeResType } from '@/types/user.type';
 import { clearStoredUser, readStoredUser, writeStoredUser } from '@/lib/userStorage';
 import { useQuery } from '@tanstack/react-query';
+import { isDemoMode } from '@/lib/demoMode';
+import { demoGetUserInfo } from '@/mocks/fixtures/demoApi';
 
 const endpoint = '/users';
 
@@ -44,6 +46,10 @@ function parseUserMeResponse(raw: unknown): GetUserMeResType {
 
 /** GET /users/me — 현재 사용자 정보 조회 */
 async function getUserInfo() {
+  if (isDemoMode()) {
+    return demoGetUserInfo();
+  }
+
   return Http.instance
     .get<GetUserMeResType>(`${endpoint}/me`)
     .then((response) => {

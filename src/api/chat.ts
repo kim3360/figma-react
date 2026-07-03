@@ -1,6 +1,8 @@
 import Http from '@/utils/httpClients';
 import { useQuery } from '@tanstack/react-query';
 import { errorResponse, succesResponse } from '@/utils/response';
+import { isDemoMode } from '@/lib/demoMode';
+import * as demoApi from '@/mocks/fixtures/demoApi';
 import {
   deleteConversationParamsSchema,
   getConversationDetailParamsSchema,
@@ -36,6 +38,10 @@ async function getConversationDetail(conversationId: number) {
     conversationId,
   });
 
+  if (isDemoMode()) {
+    return demoApi.demoGetConversationDetail(id);
+  }
+
   return Http.instance
     .get<GetConversationDetailResType>(`${conversationsEndpoint}/${id}`)
     .then((response) => {
@@ -50,6 +56,10 @@ async function getConversationMessageList(conversationId: number) {
   const { conversationId: id } = getConversationMessageListParamsSchema.parse({
     conversationId,
   });
+
+  if (isDemoMode()) {
+    return demoApi.demoGetConversationMessageList(id);
+  }
 
   return Http.instance
     .get<GetConversationMessageListResType>(`${conversationsEndpoint}/${id}/messages`)
@@ -70,6 +80,10 @@ async function postConversationMessageCreate(
   });
   const payload = postConversationMessageCreateReqSchema.parse(params);
 
+  if (isDemoMode()) {
+    return demoApi.demoPostConversationMessageCreate(id, payload);
+  }
+
   return Http.instance
     .post<PostConversationMessageCreateResType>(`${conversationsEndpoint}/${id}/messages`, payload)
     .then((response) => {
@@ -82,6 +96,10 @@ async function postConversationMessageCreate(
 /** 프로젝트 대화 목록 조회 API GET */
 async function getProjectConversationList(projectId: number) {
   const { projectId: id } = getProjectConversationListParamsSchema.parse({ projectId });
+
+  if (isDemoMode()) {
+    return demoApi.demoGetProjectConversationList(id);
+  }
 
   return Http.instance
     .get<GetProjectConversationListResType>(`${projectsEndpoint}/${id}/conversations`)
@@ -97,6 +115,10 @@ async function postProjectConversationCreate(projectId: number) {
   const { projectId: id } = postProjectConversationCreateParamsSchema.parse({
     projectId,
   });
+
+  if (isDemoMode()) {
+    return demoApi.demoPostProjectConversationCreate(id);
+  }
 
   return Http.instance
     .post<PostProjectConversationCreateResType>(`${projectsEndpoint}/${id}/conversations`)
@@ -121,6 +143,10 @@ async function deleteConversation(conversationId: number) {
 
 /** 휴지통 대화 목록 조회 API GET */
 async function getTrashConversationList() {
+  if (isDemoMode()) {
+    return demoApi.demoGetTrashConversationList();
+  }
+
   return Http.instance
     .get<GetTrashConversationListResType>(`${trashEndpoint}/conversations`)
     .then((response) => {
