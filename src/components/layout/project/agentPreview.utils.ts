@@ -55,6 +55,37 @@ export function deriveAgentPreviewUrl(messages: ConversationMessage[]): string {
   return AGENT_TODO_PREVIEW_URL;
 }
 
+/** 주소창 표시용 — 프로토콜 제거 */
+export function formatAddressBarUrl(url: string): string {
+  return url.replace(/^https?:\/\//, '');
+}
+
+function defaultRepositoryFullName(previewUrl: string): string {
+  if (previewUrl.includes('portfolio_fix')) return 'dldnsgkr/portfolio_fix';
+  return 'dldnsgkr/my-todo-app';
+}
+
+export type AgentAddressBarView = 'preview' | 'code' | 'pipeline';
+
+/** 패널·버튼 상태에 맞는 주소창 URL */
+export function deriveAddressBarUrl(options: {
+  view: AgentAddressBarView;
+  previewUrl: string;
+  repositoryFullName?: string | null;
+}): string {
+  const repo = options.repositoryFullName ?? defaultRepositoryFullName(options.previewUrl);
+
+  switch (options.view) {
+    case 'code':
+      return `github.com/${repo}`;
+    case 'pipeline':
+      return `github.com/${repo}/actions`;
+    case 'preview':
+    default:
+      return formatAddressBarUrl(options.previewUrl);
+  }
+}
+
 /** 코드·수정 완료 안내 메시지가 오면 배포 URL 프리뷰를 표시한다. */
 export function deriveAgentPreviewPhase(messages: ConversationMessage[]): AgentPreviewPhase {
   if (hasPreviewReadyMessage(messages)) return 'ready';

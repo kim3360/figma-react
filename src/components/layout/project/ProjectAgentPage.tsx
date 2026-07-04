@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ChevronLeft,
@@ -26,6 +26,7 @@ import {
 import {
   deriveAgentPreviewPhase,
   deriveAgentPreviewUrl,
+  deriveAddressBarUrl,
 } from '@/components/layout/project/agentPreview.utils';
 import AgentChatListPanel from '@/components/layout/project/AgentChatListPanel';
 import AgentConversationPanel from '@/components/layout/project/AgentConversationPanel';
@@ -43,21 +44,29 @@ const AGENT_CHAT_PANEL_MAX_WIDTH = 640;
 const AGENT_CHAT_PANEL_DEFAULT_WIDTH = 380;
 
 type AgentSidebarTab = 'list' | 'conversation';
-type RightPanelView = 'preview' | 'code' | 'pipeline';
+export type AgentPanelView = 'preview' | 'code' | 'pipeline';
+
+const PANEL_VIEW_ORDER: AgentPanelView[] = ['preview', 'code', 'pipeline'];
+
+export function isAgentPanelView(value: unknown): value is AgentPanelView {
+  return value === 'preview' || value === 'code' || value === 'pipeline';
+}
 
 type ProjectAgentPageProps = {
   projectId: number;
   project: GetProjectDetailResType;
+  panelView: AgentPanelView;
 };
 
-function ProjectAgentPage({ projectId, project }: ProjectAgentPageProps) {
+function ProjectAgentPage({ projectId, project, panelView }: ProjectAgentPageProps) {
   const [homePrompt] = useState(() => consumePendingHomeAgentPrompt());
   const [sidebarTab, setSidebarTab] = useState<AgentSidebarTab>('conversation');
   const [activeConversationId, setActiveConversationId] = useState<number | null>(null);
   const [isNewConversation, setIsNewConversation] = useState(() => homePrompt !== null);
   const [deletingConversationId, setDeletingConversationId] = useState<number | null>(null);
   const [connectedRepo, setConnectedRepo] = useState<GithubRepository | null>(null);
-  const [rightPanelView, setRightPanelView] = useState<RightPanelView>('preview');
+  const rightPanelView = panelView;
+  const navigate = useNavigate();
   const [previewRevision, setPreviewRevision] = useState(0);
   const [pipelineRun, setPipelineRun] = useState<PipelineRun>(() => createIdlePipelineRun());
   const pipelineAbortRef = useRef<AbortController | null>(null);
@@ -77,7 +86,12 @@ function ProjectAgentPage({ projectId, project }: ProjectAgentPageProps) {
     pipelineAbortRef.current?.abort();
     const controller = new AbortController();
     pipelineAbortRef.current = controller;
-    setRightPanelView('pipeline');
+
+    void navigate({
+      to: '/project/$slug/agent',
+      params: { slug: String(projectId) },
+      search: { view: 'pipeline' },
+    });
 
     try {
       await runPipelineSequence(setPipelineRun, { signal: controller.signal });
@@ -86,7 +100,7 @@ function ProjectAgentPage({ projectId, project }: ProjectAgentPageProps) {
         pipelineAbortRef.current = null;
       }
     }
-  }, []);
+  }, [navigate, projectId]);
 
   useEffect(() => {
     return () => {
@@ -124,6 +138,16 @@ function ProjectAgentPage({ projectId, project }: ProjectAgentPageProps) {
 
     return deriveAgentPreviewUrl(readSessionMessages(activeConversationId));
   }, [activeConversationId, isNewConversation, previewRevision]);
+
+  const addressBarUrl = useMemo(
+    () =>
+      deriveAddressBarUrl({
+        view: rightPanelView,
+        previewUrl,
+        repositoryFullName: connectedRepo?.fullName,
+      }),
+    [connectedRepo, previewUrl, rightPanelView],
+  );
 
   const handleConversationActivity = (conversationId: number) => {
     if (conversationId === activeConversationId) {
@@ -171,6 +195,23 @@ function ProjectAgentPage({ projectId, project }: ProjectAgentPageProps) {
         ? 'border-[#7c3aed] text-[#7c3aed]'
         : 'border-transparent text-[#94a3b8] hover:text-[#64748b]'
     }`;
+
+  const goToPanelView = (view: AgentPanelView) => {
+    void navigate({
+      to: '/project/$slug/agent',
+      params: { slug: String(projectId) },
+      search: view === 'preview' ? {} : { view },
+    });
+  };
+
+  const goToAdjacentPanelView = (direction: 'back' | 'forward') => {
+    const currentIndex = PANEL_VIEW_ORDER.indexOf(rightPanelView);
+    const nextIndex =
+      direction === 'back'
+        ? Math.max(0, currentIndex - 1)
+        : Math.min(PANEL_VIEW_ORDER.length - 1, currentIndex + 1);
+    goToPanelView(PANEL_VIEW_ORDER[nextIndex]);
+  };
 
   return (
     <div className="flex h-[calc(100vh)] min-h-0 w-full overflow-hidden bg-[#f4f5f7]">
@@ -276,14 +317,27 @@ function ProjectAgentPage({ projectId, project }: ProjectAgentPageProps) {
               <ChevronLeft className="size-4" />
             </Link>
             <div className="flex min-w-0 items-center gap-1 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-1">
-              <button type="button" className="rounded p-1.5 text-[#94a3b8] hover:bg-white">
+              <button
+                type="button"
+                onClick={() => goToAdjacentPanelView('back')}
+                disabled={rightPanelView === PANEL_VIEW_ORDER[0]}
+                className="rounded p-1.5 text-[#94a3b8] hover:bg-white disabled:opacity-40"
+                aria-label="이전 URL"
+              >
                 <ChevronLeft className="size-3.5" />
               </button>
-              <button type="button" className="rounded p-1.5 text-[#94a3b8] hover:bg-white">
+              <button
+                type="button"
+                onClick={() => goToAdjacentPanelView('forward')}
+                disabled={rightPanelView === PANEL_VIEW_ORDER[PANEL_VIEW_ORDER.length - 1]}
+                className="rounded p-1.5 text-[#94a3b8] hover:bg-white disabled:opacity-40"
+                aria-label="다음 URL"
+              >
                 <ChevronRight className="size-3.5" />
               </button>
               <button
                 type="button"
+                onClick={() => goToPanelView('preview')}
                 className="rounded p-1.5 text-[#94a3b8] hover:bg-white"
                 aria-label="새로고침"
               >
@@ -291,7 +345,9 @@ function ProjectAgentPage({ projectId, project }: ProjectAgentPageProps) {
               </button>
               <button
                 type="button"
-                onClick={() => setRightPanelView((view) => (view === 'code' ? 'preview' : 'code'))}
+                onClick={() =>
+                  goToPanelView(rightPanelView === 'code' ? 'preview' : 'code')
+                }
                 aria-label="코드 보기"
                 aria-pressed={rightPanelView === 'code'}
                 className={cn(
@@ -305,13 +361,7 @@ function ProjectAgentPage({ projectId, project }: ProjectAgentPageProps) {
               </button>
             </div>
             <div className="flex min-w-0 flex-1 items-center rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-1.5">
-              <span className="truncate text-[12px] text-[#64748b]">
-                {connectedRepo
-                  ? `/${connectedRepo.fullName}`
-                  : previewPhase === 'ready'
-                    ? previewUrl
-                    : '/'}
-              </span>
+              <span className="truncate text-[12px] text-[#64748b]">{addressBarUrl}</span>
             </div>
             <span className="hidden shrink-0 rounded-full bg-[#ede9fe] px-2 py-0.5 text-[10px] font-semibold text-[#7c3aed] sm:inline">
               preview branch
@@ -330,7 +380,7 @@ function ProjectAgentPage({ projectId, project }: ProjectAgentPageProps) {
             <button
               type="button"
               onClick={() =>
-                setRightPanelView((view) => (view === 'pipeline' ? 'preview' : 'pipeline'))
+                goToPanelView(rightPanelView === 'pipeline' ? 'preview' : 'pipeline')
               }
               aria-pressed={rightPanelView === 'pipeline'}
               className={cn(
