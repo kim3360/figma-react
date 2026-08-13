@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { ArrowLeft, Check, Play, Settings, X } from 'lucide-react';
 import {
   useApproveApprovalMutation,
@@ -19,7 +19,12 @@ import {
   useUpdateCostBudgetMutation,
 } from '@/api/projectSettings';
 import { formatProjectDisplayName } from '@/components/layout/project/agentChat.utils';
+import ProjectAgentPreviewPanel from '@/components/layout/project/ProjectAgentPreviewPanel';
+import ProjectDeploymentsPanel from '@/components/layout/project/ProjectDeploymentsPanel';
+import ProjectDomainsPanel from '@/components/layout/project/ProjectDomainsPanel';
+import ProjectEnvironmentPanel from '@/components/layout/project/ProjectEnvironmentPanel';
 import ProjectSettingsDialog from '@/components/layout/project/ProjectSettingsDialog';
+import { MetaRow, SectionCard } from '@/components/layout/project/ProjectSectionCard';
 import type { Approval } from '@/types/approvals.type';
 import type { Change } from '@/types/changes.type';
 import type {
@@ -29,9 +34,23 @@ import type {
   GetProjectOverviewResType,
   GetProjectRepositoryHealthResType,
 } from '@/types/projects.type';
+import {
+  PROJECT_DETAIL_TABS,
+  type ProjectDetailTab,
+} from '@/lib/projectDetailTabs';
 import { cn } from '@/lib/utils';
 
-type DetailTab = 'overview' | 'changes' | 'approvals' | 'activity' | 'settings';
+const TAB_LABEL: Record<ProjectDetailTab, string> = {
+  overview: '개요',
+  changes: 'Changes',
+  approvals: '승인',
+  deployments: '배포',
+  domains: '도메인',
+  environment: '환경변수',
+  'agent-preview': 'Agent·Preview',
+  activity: '커밋·활동',
+  settings: '설정',
+};
 
 const projectStatusLabel: Record<GetProjectDetailResType['status'], string> = {
   DRAFT: '초안',
@@ -75,37 +94,9 @@ type ProjectDetailPageProps = {
   commits?: GetProjectCommitListResType;
   activityLogs?: GetProjectActivityLogListResType;
   repositoryHealth?: GetProjectRepositoryHealthResType;
+  tab: ProjectDetailTab;
   isRelatedLoading?: boolean;
 };
-
-function SectionCard({
-  title,
-  description,
-  children,
-}: {
-  title: string;
-  description?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="rounded-2xl border border-[#e2e8f0] bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-      <div className="mb-4">
-        <h2 className="text-[15px] font-semibold text-[#0f172a]">{title}</h2>
-        {description ? <p className="mt-1 text-[12px] text-[#64748b]">{description}</p> : null}
-      </div>
-      {children}
-    </section>
-  );
-}
-
-function MetaRow({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="flex items-start justify-between gap-4 border-b border-[#f1f5f9] py-2.5 last:border-b-0">
-      <span className="shrink-0 text-[12px] text-[#94a3b8]">{label}</span>
-      <span className="min-w-0 text-right text-[13px] font-medium text-[#0f172a]">{value}</span>
-    </div>
-  );
-}
 
 function ProjectDetailPage({
   projectId,
@@ -114,11 +105,26 @@ function ProjectDetailPage({
   commits = [],
   activityLogs = [],
   repositoryHealth,
+  tab,
 }: ProjectDetailPageProps) {
-  const [tab, setTab] = useState<DetailTab>('overview');
+  const navigate = useNavigate();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [selectedChangeId, setSelectedChangeId] = useState<number | null>(null);
   const [budgetInput, setBudgetInput] = useState('50');
+
+  const goToTab = (nextTab: ProjectDetailTab) => {
+    if (nextTab === 'overview') {
+      void navigate({
+        to: '/project/$slug',
+        params: { slug: String(projectId) },
+      });
+      return;
+    }
+    void navigate({
+      to: '/project/$slug/$tab',
+      params: { slug: String(projectId), tab: nextTab },
+    });
+  };
 
   const { data: approvals = [] } = useProjectApprovalListQuery('project-detail', projectId);
   const { data: changes = [] } = useProjectChangeListQuery('project-detail', projectId);
@@ -157,13 +163,7 @@ function ProjectDetailPage({
 
   const chatForm = chatDraft;
 
-  const tabs: { id: DetailTab; label: string }[] = [
-    { id: 'overview', label: '개요' },
-    { id: 'changes', label: 'Changes' },
-    { id: 'approvals', label: '승인' },
-    { id: 'activity', label: '커밋·활동' },
-    { id: 'settings', label: '설정' },
-  ];
+  const tabs = PROJECT_DETAIL_TABS.map((id) => ({ id, label: TAB_LABEL[id] }));
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-[#f8fafc]">
@@ -219,7 +219,7 @@ function ProjectDetailPage({
               <button
                 key={item.id}
                 type="button"
-                onClick={() => setTab(item.id)}
+                onClick={() => goToTab(item.id)}
                 className={cn(
                   'shrink-0 border-b-2 px-3 py-2.5 text-[13px] font-semibold transition',
                   tab === item.id
@@ -427,6 +427,11 @@ function ProjectDetailPage({
                 </ul>
               </SectionCard>
             ) : null}
+
+            {tab === 'deployments' ? <ProjectDeploymentsPanel projectId={projectId} /> : null}
+            {tab === 'domains' ? <ProjectDomainsPanel projectId={projectId} /> : null}
+            {tab === 'environment' ? <ProjectEnvironmentPanel projectId={projectId} /> : null}
+            {tab === 'agent-preview' ? <ProjectAgentPreviewPanel projectId={projectId} /> : null}
 
             {tab === 'activity' ? (
               <div className="grid gap-4 lg:grid-cols-2">

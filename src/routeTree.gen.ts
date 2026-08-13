@@ -20,6 +20,7 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedProjectRouteImport } from './routes/_authenticated/project'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedHelpRouteImport } from './routes/_authenticated/help'
+import { Route as AuthenticatedCloudConnectionsRouteImport } from './routes/_authenticated/cloud-connections'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
 import { Route as AuthenticatedProjectIndexRouteImport } from './routes/_authenticated/project.index'
 import { Route as AuthenticatedProjectNewRouteImport } from './routes/_authenticated/project.new'
@@ -28,6 +29,7 @@ import { Route as AuthenticatedProjectSlugIndexRouteImport } from './routes/_aut
 import { Route as AuthenticatedProjectSlugPipelineRouteImport } from './routes/_authenticated/project.$slug.pipeline'
 import { Route as AuthenticatedProjectSlugCodeRouteImport } from './routes/_authenticated/project.$slug.code'
 import { Route as AuthenticatedProjectSlugAgentRouteImport } from './routes/_authenticated/project.$slug.agent'
+import { Route as AuthenticatedProjectSlugTabRouteImport } from './routes/_authenticated/project.$slug.$tab'
 
 const CallbackRoute = CallbackRouteImport.update({
   id: '/callback',
@@ -83,6 +85,12 @@ const AuthenticatedHelpRoute = AuthenticatedHelpRouteImport.update({
   path: '/help',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedCloudConnectionsRoute =
+  AuthenticatedCloudConnectionsRouteImport.update({
+    id: '/cloud-connections',
+    path: '/cloud-connections',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
@@ -129,11 +137,18 @@ const AuthenticatedProjectSlugAgentRoute =
     path: '/agent',
     getParentRoute: () => AuthenticatedProjectSlugRoute,
   } as any)
+const AuthenticatedProjectSlugTabRoute =
+  AuthenticatedProjectSlugTabRouteImport.update({
+    id: '/$tab',
+    path: '/$tab',
+    getParentRoute: () => AuthenticatedProjectSlugRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/callback': typeof CallbackRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
+  '/cloud-connections': typeof AuthenticatedCloudConnectionsRoute
   '/help': typeof AuthenticatedHelpRoute
   '/home': typeof AuthenticatedHomeRoute
   '/project': typeof AuthenticatedProjectRouteWithChildren
@@ -145,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/project/$slug': typeof AuthenticatedProjectSlugRouteWithChildren
   '/project/new': typeof AuthenticatedProjectNewRoute
   '/project/': typeof AuthenticatedProjectIndexRoute
+  '/project/$slug/$tab': typeof AuthenticatedProjectSlugTabRoute
   '/project/$slug/agent': typeof AuthenticatedProjectSlugAgentRoute
   '/project/$slug/code': typeof AuthenticatedProjectSlugCodeRoute
   '/project/$slug/pipeline': typeof AuthenticatedProjectSlugPipelineRoute
@@ -154,6 +170,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/callback': typeof CallbackRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
+  '/cloud-connections': typeof AuthenticatedCloudConnectionsRoute
   '/help': typeof AuthenticatedHelpRoute
   '/home': typeof AuthenticatedHomeRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -163,6 +180,7 @@ export interface FileRoutesByTo {
   '/auth/callback': typeof AuthCallbackRoute
   '/project/new': typeof AuthenticatedProjectNewRoute
   '/project': typeof AuthenticatedProjectIndexRoute
+  '/project/$slug/$tab': typeof AuthenticatedProjectSlugTabRoute
   '/project/$slug/agent': typeof AuthenticatedProjectSlugAgentRoute
   '/project/$slug/code': typeof AuthenticatedProjectSlugCodeRoute
   '/project/$slug/pipeline': typeof AuthenticatedProjectSlugPipelineRoute
@@ -174,6 +192,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/callback': typeof CallbackRoute
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
+  '/_authenticated/cloud-connections': typeof AuthenticatedCloudConnectionsRoute
   '/_authenticated/help': typeof AuthenticatedHelpRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/project': typeof AuthenticatedProjectRouteWithChildren
@@ -185,6 +204,7 @@ export interface FileRoutesById {
   '/_authenticated/project/$slug': typeof AuthenticatedProjectSlugRouteWithChildren
   '/_authenticated/project/new': typeof AuthenticatedProjectNewRoute
   '/_authenticated/project/': typeof AuthenticatedProjectIndexRoute
+  '/_authenticated/project/$slug/$tab': typeof AuthenticatedProjectSlugTabRoute
   '/_authenticated/project/$slug/agent': typeof AuthenticatedProjectSlugAgentRoute
   '/_authenticated/project/$slug/code': typeof AuthenticatedProjectSlugCodeRoute
   '/_authenticated/project/$slug/pipeline': typeof AuthenticatedProjectSlugPipelineRoute
@@ -196,6 +216,7 @@ export interface FileRouteTypes {
     | '/'
     | '/callback'
     | '/analytics'
+    | '/cloud-connections'
     | '/help'
     | '/home'
     | '/project'
@@ -207,6 +228,7 @@ export interface FileRouteTypes {
     | '/project/$slug'
     | '/project/new'
     | '/project/'
+    | '/project/$slug/$tab'
     | '/project/$slug/agent'
     | '/project/$slug/code'
     | '/project/$slug/pipeline'
@@ -216,6 +238,7 @@ export interface FileRouteTypes {
     | '/'
     | '/callback'
     | '/analytics'
+    | '/cloud-connections'
     | '/help'
     | '/home'
     | '/settings'
@@ -225,6 +248,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/project/new'
     | '/project'
+    | '/project/$slug/$tab'
     | '/project/$slug/agent'
     | '/project/$slug/code'
     | '/project/$slug/pipeline'
@@ -235,6 +259,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/callback'
     | '/_authenticated/analytics'
+    | '/_authenticated/cloud-connections'
     | '/_authenticated/help'
     | '/_authenticated/home'
     | '/_authenticated/project'
@@ -246,6 +271,7 @@ export interface FileRouteTypes {
     | '/_authenticated/project/$slug'
     | '/_authenticated/project/new'
     | '/_authenticated/project/'
+    | '/_authenticated/project/$slug/$tab'
     | '/_authenticated/project/$slug/agent'
     | '/_authenticated/project/$slug/code'
     | '/_authenticated/project/$slug/pipeline'
@@ -339,6 +365,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHelpRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/cloud-connections': {
+      id: '/_authenticated/cloud-connections'
+      path: '/cloud-connections'
+      fullPath: '/cloud-connections'
+      preLoaderRoute: typeof AuthenticatedCloudConnectionsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/analytics': {
       id: '/_authenticated/analytics'
       path: '/analytics'
@@ -395,10 +428,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProjectSlugAgentRouteImport
       parentRoute: typeof AuthenticatedProjectSlugRoute
     }
+    '/_authenticated/project/$slug/$tab': {
+      id: '/_authenticated/project/$slug/$tab'
+      path: '/$tab'
+      fullPath: '/project/$slug/$tab'
+      preLoaderRoute: typeof AuthenticatedProjectSlugTabRouteImport
+      parentRoute: typeof AuthenticatedProjectSlugRoute
+    }
   }
 }
 
 interface AuthenticatedProjectSlugRouteChildren {
+  AuthenticatedProjectSlugTabRoute: typeof AuthenticatedProjectSlugTabRoute
   AuthenticatedProjectSlugAgentRoute: typeof AuthenticatedProjectSlugAgentRoute
   AuthenticatedProjectSlugCodeRoute: typeof AuthenticatedProjectSlugCodeRoute
   AuthenticatedProjectSlugPipelineRoute: typeof AuthenticatedProjectSlugPipelineRoute
@@ -407,6 +448,7 @@ interface AuthenticatedProjectSlugRouteChildren {
 
 const AuthenticatedProjectSlugRouteChildren: AuthenticatedProjectSlugRouteChildren =
   {
+    AuthenticatedProjectSlugTabRoute: AuthenticatedProjectSlugTabRoute,
     AuthenticatedProjectSlugAgentRoute: AuthenticatedProjectSlugAgentRoute,
     AuthenticatedProjectSlugCodeRoute: AuthenticatedProjectSlugCodeRoute,
     AuthenticatedProjectSlugPipelineRoute:
@@ -436,6 +478,7 @@ const AuthenticatedProjectRouteWithChildren =
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
+  AuthenticatedCloudConnectionsRoute: typeof AuthenticatedCloudConnectionsRoute
   AuthenticatedHelpRoute: typeof AuthenticatedHelpRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedProjectRoute: typeof AuthenticatedProjectRouteWithChildren
@@ -446,6 +489,7 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
+  AuthenticatedCloudConnectionsRoute: AuthenticatedCloudConnectionsRoute,
   AuthenticatedHelpRoute: AuthenticatedHelpRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedProjectRoute: AuthenticatedProjectRouteWithChildren,

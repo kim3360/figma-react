@@ -1,15 +1,33 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 import ProjectDetailPage from '@/components/layout/project/ProjectDetailPage';
-import { Route as ProjectSlugRoute } from '@/routes/_authenticated/project.$slug';
 import { useProjectDetailBundleQuery } from '@/api/projects';
+import {
+  isProjectDetailTab,
+  type ProjectDetailTab,
+} from '@/lib/projectDetailTabs';
 
-export const Route = createFileRoute('/_authenticated/project/$slug/')({
-  component: ProjectDetailRoute,
+const RESERVED_SLUG_CHILDREN = new Set(['agent', 'code', 'pipeline']);
+
+export const Route = createFileRoute('/_authenticated/project/$slug/$tab')({
+  beforeLoad: ({ params }) => {
+    if (RESERVED_SLUG_CHILDREN.has(params.tab)) {
+      return;
+    }
+    if (!isProjectDetailTab(params.tab) || params.tab === 'overview') {
+      throw redirect({
+        to: '/project/$slug',
+        params: { slug: params.slug },
+        replace: true,
+      });
+    }
+  },
+  component: ProjectDetailTabRoute,
 });
 
-function ProjectDetailRoute() {
-  const { slug } = ProjectSlugRoute.useParams();
+function ProjectDetailTabRoute() {
+  const { slug, tab } = Route.useParams();
   const parsedProjectId = Number(slug);
+  const activeTab = tab as ProjectDetailTab;
   const { data, isLoading } = useProjectDetailBundleQuery('project-detail-page', parsedProjectId);
 
   if (isLoading) {
@@ -28,7 +46,7 @@ function ProjectDetailRoute() {
       commits={data.commits}
       activityLogs={data.activityLogs}
       repositoryHealth={data.repositoryHealth}
-      tab="overview"
+      tab={activeTab}
       isRelatedLoading={false}
     />
   );
