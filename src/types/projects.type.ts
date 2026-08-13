@@ -109,6 +109,12 @@ const postProjectCreateResSchema = z.object({
   name: z.string().min(1, '프로젝트 이름이 없습니다.').prefault(''),
   /** 프로젝트 상태 */
   status: projectStatusSchema,
+  /** 초기 코드 생성 Agent task ID */
+  taskId: z.string().nullable().prefault(null),
+  /** 초기 코드 생성 task 상태 */
+  taskStatus: z.string().nullable().prefault(null),
+  /** 초기 코드 생성에 필요한 승인 ID */
+  approvalIds: z.array(z.number().int()).prefault([]),
 });
 
 /**
@@ -145,25 +151,21 @@ const projectLatestCommitSchema = z.object({
   author: z.string().min(1, '커밋 작성자가 없습니다.').prefault(''),
   /** 커밋 시각 (ISO 8601 date-time) */
   committedAt: z.string().min(1, '커밋 시각이 없습니다.').prefault(''),
+  /** 상대 시간 표현 */
+  relativeTime: z.string().nullable().prefault(null),
 });
 
 /**
- * GET /projects/{projectId}/commit 프로젝트 커밋 목록 조회 응답
+ * GET /projects/{projectId}/commits 프로젝트 커밋 목록 조회 응답
  */
 const getProjectCommitListResSchema = z.array(projectLatestCommitSchema);
-
-/**
- * 프로젝트 활동 유형
- * @example "PROJECT_CREATED"
- */
-const projectActivityTypeSchema = z.enum(['PROJECT_CREATED']);
 
 /**
  * 프로젝트 활동 로그
  */
 const projectActivityLogSchema = z.object({
-  /** 활동 유형 */
-  type: projectActivityTypeSchema,
+  /** 활동 유형 (예: PROJECT_CREATED, DEPLOYMENT_SUCCEEDED) */
+  type: z.string().prefault(''),
   /** 활동 메시지 */
   message: z.string().min(1, '활동 메시지가 없습니다.').prefault(''),
   /** 활동 발생 시각 (ISO 8601 date-time) */
@@ -183,26 +185,79 @@ const projectRepositoryHealthSummarySchema = z.object({
   health: repositoryHealthStatusSchema,
 });
 
+const projectDomainSummarySchema = z.object({
+  domainId: z.number().int(),
+  hostname: z.string().prefault(''),
+  url: z.string().prefault(''),
+  type: z.enum(['managed_subdomain', 'custom_domain', 'purchasable_domain']),
+  hostingTarget: z.enum(['GITHUB_PAGES', 'AWS', 'GCP']),
+  status: z.enum(['REQUESTED', 'PROVISIONING', 'VERIFYING', 'CONNECTED', 'FAILED']),
+  httpsEnforced: z.boolean(),
+  certificateStatus: z.enum(['PENDING', 'PROVISIONING', 'ACTIVE', 'FAILED']).nullable().prefault(null),
+  certificateExpiresAt: z.string().nullable().prefault(null),
+  lastCheckedAt: z.string().nullable().prefault(null),
+});
+
+const projectCloudSummarySchema = z.object({
+  configured: z.boolean(),
+  cloudConnectionId: z.number().int().nullable().prefault(null),
+  provider: z.enum(['AWS', 'GCP']).nullable().prefault(null),
+  displayName: z.string().nullable().prefault(null),
+  region: z.string().nullable().prefault(null),
+  status: z
+    .enum([
+      'VALIDATED',
+      'VERIFYING',
+      'CHECKING',
+      'CONNECTED',
+      'PERMISSION_MISSING',
+      'BILLING_DISABLED',
+      'REGION_UNSUPPORTED',
+      'INVALID_CREDENTIAL',
+      'UNKNOWN_ERROR',
+    ])
+    .nullable()
+    .prefault(null),
+  lastCheckedAt: z.string().nullable().prefault(null),
+});
+
+const projectOperationActionSchema = z.object({
+  type: z.enum([
+    'DEPLOY',
+    'MANAGE_DOMAIN',
+    'MANAGE_CLOUD',
+    'OPEN_AI_AGENT',
+    'PROJECT_SETTINGS',
+    'REMOVE_PROJECT',
+  ]),
+  available: z.boolean(),
+  reason: z.string().nullable().prefault(null),
+});
+
 /**
  * GET /projects/{projectId}/overview 프로젝트 개요 조회 응답
  */
 const getProjectOverviewResSchema = z.object({
   /** 현재 배포 URL. 배포 전이면 null */
-  currentUrl: z.string().nullable().prefault(''),
+  currentUrl: z.string().nullable().prefault(null),
   /** 현재 배포 상태 */
   deployStatus: deployStatusSchema,
   /** 현재 배포 버전 */
-  currentVersion: z.string().min(1, '배포 버전이 없습니다.').prefault(''),
-  /** 최근 프로젝트 변경 요약 */
-  recentChanges: z.array(z.string().min(1, '변경 요약이 없습니다.').prefault('')),
+  currentVersion: z.string().nullable().prefault(null),
+  /** GitHub webhook으로 동기화된 최신 저장소 태그 */
+  repositoryVersion: z.string().nullable().prefault(null),
+  /** 최근 운영 이벤트 */
+  recentChanges: z.array(projectActivityLogSchema).prefault([]),
   /** 연결 저장소의 최신 커밋. 저장소가 없으면 null */
   latestCommit: projectLatestCommitSchema.nullable().prefault(null),
-  /** 트래픽 요약. 현재는 외부 지표 미연동 안내 문구 */
-  trafficSummary: z.string().min(1, '트래픽 요약이 없습니다.').prefault(''),
   /** 연결 저장소 health 요약 */
-  repositoryHealth: projectRepositoryHealthSummarySchema,
-  /** 도메인 요약. 현재는 관리형 도메인 미연동 안내 문구 */
-  domainSummary: z.string().min(1, '도메인 요약이 없습니다.').prefault(''),
+  repositoryHealth: projectRepositoryHealthSummarySchema.nullable().prefault(null),
+  /** 현재 우선 도메인 요약 */
+  domainSummary: projectDomainSummarySchema.nullable().prefault(null),
+  /** 선택된 클라우드 연결 상태 */
+  cloudSummary: projectCloudSummarySchema.nullable().prefault(null),
+  /** 현재 프로젝트 상태에 따른 운영 조치 */
+  operationActions: z.array(projectOperationActionSchema).prefault([]),
 });
 
 /**
@@ -268,10 +323,8 @@ type PostProjectRepositoryReqType = z.infer<typeof postProjectRepositoryReqSchem
 type GetProjectRepositoryHealthResType = z.infer<typeof getProjectRepositoryHealthResSchema>;
 /** 프로젝트 저장소 커밋 정보 */
 type ProjectLatestCommit = z.infer<typeof projectLatestCommitSchema>;
-/** GET /projects/{projectId}/commit 프로젝트 커밋 목록 조회 응답 */
+/** GET /projects/{projectId}/commits 프로젝트 커밋 목록 조회 응답 */
 type GetProjectCommitListResType = z.infer<typeof getProjectCommitListResSchema>;
-/** 프로젝트 활동 유형 */
-type ProjectActivityType = z.infer<typeof projectActivityTypeSchema>;
 /** 프로젝트 활동 로그 */
 type ProjectActivityLog = z.infer<typeof projectActivityLogSchema>;
 /** GET /projects/{projectId}/activity-logs 프로젝트 활동 로그 조회 응답 */
@@ -300,10 +353,12 @@ export {
   getProjectRepositoryHealthResSchema,
   projectLatestCommitSchema,
   getProjectCommitListResSchema,
-  projectActivityTypeSchema,
   projectActivityLogSchema,
   getProjectActivityLogListResSchema,
   projectRepositoryHealthSummarySchema,
+  projectDomainSummarySchema,
+  projectCloudSummarySchema,
+  projectOperationActionSchema,
   getProjectOverviewResSchema,
   postProjectRepositoryResSchema,
   githubRepositorySchema,
@@ -320,7 +375,6 @@ export {
   type GetProjectRepositoryHealthResType,
   type ProjectLatestCommit,
   type GetProjectCommitListResType,
-  type ProjectActivityType,
   type ProjectActivityLog,
   type GetProjectActivityLogListResType,
   type ProjectRepositoryHealthSummary,

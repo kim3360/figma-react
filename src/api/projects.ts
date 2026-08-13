@@ -69,7 +69,7 @@ async function postProjectCreate(params: PostProjectCreateReqType) {
 
 async function getProjectActivityLogList(projectId: number) {
   getProjectDetailParamsSchema.parse({ projectId });
-  const data = dummyGetProjectActivityLogList();
+  const data = dummyGetProjectActivityLogList(projectId);
   return getProjectActivityLogListResSchema.parse(data);
 }
 

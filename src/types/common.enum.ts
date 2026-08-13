@@ -14,7 +14,14 @@ const projectStatusSchema = z.enum(['DRAFT', 'ACTIVE', 'ARCHIVED']);
  * 배포 상태
  * @example "DRAFT"
  */
-const deployStatusSchema = z.enum(['DRAFT', 'IN_PROGRESS', 'PREVIEW_READY', 'LIVE', 'FAILED']);
+const deployStatusSchema = z.enum([
+  'DRAFT',
+  'PENDING',
+  'IN_PROGRESS',
+  'PREVIEW_READY',
+  'LIVE',
+  'FAILED',
+]);
 
 /**
  * 저장소 공개 범위

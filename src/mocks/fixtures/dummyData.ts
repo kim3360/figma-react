@@ -26,6 +26,12 @@ import type {
 } from '@/types/chat.type';
 import type { GetUserMeResType } from '@/types/user.type';
 import { readStoredUser } from '@/lib/userStorage';
+import {
+  dummyConnectRepository,
+  dummyGetProjectActivityLogList as dummyActivityLogs,
+  dummyGetProjectCommitList as dummyCommits,
+  dummyGetProjectOverviewV2,
+} from '@/mocks/fixtures/dummyProjectApi';
 
 const ISO_NOW = '2026-07-03T06:00:00.000Z';
 
@@ -142,48 +148,21 @@ export function dummyGetProjectOverview(projectId: number): GetProjectOverviewRe
   const project = getProjectDetail(projectId);
   const listItem = findProjectListItem(projectId);
 
-  return {
-    currentUrl: listItem?.currentUrl ?? '',
+  return dummyGetProjectOverviewV2(projectId, {
+    name: project?.name ?? `project-${projectId}`,
     deployStatus: listItem?.deployStatus ?? 'DRAFT',
-    currentVersion: 'v1',
-    recentChanges: ['히어로 섹션 카피 수정', 'CTA 버튼 색상 변경'],
-    latestCommit: {
-      sha: 'a1b2c3d',
-      message: 'feat: update landing hero copy',
-      author: 'demo-user',
-      committedAt: ISO_NOW,
-    },
-    trafficSummary: '더미 데이터 — 트래픽 지표는 API 연동 후 표시됩니다.',
-    repositoryHealth: { health: 'HEALTHY' },
-    domainSummary: project ? `${project.name}.devely.app` : '도메인 미연결',
-  };
+    currentUrl: listItem?.currentUrl || null,
+  });
 }
 
 export function dummyGetProjectCommitList(): GetProjectCommitListResType {
-  return [
-    {
-      sha: 'a1b2c3d4e5f6',
-      message: 'feat: update landing hero copy',
-      author: 'demo-user',
-      committedAt: ISO_NOW,
-    },
-    {
-      sha: 'b2c3d4e5f6a1',
-      message: 'chore: adjust spacing on mobile',
-      author: 'demo-user',
-      committedAt: ISO_NOW,
-    },
-  ];
+  return dummyCommits();
 }
 
-export function dummyGetProjectActivityLogList(): GetProjectActivityLogListResType {
-  return [
-    {
-      type: 'PROJECT_CREATED',
-      message: '프로젝트가 생성되었습니다.',
-      occurredAt: ISO_NOW,
-    },
-  ];
+export function dummyGetProjectActivityLogList(
+  projectId = 1,
+): GetProjectActivityLogListResType {
+  return dummyActivityLogs(projectId);
 }
 
 export function dummyGetProjectRepositoryHealth(): GetProjectRepositoryHealthResType {
@@ -195,7 +174,7 @@ export function dummyGetProjectDetailBundle(projectId: number) {
     project: dummyGetProjectDetail(projectId),
     overview: dummyGetProjectOverview(projectId),
     commits: dummyGetProjectCommitList(),
-    activityLogs: dummyGetProjectActivityLogList(),
+    activityLogs: dummyGetProjectActivityLogList(projectId),
     repositoryHealth: dummyGetProjectRepositoryHealth(),
   };
 }
@@ -217,6 +196,9 @@ export function dummyPostProjectCreate(params: PostProjectCreateReqType): PostPr
     projectId,
     name: params.name,
     status: 'DRAFT',
+    taskId: `task_init_${projectId}`,
+    taskStatus: 'QUEUED',
+    approvalIds: [],
   };
 }
 
@@ -244,17 +226,7 @@ export function dummyPostProjectRepository(
   projectId: number,
   params: PostProjectRepositoryReqType,
 ): PostProjectRepositoryResType {
-  const fullName =
-    params.repositoryFullName ??
-    (params.repositoryName ? `demo-user/${params.repositoryName}` : 'demo-user/my-repo');
-
-  return {
-    projectId,
-    repositoryFullName: fullName,
-    repositoryVisibility: params.repositoryVisibility ?? 'PRIVATE',
-    bindingStatus: 'BOUND',
-    repositoryHealth: 'HEALTHY',
-  };
+  return dummyConnectRepository(projectId, params);
 }
 
 export function dummyGetProjectConversationList(

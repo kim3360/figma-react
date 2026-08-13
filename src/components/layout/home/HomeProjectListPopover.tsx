@@ -14,6 +14,7 @@ type ProjectListItem = {
 
 const DEPLOY_STATUS_LABEL: Record<DeployStatus, string> = {
   DRAFT: 'Draft',
+  PENDING: '대기',
   IN_PROGRESS: '배포 중',
   PREVIEW_READY: '미리보기',
   LIVE: 'Live',

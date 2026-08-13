@@ -43,6 +43,7 @@ function toProjectCardItem(project: {
 }): ProjectItem {
   const deployStatusMap: Record<DeployStatus, ProjectItem['deployStatus']> = {
     DRAFT: 'pending',
+    PENDING: 'pending',
     IN_PROGRESS: 'deploying',
     PREVIEW_READY: 'deploying',
     LIVE: 'deployed',
