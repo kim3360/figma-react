@@ -17,7 +17,11 @@ function RootComponent() {
       <AppRouterEffects />
 
       {!showAppChrome ? (
-        <div className="min-h-screen w-full bg-[#f8fafc] text-[#0f172a]">
+        <div
+          className={`min-h-screen w-full text-[#0f172a] ${
+            pathname.startsWith('/template') ? 'bg-[#f3f0ec]' : 'bg-[#f8fafc]'
+          }`}
+        >
           <Outlet />
         </div>
       ) : (
