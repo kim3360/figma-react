@@ -1,13 +1,4 @@
-import {
-  BarChart2,
-  Cloud,
-  FolderKanban,
-  Home,
-  LayoutTemplate,
-  PanelLeft,
-  PanelRight,
-  Trash2,
-} from 'lucide-react';
+import { FolderKanban, Home, PanelLeft, PanelRight, Trash2 } from 'lucide-react';
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
 import { Fragment, useState } from 'react';
 
@@ -20,9 +11,6 @@ const navItems: {
 }[] = [
   { to: '/home', label: '홈', icon: Home },
   { to: '/project', label: '프로젝트', icon: FolderKanban },
-  { to: '/templates', label: '템플릿', icon: LayoutTemplate },
-  { to: '/cloud-connections', label: '클라우드', icon: Cloud },
-  { to: '/analytics', label: '분석', icon: BarChart2 },
   { to: '/trash', label: '휴지통', icon: Trash2 },
 ];
 

@@ -1,8 +1,40 @@
 import type { ConversationMessage } from '@/types/chat.type';
 
+let localMessageId = -1;
+
+type CreateLocalMessageOptions = {
+  tokenCount?: number;
+  taskId?: string | null;
+};
+
+export function createLocalMessage(
+  conversationId: number,
+  role: 'user' | 'assistant',
+  content: string,
+  options: CreateLocalMessageOptions = {},
+): ConversationMessage {
+  const messageId = localMessageId;
+  localMessageId -= 1;
+  const tokenCount = options.tokenCount ?? (role === 'assistant' ? 96 : 0);
+
+  return {
+    messageId,
+    conversationId,
+    role,
+    content,
+    tokenCount,
+    createdAt: new Date().toISOString(),
+    taskId: options.taskId ?? null,
+    // 서버가 붙이는 값이다. 화면이 만든 임시 메시지에는 종류가 없고, 없으면
+    // 지금까지와 똑같은 평범한 줄로 그려진다
+    kind: null,
+  };
+}
+
 export const AGENT_CHAT_QUERY_KEY = 'project-agent';
 
 const sessionMessagesByConversation = new Map<number, ConversationMessage[]>();
+const taskIdByConversation = new Map<number, string>();
 
 export function readSessionMessages(conversationId: number): ConversationMessage[] {
   return sessionMessagesByConversation.get(conversationId) ?? [];
@@ -10,6 +42,65 @@ export function readSessionMessages(conversationId: number): ConversationMessage
 
 export function writeSessionMessages(conversationId: number, messages: ConversationMessage[]) {
   sessionMessagesByConversation.set(conversationId, messages);
+}
+
+export function rememberConversationTaskId(conversationId: number, taskId: string) {
+  const trimmed = taskId.trim();
+  if (!trimmed) return;
+  taskIdByConversation.set(conversationId, trimmed);
+}
+
+export function readConversationTaskId(conversationId: number | null) {
+  if (conversationId == null) return null;
+  return taskIdByConversation.get(conversationId) ?? null;
+}
+
+/** 서버 메시지에 세션의 승인 버튼 상태·아직 저장 안 된 로컬 메시지를 합친다. */
+export function mergeConversationMessages(
+  serverMessages: ConversationMessage[],
+  sessionMessages: ConversationMessage[],
+): ConversationMessage[] {
+  const usedSessionIds = new Set<number>();
+
+  const takeSessionMatch = (message: ConversationMessage) => {
+    const byId = sessionMessages.find(
+      (sessionMessage) => sessionMessage.messageId === message.messageId,
+    );
+    if (byId) {
+      usedSessionIds.add(byId.messageId);
+      return byId;
+    }
+
+    const byContent = sessionMessages.find(
+      (sessionMessage) =>
+        !usedSessionIds.has(sessionMessage.messageId) &&
+        sessionMessage.role === message.role &&
+        sessionMessage.content === message.content,
+    );
+    if (byContent) {
+      usedSessionIds.add(byContent.messageId);
+      return byContent;
+    }
+
+    return null;
+  };
+
+  const mergedServer = serverMessages.map((message) => {
+    const sessionMessage = takeSessionMatch(message);
+    if (!sessionMessage) return message;
+
+    return {
+      ...message,
+      taskId: sessionMessage.taskId || message.taskId,
+    };
+  });
+
+  const localOnly = sessionMessages.filter((message) => !usedSessionIds.has(message.messageId));
+
+  // 승인 UI는 여기서 만들지 않는다 — 무엇이 승인 대기인지는 서버(태스크의 pendingApprovalId
+  // → 승인 상세)만 알고 있다. 예전에는 본문에 '승인 후 실행'과 '[숫자]'가 있으면 버튼을 붙였는데,
+  // 모델이 그 문장을 지어내면 존재하지 않는 승인 버튼이 그대로 떴다.
+  return [...mergedServer, ...localOnly];
 }
 
 /** 새 대화 생성 전 임시 ID(0)에 쌓인 메시지를 실제 conversationId로 옮긴다. */
@@ -25,38 +116,6 @@ export function migrateSessionMessages(fromConversationId: number, toConversatio
 }
 
 const PENDING_HOME_AGENT_PROMPT_KEY = 'dvely:pending-home-agent-prompt';
-const HOME_CHAT_PROJECT_IDS_KEY = 'dvely:home-chat-project-ids';
-
-function readHomeChatProjectIds(): Set<number> {
-  try {
-    const raw = sessionStorage.getItem(HOME_CHAT_PROJECT_IDS_KEY);
-    if (!raw) return new Set();
-
-    const parsed: unknown = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return new Set();
-
-    return new Set(
-      parsed.filter((id): id is number => typeof id === 'number' && Number.isFinite(id)),
-    );
-  } catch {
-    return new Set();
-  }
-}
-
-function writeHomeChatProjectIds(ids: Set<number>) {
-  sessionStorage.setItem(HOME_CHAT_PROJECT_IDS_KEY, JSON.stringify([...ids]));
-}
-
-/** 홈에서 프로젝트를 연결하고 채팅을 보낸 프로젝트 — 목록 클릭 시 상세로 이동 */
-export function markHomeChatProject(projectId: number) {
-  const ids = readHomeChatProjectIds();
-  ids.add(projectId);
-  writeHomeChatProjectIds(ids);
-}
-
-export function isHomeChatProject(projectId: number): boolean {
-  return readHomeChatProjectIds().has(projectId);
-}
 
 export function setPendingHomeAgentPrompt(prompt: string) {
   sessionStorage.setItem(PENDING_HOME_AGENT_PROMPT_KEY, prompt.trim());

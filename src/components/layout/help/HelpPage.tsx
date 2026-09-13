@@ -59,8 +59,12 @@ function HelpPage() {
       <div className="mx-auto flex max-w-[960px] flex-col gap-8">
         <header className="flex flex-col gap-4">
           <div>
-            <h1 className="text-[28px] font-bold tracking-tight text-[#0f172a]">{t('help.title')}</h1>
-            <p className="mt-1 text-[14px] leading-relaxed text-[#64748b]">{t('help.description')}</p>
+            <h1 className="text-[28px] font-bold tracking-tight text-[#0f172a]">
+              {t('help.title')}
+            </h1>
+            <p className="mt-1 text-[14px] leading-relaxed text-[#64748b]">
+              {t('help.description')}
+            </p>
           </div>
 
           <div className="relative max-w-xl">
@@ -130,10 +134,7 @@ function HelpPage() {
                 const isOpen = openFaqId === id;
 
                 return (
-                  <div
-                    key={id}
-                    className={cn(index > 0 && 'border-t border-[#f1f5f9]')}
-                  >
+                  <div key={id} className={cn(index > 0 && 'border-t border-[#f1f5f9]')}>
                     <button
                       type="button"
                       onClick={() => handleFaqToggle(id)}
@@ -160,7 +161,9 @@ function HelpPage() {
                 );
               })
             ) : (
-              <p className="px-4 py-8 text-center text-[14px] text-[#64748b]">{t('help.faq.empty')}</p>
+              <p className="px-4 py-8 text-center text-[14px] text-[#64748b]">
+                {t('help.faq.empty')}
+              </p>
             )}
           </div>
         </section>
@@ -172,7 +175,9 @@ function HelpPage() {
                 <MessageCircle className="size-5 text-[#475569]" strokeWidth={1.75} />
               </div>
               <div>
-                <h2 className="text-[15px] font-semibold text-[#0f172a]">{t('help.contact.title')}</h2>
+                <h2 className="text-[15px] font-semibold text-[#0f172a]">
+                  {t('help.contact.title')}
+                </h2>
                 <p className="mt-1 text-[13px] leading-relaxed text-[#64748b]">
                   {t('help.contact.description')}
                 </p>

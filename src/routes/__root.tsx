@@ -1,5 +1,6 @@
 import { createRootRoute, Outlet, useRouterState } from '@tanstack/react-router';
 import AppRouterEffects from '@/components/auth/AppRouterEffects';
+import GitHubAppInstallPromptDialog from '@/components/auth/GitHubAppInstallPromptDialog';
 import NotFoundPage from '@/components/layout/NotFoundPage';
 import AppSidebar from '@/components/common/AppSidebar';
 
@@ -15,17 +16,18 @@ function RootComponent() {
   return (
     <>
       <AppRouterEffects />
+      <GitHubAppInstallPromptDialog />
 
       {!showAppChrome ? (
         <div
           className={`min-h-screen w-full text-[#0f172a] ${
-            pathname.startsWith('/template') ? 'bg-[#f3f0ec]' : 'bg-[#f8fafc]'
+            pathname.startsWith('/template') ? 'bg-[#f3f0ec]' : 'bg-white'
           }`}
         >
           <Outlet />
         </div>
       ) : (
-        <div className="flex h-screen w-full overflow-hidden bg-[#f8fafc] text-[#0f172a]">
+        <div className="flex h-screen w-full overflow-hidden bg-white text-[#0f172a]">
           <AppSidebar />
           <main id="app-main-scroll" className="min-h-0 min-w-0 flex-1 overflow-y-auto">
             {/* <HeaderContainer /> */}

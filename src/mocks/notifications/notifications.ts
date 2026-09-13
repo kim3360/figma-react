@@ -41,7 +41,8 @@ export const notificationItems: NotificationItem[] = [
     id: 'n4',
     tab: 'messages',
     title: '배포가 완료되었습니다',
-    description: "'개발자 포트폴리오' 프로젝트가 성공적으로 배포되었습니다. 라이브 URL을 확인해 보세요.",
+    description:
+      "'개발자 포트폴리오' 프로젝트가 성공적으로 배포되었습니다. 라이브 URL을 확인해 보세요.",
     dateLabel: '2026.06.05',
     media: 'none',
   },

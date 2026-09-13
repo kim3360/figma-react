@@ -39,8 +39,8 @@ const themeOptions: { value: ThemeFilter; label: string }[] = [
 ];
 
 const sortOptions: { value: SortOption; label: string }[] = [
-  { value: 'popular', label: '정렬 기준: 인기순' },
-  { value: 'newest', label: '정렬 기준: 최신순' },
+  { value: 'popular', label: '인기순' },
+  { value: 'newest', label: '최신순' },
 ];
 
 function HomeExploreSection() {
@@ -95,45 +95,47 @@ function HomeExploreSection() {
         ))}
       </div>
 
-      {activeTab === 'explore' ? (
-        <>
-          <Filter className="mt-4">
-            <FilterSelect
-              value={styleFilter}
-              onChange={(value) => setStyleFilter(value as StyleFilter)}
-              options={styleOptions}
-              aria-label="스타일 필터"
-            />
-            <FilterSelect
-              value={themeFilter}
-              onChange={(value) => setThemeFilter(value as ThemeFilter)}
-              options={themeOptions}
-              aria-label="테마 필터"
-            />
-            <FilterSelect
-              value={sort}
-              onChange={(value) => setSort(value as SortOption)}
-              options={sortOptions}
-              aria-label="정렬 기준"
-            />
-          </Filter>
+      <Filter className="relative z-20 mt-4 justify-between">
+        <div className="flex flex-wrap items-center gap-2">
+          <FilterSelect
+            value={styleFilter}
+            onChange={(value) => setStyleFilter(value as StyleFilter)}
+            options={styleOptions}
+            aria-label="스타일 필터"
+          />
+          <FilterSelect
+            value={themeFilter}
+            onChange={(value) => setThemeFilter(value as ThemeFilter)}
+            options={themeOptions}
+            aria-label="테마 필터"
+          />
+        </div>
+        {activeTab === 'explore' ? (
+          <FilterSelect
+            value={sort}
+            onChange={(value) => setSort(value as SortOption)}
+            options={sortOptions}
+            aria-label="정렬 기준"
+          />
+        ) : null}
+      </Filter>
 
-          <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            <HomeAddTemplateCard />
-            {filteredCards.map((card) => (
-              <HomeTemplateCard
-                key={card.id}
-                card={card}
-                selected={selectedId === card.id}
-                onSelect={() => setSelectedId(card.id)}
-              />
-            ))}
-          </div>
-        </>
+      {activeTab === 'explore' ? (
+        <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <HomeAddTemplateCard />
+          {filteredCards.map((card) => (
+            <HomeTemplateCard
+              key={card.id}
+              card={card}
+              selected={selectedId === card.id}
+              onSelect={() => setSelectedId(card.id)}
+            />
+          ))}
+        </div>
       ) : (
         <div className="mt-5 grid max-w-[280px] grid-cols-1 gap-5 sm:max-w-none sm:grid-cols-2 lg:grid-cols-4">
           <HomeAddTemplateCard />
-          <div className="col-span-full flex min-h-[200px] items-center justify-center rounded-2xl border border-dashed border-[#e2e8f0] bg-[#f8fafc] sm:col-span-2 lg:col-span-3">
+          <div className="col-span-full flex min-h-[150px] items-center justify-center rounded-2xl border border-dashed border-[#e2e8f0] bg-[#f8fafc] sm:col-span-2 lg:col-span-3">
             <p className="text-[14px] text-[#94a3b8]">저장한 템플릿이 없습니다.</p>
           </div>
         </div>

@@ -30,7 +30,7 @@ function HomeTemplateCard({ card, onSelect }: HomeTemplateCardProps) {
       role="button"
       tabIndex={0}
     >
-      <div className="relative aspect-16/10 overflow-hidden rounded-2xl border border-[#e2e8f0] bg-[#f1f5f9] transition duration-300">
+      <div className="relative isolate aspect-16/10 overflow-hidden rounded-2xl border border-[#e2e8f0] bg-[#f1f5f9] transition duration-300">
         <img
           src={card.image}
           alt={card.title}

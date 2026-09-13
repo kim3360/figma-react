@@ -64,7 +64,7 @@ function startTypeToPreview(type: ProjectStartType): PreviewVariant {
 }
 
 export function getAllProjects(): ProjectItem[] {
-  return [...readUserProjects()];
+  return readUserProjects();
 }
 
 export function getProjectBySlug(slug: string): ProjectItem | undefined {

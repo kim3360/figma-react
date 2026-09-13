@@ -1,9 +1,4 @@
-export const HELP_QUICK_LINK_IDS = [
-  'gettingStarted',
-  'projects',
-  'github',
-  'account',
-] as const;
+export const HELP_QUICK_LINK_IDS = ['gettingStarted', 'projects', 'github', 'account'] as const;
 
 export type HelpQuickLinkId = (typeof HELP_QUICK_LINK_IDS)[number];
 

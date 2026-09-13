@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import ProjectDetailPage from '@/components/layout/project/ProjectDetailPage';
+import ProjectDetailPageSkeleton from '@/components/layout/project/ProjectDetailPageSkeleton';
 import { Route as ProjectSlugRoute } from '@/routes/_authenticated/project.$slug';
 import { useProjectDetailBundleQuery } from '@/api/projects';
 
@@ -13,7 +14,7 @@ function ProjectDetailRoute() {
   const { data, isLoading } = useProjectDetailBundleQuery('project-detail-page', parsedProjectId);
 
   if (isLoading) {
-    return <div className="p-6 text-sm text-[#94a3b8]">프로젝트 상세를 불러오는 중...</div>;
+    return <ProjectDetailPageSkeleton projectId={parsedProjectId} />;
   }
 
   if (!data?.project) {
@@ -28,7 +29,6 @@ function ProjectDetailRoute() {
       commits={data.commits}
       activityLogs={data.activityLogs}
       repositoryHealth={data.repositoryHealth}
-      tab="overview"
       isRelatedLoading={false}
     />
   );

@@ -21,7 +21,7 @@ function HighlightSection() {
           AI 시대에 영업·마케팅만큼 중요한 건
           <span className="text-[#111827]">첫인상을 만드는 웹 경험</span>입니다.
           <br />
-          Dvely는 그 첫 화면을 팀이 같은 속도로 만들 수 있게 돕습니다.
+          Qeploy는 그 첫 화면을 팀이 같은 속도로 만들 수 있게 돕습니다.
         </p>
       </div>
     </section>

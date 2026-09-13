@@ -84,7 +84,7 @@ function OutputShowcase() {
   }, [categoryFilter]);
 
   return (
-    <section className="w-full bg-white">
+    <section id="showcase" className="w-full scroll-mt-4 bg-white">
       <div className="mx-auto flex max-w-[1080px] flex-col items-center px-6 py-20">
         <header className="flex flex-col items-center gap-3 text-center">
           <h2 className="text-[32px] font-bold tracking-tight text-[#0f172a] sm:text-[36px]">

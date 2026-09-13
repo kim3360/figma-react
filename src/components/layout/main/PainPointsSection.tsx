@@ -4,7 +4,10 @@ const infoCardClassName = 'w-[330px] shadow-[0_10px_40px_-8px_rgba(15,23,42,0.12
 
 function PainPointsSection() {
   return (
-    <section className="w-full bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FAFC_100%)]">
+    <section
+      id="pain"
+      className="w-full scroll-mt-4 bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FAFC_100%)]"
+    >
       <div className="flex flex-col gap-2 items-start justify-center py-16 px-52">
         <p className="text-[#7C3AED] text-lg font-extrabold">이런 고민 없으신가요?</p>
         <p className="text-[#111827] typo-h2-bd">혼자 만들기엔 막막한 순간들</p>

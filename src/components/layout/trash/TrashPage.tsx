@@ -1,12 +1,17 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { postTrashConversationRestore, useTrashConversationListQuery } from '@/api/chat';
+import {
+  postTrashConversationRestore,
+  deleteTrashConversation,
+  useTrashConversationListQuery,
+} from '@/api/chat';
 import AgentTrashListPanel from '@/components/layout/project/AgentTrashListPanel';
 
 const TRASH_PAGE_QUERY_KEY = 'trash-page';
 
 function TrashPage() {
   const [restoringConversationId, setRestoringConversationId] = useState<number | null>(null);
+  const [deletingConversationId, setDeletingConversationId] = useState<number | null>(null);
 
   const queryClient = useQueryClient();
 
@@ -41,9 +46,27 @@ function TrashPage() {
     },
   });
 
+  const deleteConversationMutation = useMutation({
+    mutationFn: deleteTrashConversation,
+    onMutate: (conversationId) => {
+      setDeletingConversationId(conversationId);
+    },
+    onSuccess: () => {
+      invalidateConversationQueries();
+    },
+    onSettled: () => {
+      setDeletingConversationId(null);
+    },
+  });
+
   const handleRestoreChat = (conversationId: number) => {
-    if (restoringConversationId !== null) return;
+    if (restoringConversationId !== null || deletingConversationId !== null) return;
     restoreConversationMutation.mutate(conversationId);
+  };
+
+  const handlePermanentDeleteChat = (conversationId: number) => {
+    if (restoringConversationId !== null || deletingConversationId !== null) return;
+    deleteConversationMutation.mutate(conversationId);
   };
 
   return (
@@ -61,7 +84,9 @@ function TrashPage() {
             conversations={sortedTrashConversations}
             isLoading={isTrashLoading}
             restoringConversationId={restoringConversationId}
+            deletingConversationId={deletingConversationId}
             onRestore={handleRestoreChat}
+            onPermanentDelete={handlePermanentDeleteChat}
           />
         </section>
       </div>

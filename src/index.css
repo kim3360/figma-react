@@ -180,3 +180,137 @@ body {
     font-weight: 500;
   }
 }
+
+@keyframes hero-char-up {
+  from {
+    transform: translateY(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes hero-ring-pulse {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.08);
+    opacity: 0.8;
+  }
+}
+
+@keyframes hero-wave {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.12);
+    opacity: 0.9;
+  }
+}
+
+@keyframes hero-cut-in {
+  from {
+    transform: translateY(28%);
+    opacity: 0;
+    font-weight: 500;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+    font-weight: 800;
+  }
+}
+
+@keyframes hero-role-in {
+  from {
+    transform: translateY(50%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes hero-caret {
+  0%,
+  40% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes hero-word-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.hero-char {
+  animation: hero-char-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hero-ring {
+  animation: hero-ring-pulse 3.8s ease-in-out infinite;
+}
+
+.hero-wave {
+  animation: hero-wave 5.6s ease-in-out infinite;
+}
+
+.hero-cut-word {
+  animation: hero-cut-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hero-role-in {
+  animation: hero-role-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hero-caret {
+  animation: hero-caret 0.9s steps(1) infinite;
+}
+
+.hero-orbit-word {
+  animation: hero-word-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hero-morph {
+  transition:
+    width 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    height 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.45s ease,
+    opacity 0.45s ease,
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    border-radius 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.45s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-char,
+  .hero-ring,
+  .hero-wave,
+  .hero-cut-word,
+  .hero-role-in,
+  .hero-caret,
+  .hero-orbit-word,
+  .hero-morph {
+    animation: none;
+    transition: none;
+  }
+}

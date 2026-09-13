@@ -1,4 +1,9 @@
-import { DEFAULT_LOCALE, isAppLocale, LOCALE_STORAGE_KEY, type AppLocale } from '@/lib/i18n/locales';
+import {
+  DEFAULT_LOCALE,
+  isAppLocale,
+  LOCALE_STORAGE_KEY,
+  type AppLocale,
+} from '@/lib/i18n/locales';
 
 export function detectLocale(): AppLocale {
   if (typeof window === 'undefined') return DEFAULT_LOCALE;

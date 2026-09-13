@@ -4,7 +4,6 @@ import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useProjectListQuery } from '@/api/projects';
 import {
   formatProjectDisplayName,
-  markHomeChatProject,
   setPendingHomeAgentPrompt,
 } from '@/components/layout/project/agentChat.utils';
 import HomeProjectListPopover from '@/components/layout/home/HomeProjectListPopover';
@@ -84,7 +83,6 @@ function HomePromptHero() {
     const message = attachedTemplate ? `[${attachedTemplate.title} 템플릿] ${trimmed}` : trimmed;
 
     setSubmitError(null);
-    markHomeChatProject(targetProjectId);
     setPendingHomeAgentPrompt(message);
     clearHomePromptTemplate();
     setAttachedTemplate(null);
@@ -104,7 +102,12 @@ function HomePromptHero() {
     : '작업을 할당하거나 무엇이든 질문하세요';
 
   return (
-    <section className="relative z-10 flex flex-col items-center pt-10 pb-8">
+    <section
+      className={cn(
+        'relative flex flex-col items-center pt-10 pb-8',
+        projectPickerOpen ? 'z-50' : 'z-10',
+      )}
+    >
       <h1 className="text-center text-[32px] font-semibold tracking-tight text-[#0f172a] sm:text-[36px]">
         무엇을 도와드릴까요?
       </h1>

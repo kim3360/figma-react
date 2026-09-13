@@ -2,7 +2,6 @@ export const APP_SHELL_PATHS = [
   '/home',
   '/project',
   '/templates',
-  '/cloud-connections',
   '/analytics',
   '/trash',
   '/settings',

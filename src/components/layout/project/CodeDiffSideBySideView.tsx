@@ -21,13 +21,7 @@ function cellTextColor(kind: SideBySideCell['kind']) {
   return 'text-[#1f2328]';
 }
 
-function DiffCell({
-  cell,
-  side,
-}: {
-  cell: SideBySideCell;
-  side: 'left' | 'right';
-}) {
+function DiffCell({ cell, side }: { cell: SideBySideCell; side: 'left' | 'right' }) {
   const showMarker = cell.kind === 'removed' || cell.kind === 'added';
 
   return (
@@ -67,7 +61,9 @@ function DiffCell({
 function DiffHunkBlock({ hunk }: { hunk: SideBySideHunk }) {
   return (
     <div className="border-b border-[#d0d7de] last:border-b-0">
-      <div className="bg-[#ddf4ff] px-4 py-1.5 font-mono text-[11px] text-[#0969da]">{hunk.header}</div>
+      <div className="bg-[#ddf4ff] px-4 py-1.5 font-mono text-[11px] text-[#0969da]">
+        {hunk.header}
+      </div>
       <div className="grid grid-cols-2 divide-x divide-[#d0d7de]">
         <div className="min-w-0">
           {hunk.rows.map((row, index) => (

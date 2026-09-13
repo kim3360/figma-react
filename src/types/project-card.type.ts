@@ -23,9 +23,9 @@ const previewVariantSchema = z.enum(['landing', 'portfolio', 'business']);
  */
 const projectItemSchema = z.object({
   /** 프로젝트 식별자 */
-  id: z.string().min(1, '프로젝트 ID가 없습니다.').prefault(''),
+  id: z.string().prefault(''),
   /** URL 슬러그 */
-  slug: z.string().min(1, '슬러그가 없습니다.').prefault(''),
+  slug: z.string().prefault(''),
   /** 카드 배포 상태 */
   deployStatus: projectCardDeployStatusSchema,
   /** 프로젝트 카테고리 */
@@ -33,9 +33,9 @@ const projectItemSchema = z.object({
   /** 템플릿 설정 여부 */
   hasTemplate: z.boolean(),
   /** 카드 부제 */
-  subtitle: z.string().min(1, '부제가 없습니다.').prefault(''),
+  subtitle: z.string().prefault(''),
   /** 마지막 수정 시각 표시 */
-  updatedAt: z.string().min(1, '수정 시각이 없습니다.').prefault(''),
+  updatedAt: z.string().prefault(''),
   /** 미리보기 변형 */
   preview: previewVariantSchema,
 });

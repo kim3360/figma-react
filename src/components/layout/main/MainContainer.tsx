@@ -1,7 +1,6 @@
 import HeaderContainer from '@/components/layout/header/HeaderContainer';
 import HeroSection from './HeroSection';
 import HighlightSection from './HighlightSection';
-import PainPointsSection from './PainPointsSection';
 import RoleSpecificUsage from './RoleSpecificUsage';
 import ServiceIntro from './ServiceIntro';
 import OutputShowcase from './OutputShowcase';
@@ -14,11 +13,11 @@ import Footer from '../footer/Footer';
 
 function MainContainer() {
   return (
-    <main className="w-[1440px] mx-auto flex flex-col">
+    <main className="mx-auto flex w-full flex-col">
       <HeaderContainer />
       <HeroSection />
       <HighlightSection />
-      <PainPointsSection />
+
       <RoleSpecificUsage />
       <ServiceIntro />
       <OutputShowcase />

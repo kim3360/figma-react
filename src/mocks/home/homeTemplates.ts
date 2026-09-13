@@ -19,7 +19,8 @@ export type HomeTemplateItem = {
   previewUrl?: string;
 };
 
-const DEFAULT_LANDING_PREVIEW_URL = '/template/crimson';
+const DEFAULT_LANDING_PREVIEW_URL =
+  'https://aih-b-image-service.cafe24.com/templates/professional/crimson/';
 
 export function resolveHomeTemplatePreviewUrl(template: HomeTemplateItem): string {
   if (template.previewUrl) return template.previewUrl;
@@ -48,11 +49,10 @@ export const homeTemplates: HomeTemplateItem[] = [
   {
     id: '3',
     title: 'Crimson',
-    tags: ['#국내여행', '#제주'],
+    tags: ['#랜딩페이지', '#애니메이션'],
     image: container3,
     startType: 'landing',
-    category: 'service',
-    previewUrl: '/template/crimson',
+    category: 'academy',
   },
   {
     id: '4',

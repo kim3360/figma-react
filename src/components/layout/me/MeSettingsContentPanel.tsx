@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import MeAccountSettingsPanel from '@/components/layout/me/MeAccountSettingsPanel';
+import MeCloudConnectionsPanel from '@/components/layout/me/MeCloudConnectionsPanel';
 import MeGeneralSettingsPanel from '@/components/layout/me/MeGeneralSettingsPanel';
 import MeSettingsPlaceholderPanel from '@/components/layout/me/MeSettingsPlaceholderPanel';
 import type { MeSettingsSectionId } from '@/components/layout/me/meSettingsNav';
@@ -18,6 +19,8 @@ function MeSettingsContentPanel({ activeSection }: MeSettingsContentPanelProps) 
     panel = <MeAccountSettingsPanel />;
   } else if (activeSection === 'general') {
     panel = <MeGeneralSettingsPanel />;
+  } else if (activeSection === 'cloud-browser') {
+    panel = <MeCloudConnectionsPanel />;
   }
 
   return (

@@ -4,7 +4,10 @@ const infoCardClassName = 'bg-[linear-gradient(180deg,#F8FAFC_0%,#FFFFFF_100%)]'
 
 function RoleSpecificUsage() {
   return (
-    <section className="w-full bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FAFC_100%)]">
+    <section
+      id="roles"
+      className="w-full scroll-mt-4 bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FAFC_100%)]"
+    >
       <div className="flex flex-col gap-2 items-start justify-center py-16 px-52">
         <p className="text-[#7C3AED] text-lg font-extrabold">이런 분들에게</p>
         <p className="text-[#111827] typo-h2-bd">직군별로 이렇게 씁니다</p>

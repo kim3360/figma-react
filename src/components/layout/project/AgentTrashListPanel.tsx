@@ -1,4 +1,4 @@
-import { RotateCcw } from 'lucide-react';
+import { RotateCcw, Trash2 } from 'lucide-react';
 import type { ConversationResponse } from '@/types/chat.type';
 import {
   formatConversationDateLabel,
@@ -10,7 +10,9 @@ type AgentTrashListPanelProps = {
   conversations: ConversationResponse[];
   isLoading: boolean;
   restoringConversationId: number | null;
+  deletingConversationId: number | null;
   onRestore: (conversationId: number) => void;
+  onPermanentDelete: (conversationId: number) => void;
 };
 
 const skeletonItems = Array.from({ length: 5 }, (_, index) => `trash-list-skeleton-${index}`);
@@ -19,7 +21,9 @@ function AgentTrashListPanel({
   conversations,
   isLoading,
   restoringConversationId,
+  deletingConversationId,
   onRestore,
+  onPermanentDelete,
 }: AgentTrashListPanelProps) {
   const isEmpty = !isLoading && conversations.length === 0;
 
@@ -45,6 +49,8 @@ function AgentTrashListPanel({
         <ul className="flex flex-col gap-1">
           {conversations.map((conversation) => {
             const isRestoring = restoringConversationId === conversation.conversationId;
+            const isDeleting = deletingConversationId === conversation.conversationId;
+            const isBusy = isRestoring || isDeleting;
 
             return (
               <li
@@ -68,12 +74,21 @@ function AgentTrashListPanel({
                 </div>
                 <button
                   type="button"
-                  disabled={isRestoring}
+                  disabled={isBusy}
                   onClick={() => onRestore(conversation.conversationId)}
                   className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-[#e2e8f0] bg-white px-2.5 py-1.5 text-[11px] font-semibold text-[#475569] transition hover:border-[#c4b5fd] hover:text-[#7c3aed] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <RotateCcw className="size-3" />
                   {isRestoring ? '복구 중' : '복구'}
+                </button>
+                <button
+                  type="button"
+                  disabled={isBusy}
+                  onClick={() => onPermanentDelete(conversation.conversationId)}
+                  className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-[#e2e8f0] bg-white px-2.5 py-1.5 text-[11px] font-semibold text-[#475569] transition hover:border-[#fecaca] hover:text-[#dc2626] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <Trash2 className="size-3" />
+                  {isDeleting ? '삭제 중' : '삭제'}
                 </button>
               </li>
             );
