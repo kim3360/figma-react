@@ -1,0 +1,22 @@
+---
+description: Commit after each meaningful unit of work in this repo
+alwaysApply: true
+---
+
+# Auto-commit after meaningful work
+
+When the user asks to apply Dvely_FE UI, migrate pages, or otherwise change this repo, commit after each completed unit of work. Do not wait until the entire task is finished.
+
+## When to commit
+
+- After adding a Cursor rule or project convention
+- After copying or replacing a coherent UI group (landing, home, project workspace, agent, settings)
+- After wiring dummy APIs for a domain
+- After a typecheck/build fix that unblocks the next step
+
+## How
+
+- Follow the repo git commit protocol (status, diff, log, HEREDOC message)
+- Commit only relevant source files, not `.env` or secrets
+- Use short Korean or English messages that say why, not a file list
+- Do not push unless the user asks
