@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as CallbackRouteImport } from './routes/callback'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TemplateSolunaRouteImport } from './routes/template.soluna'
+import { Route as TemplateOtherdayRouteImport } from './routes/template.otherday'
 import { Route as TemplateMonoformRouteImport } from './routes/template.monoform'
 import { Route as TemplateCrimsonRouteImport } from './routes/template.crimson'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
@@ -51,6 +53,16 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemplateSolunaRoute = TemplateSolunaRouteImport.update({
+  id: '/template/soluna',
+  path: '/template/soluna',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemplateOtherdayRoute = TemplateOtherdayRouteImport.update({
+  id: '/template/otherday',
+  path: '/template/otherday',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TemplateMonoformRoute = TemplateMonoformRouteImport.update({
@@ -213,6 +225,8 @@ export interface FileRoutesByFullPath {
   '/auth/callback': typeof AuthCallbackRoute
   '/template/crimson': typeof TemplateCrimsonRoute
   '/template/monoform': typeof TemplateMonoformRoute
+  '/template/otherday': typeof TemplateOtherdayRoute
+  '/template/soluna': typeof TemplateSolunaRoute
   '/onboarding/cloud': typeof AuthenticatedOnboardingCloudRoute
   '/project/$slug': typeof AuthenticatedProjectSlugRouteWithChildren
   '/project/new': typeof AuthenticatedProjectNewRoute
@@ -242,6 +256,8 @@ export interface FileRoutesByTo {
   '/auth/callback': typeof AuthCallbackRoute
   '/template/crimson': typeof TemplateCrimsonRoute
   '/template/monoform': typeof TemplateMonoformRoute
+  '/template/otherday': typeof TemplateOtherdayRoute
+  '/template/soluna': typeof TemplateSolunaRoute
   '/onboarding/cloud': typeof AuthenticatedOnboardingCloudRoute
   '/project/new': typeof AuthenticatedProjectNewRoute
   '/project': typeof AuthenticatedProjectIndexRoute
@@ -273,6 +289,8 @@ export interface FileRoutesById {
   '/auth/callback': typeof AuthCallbackRoute
   '/template/crimson': typeof TemplateCrimsonRoute
   '/template/monoform': typeof TemplateMonoformRoute
+  '/template/otherday': typeof TemplateOtherdayRoute
+  '/template/soluna': typeof TemplateSolunaRoute
   '/_authenticated/onboarding/cloud': typeof AuthenticatedOnboardingCloudRoute
   '/_authenticated/project/$slug': typeof AuthenticatedProjectSlugRouteWithChildren
   '/_authenticated/project/new': typeof AuthenticatedProjectNewRoute
@@ -305,6 +323,8 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/template/crimson'
     | '/template/monoform'
+    | '/template/otherday'
+    | '/template/soluna'
     | '/onboarding/cloud'
     | '/project/$slug'
     | '/project/new'
@@ -334,6 +354,8 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/template/crimson'
     | '/template/monoform'
+    | '/template/otherday'
+    | '/template/soluna'
     | '/onboarding/cloud'
     | '/project/new'
     | '/project'
@@ -364,6 +386,8 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/template/crimson'
     | '/template/monoform'
+    | '/template/otherday'
+    | '/template/soluna'
     | '/_authenticated/onboarding/cloud'
     | '/_authenticated/project/$slug'
     | '/_authenticated/project/new'
@@ -388,6 +412,8 @@ export interface RootRouteChildren {
   AuthCallbackRoute: typeof AuthCallbackRoute
   TemplateCrimsonRoute: typeof TemplateCrimsonRoute
   TemplateMonoformRoute: typeof TemplateMonoformRoute
+  TemplateOtherdayRoute: typeof TemplateOtherdayRoute
+  TemplateSolunaRoute: typeof TemplateSolunaRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -411,6 +437,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/template/soluna': {
+      id: '/template/soluna'
+      path: '/template/soluna'
+      fullPath: '/template/soluna'
+      preLoaderRoute: typeof TemplateSolunaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/template/otherday': {
+      id: '/template/otherday'
+      path: '/template/otherday'
+      fullPath: '/template/otherday'
+      preLoaderRoute: typeof TemplateOtherdayRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/template/monoform': {
@@ -685,6 +725,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuthCallbackRoute: AuthCallbackRoute,
   TemplateCrimsonRoute: TemplateCrimsonRoute,
   TemplateMonoformRoute: TemplateMonoformRoute,
+  TemplateOtherdayRoute: TemplateOtherdayRoute,
+  TemplateSolunaRoute: TemplateSolunaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
