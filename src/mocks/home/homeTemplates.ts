@@ -7,7 +7,12 @@ import container5 from '@/assets/images/tasktemplate/container5.png';
 import container6 from '@/assets/images/tasktemplate/container6.png';
 import container7 from '@/assets/images/tasktemplate/container7.png';
 
-export type HomeTemplateCategory = 'service' | 'church' | 'academy' | 'company' | 'politics';
+export type HomeTemplateCategory =
+  | 'service'
+  | 'church'
+  | 'academy'
+  | 'company'
+  | 'politics';
 
 export type HomeTemplateItem = {
   id: string;
@@ -17,18 +22,31 @@ export type HomeTemplateItem = {
   startType: ProjectStartType;
   category: HomeTemplateCategory;
   previewUrl?: string;
+  livePreview?: boolean;
 };
 
 const DEFAULT_LANDING_PREVIEW_URL =
   'https://aih-b-image-service.cafe24.com/templates/professional/crimson/';
 
-export function resolveHomeTemplatePreviewUrl(template: HomeTemplateItem): string {
+export function resolveHomeTemplatePreviewUrl(
+  template: HomeTemplateItem,
+): string {
   if (template.previewUrl) return template.previewUrl;
   if (template.startType === 'portfolio') return '/template/portfolio';
   return DEFAULT_LANDING_PREVIEW_URL;
 }
 
 export const homeTemplates: HomeTemplateItem[] = [
+  {
+    id: 'monoform',
+    title: 'MONOFORM 스튜디오',
+    tags: ['#크리에이티브', '#스튜디오'],
+    image: '',
+    startType: 'landing',
+    category: 'company',
+    previewUrl: '/template/monoform',
+    livePreview: true,
+  },
   {
     id: '1',
     title: '압구정 현대',
@@ -90,6 +108,8 @@ export const homeTemplates: HomeTemplateItem[] = [
 
 export const DEFAULT_TEMPLATE_ID = '2';
 
-export function getHomeTemplateById(templateId: string): HomeTemplateItem | undefined {
+export function getHomeTemplateById(
+  templateId: string,
+): HomeTemplateItem | undefined {
   return homeTemplates.find((t) => t.id === templateId);
 }

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as CallbackRouteImport } from './routes/callback'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TemplateMonoformRouteImport } from './routes/template.monoform'
 import { Route as TemplateCrimsonRouteImport } from './routes/template.crimson'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as AuthAppCallbackRouteImport } from './routes/auth/app-callback'
@@ -50,6 +51,11 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemplateMonoformRoute = TemplateMonoformRouteImport.update({
+  id: '/template/monoform',
+  path: '/template/monoform',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TemplateCrimsonRoute = TemplateCrimsonRouteImport.update({
@@ -206,6 +212,7 @@ export interface FileRoutesByFullPath {
   '/auth/app-callback': typeof AuthAppCallbackRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/template/crimson': typeof TemplateCrimsonRoute
+  '/template/monoform': typeof TemplateMonoformRoute
   '/onboarding/cloud': typeof AuthenticatedOnboardingCloudRoute
   '/project/$slug': typeof AuthenticatedProjectSlugRouteWithChildren
   '/project/new': typeof AuthenticatedProjectNewRoute
@@ -234,6 +241,7 @@ export interface FileRoutesByTo {
   '/auth/app-callback': typeof AuthAppCallbackRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/template/crimson': typeof TemplateCrimsonRoute
+  '/template/monoform': typeof TemplateMonoformRoute
   '/onboarding/cloud': typeof AuthenticatedOnboardingCloudRoute
   '/project/new': typeof AuthenticatedProjectNewRoute
   '/project': typeof AuthenticatedProjectIndexRoute
@@ -264,6 +272,7 @@ export interface FileRoutesById {
   '/auth/app-callback': typeof AuthAppCallbackRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/template/crimson': typeof TemplateCrimsonRoute
+  '/template/monoform': typeof TemplateMonoformRoute
   '/_authenticated/onboarding/cloud': typeof AuthenticatedOnboardingCloudRoute
   '/_authenticated/project/$slug': typeof AuthenticatedProjectSlugRouteWithChildren
   '/_authenticated/project/new': typeof AuthenticatedProjectNewRoute
@@ -295,6 +304,7 @@ export interface FileRouteTypes {
     | '/auth/app-callback'
     | '/auth/callback'
     | '/template/crimson'
+    | '/template/monoform'
     | '/onboarding/cloud'
     | '/project/$slug'
     | '/project/new'
@@ -323,6 +333,7 @@ export interface FileRouteTypes {
     | '/auth/app-callback'
     | '/auth/callback'
     | '/template/crimson'
+    | '/template/monoform'
     | '/onboarding/cloud'
     | '/project/new'
     | '/project'
@@ -352,6 +363,7 @@ export interface FileRouteTypes {
     | '/auth/app-callback'
     | '/auth/callback'
     | '/template/crimson'
+    | '/template/monoform'
     | '/_authenticated/onboarding/cloud'
     | '/_authenticated/project/$slug'
     | '/_authenticated/project/new'
@@ -375,6 +387,7 @@ export interface RootRouteChildren {
   AuthAppCallbackRoute: typeof AuthAppCallbackRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   TemplateCrimsonRoute: typeof TemplateCrimsonRoute
+  TemplateMonoformRoute: typeof TemplateMonoformRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -398,6 +411,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/template/monoform': {
+      id: '/template/monoform'
+      path: '/template/monoform'
+      fullPath: '/template/monoform'
+      preLoaderRoute: typeof TemplateMonoformRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/template/crimson': {
@@ -664,6 +684,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthAppCallbackRoute: AuthAppCallbackRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   TemplateCrimsonRoute: TemplateCrimsonRoute,
+  TemplateMonoformRoute: TemplateMonoformRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -21,6 +21,8 @@ const templateCards: TemplateCard[] = homeTemplates.map((item) => ({
   title: item.title,
   tags: item.tags,
   image: item.image,
+  previewUrl: item.previewUrl,
+  livePreview: item.livePreview,
   startType: item.startType,
   category: item.category,
 }));
@@ -45,7 +47,6 @@ const sortOptions: { value: SortOption; label: string }[] = [
 
 function HomeExploreSection() {
   const [activeTab, setActiveTab] = useState<HomeTab>('explore');
-  const [selectedId, setSelectedId] = useState('2');
   const [styleFilter, setStyleFilter] = useState<StyleFilter>('all');
   const [themeFilter, setThemeFilter] = useState<ThemeFilter>('all');
   const [sort, setSort] = useState<SortOption>('popular');
@@ -124,19 +125,16 @@ function HomeExploreSection() {
         <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <HomeAddTemplateCard />
           {filteredCards.map((card) => (
-            <HomeTemplateCard
-              key={card.id}
-              card={card}
-              selected={selectedId === card.id}
-              onSelect={() => setSelectedId(card.id)}
-            />
+            <HomeTemplateCard key={card.id} card={card} />
           ))}
         </div>
       ) : (
         <div className="mt-5 grid max-w-[280px] grid-cols-1 gap-5 sm:max-w-none sm:grid-cols-2 lg:grid-cols-4">
           <HomeAddTemplateCard />
           <div className="col-span-full flex min-h-[150px] items-center justify-center rounded-2xl border border-dashed border-[#e2e8f0] bg-[#f8fafc] sm:col-span-2 lg:col-span-3">
-            <p className="text-[14px] text-[#94a3b8]">저장한 템플릿이 없습니다.</p>
+            <p className="text-[14px] text-[#94a3b8]">
+              저장한 템플릿이 없습니다.
+            </p>
           </div>
         </div>
       )}
