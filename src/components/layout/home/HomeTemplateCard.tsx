@@ -25,6 +25,13 @@ function HomeTemplateCard({ card }: HomeTemplateCardProps) {
         aria-label={`${card.title} 미리보기`}
         className="relative isolate block aspect-16/10 overflow-hidden rounded-2xl border border-[#e2e8f0] bg-[#f1f5f9] outline-none transition duration-300 focus-visible:ring-2 focus-visible:ring-[#7c3aed] focus-visible:ring-offset-2"
       >
+        {card.image ? (
+          <img
+            src={card.image}
+            alt=""
+            className="size-full object-cover object-top transition duration-500 group-hover:scale-[1.035]"
+          />
+        ) : null}
         {card.livePreview && card.previewUrl ? (
           <iframe
             src={card.previewUrl}
@@ -32,15 +39,9 @@ function HomeTemplateCard({ card }: HomeTemplateCardProps) {
             aria-hidden="true"
             tabIndex={-1}
             loading="lazy"
-            className="pointer-events-none absolute inset-0 h-[400%] w-[400%] origin-top-left scale-[0.25] border-0"
+            className="pointer-events-none absolute inset-0 h-[400%] w-[400%] origin-top-left scale-[0.25] border-0 bg-transparent"
           />
-        ) : (
-          <img
-            src={card.image}
-            alt=""
-            className="size-full object-cover object-top transition duration-500 group-hover:scale-[1.035]"
-          />
-        )}
+        ) : null}
         {!card.livePreview && (
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-black/50 to-transparent" />
         )}

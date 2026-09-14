@@ -6,6 +6,9 @@ import container4 from '@/assets/images/tasktemplate/container4.png';
 import container5 from '@/assets/images/tasktemplate/container5.png';
 import container6 from '@/assets/images/tasktemplate/container6.png';
 import container7 from '@/assets/images/tasktemplate/container7.png';
+import monoformThumb from '@/assets/images/tasktemplate/monoform.svg';
+import solunaThumb from '@/assets/images/tasktemplate/soluna.svg';
+import otherdayThumb from '@/assets/images/tasktemplate/otherday.svg';
 
 export type HomeTemplateCategory =
   | 'service'
@@ -41,7 +44,7 @@ export const homeTemplates: HomeTemplateItem[] = [
     id: 'monoform',
     title: 'MONOFORM 스튜디오',
     tags: ['#크리에이티브', '#스튜디오'],
-    image: '',
+    image: monoformThumb,
     startType: 'landing',
     category: 'company',
     previewUrl: '/template/monoform',
@@ -51,7 +54,7 @@ export const homeTemplates: HomeTemplateItem[] = [
     id: 'soluna',
     title: 'SOLUNA 웰니스',
     tags: ['#웰니스', '#라이프스타일'],
-    image: '',
+    image: solunaThumb,
     startType: 'landing',
     category: 'service',
     previewUrl: '/template/soluna',
@@ -61,7 +64,7 @@ export const homeTemplates: HomeTemplateItem[] = [
     id: 'otherday',
     title: 'OTHERDAY 커피',
     tags: ['#커피', '#브랜드'],
-    image: '',
+    image: otherdayThumb,
     startType: 'landing',
     category: 'company',
     previewUrl: '/template/otherday',

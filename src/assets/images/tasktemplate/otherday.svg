@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 640" fill="none">
+  <rect width="400" height="640" fill="#F4EAD8"/>
+  <rect width="400" height="72" fill="#30211B"/>
+  <text x="28" y="48" fill="#F4EAD8" font-family="Arial, sans-serif" font-size="20" font-weight="900" letter-spacing="-1">OTHERDAY</text>
+  <rect x="320" y="30" width="52" height="12" rx="6" fill="#ED7543"/>
+  <text x="28" y="154" fill="#30211B" font-family="Arial, sans-serif" font-size="36" font-weight="800" letter-spacing="-1.5">ã@ XËX</text>
+  <text x="28" y="198" fill="#30211B" font-family="Arial, sans-serif" font-size="36" font-weight="800" letter-spacing="-1.5">‹ë</text>
+  <rect x="28" y="226" width="88" height="8" rx="4" fill="#ED7543"/>
+  <rect x="88" y="280" width="224" height="168" rx="112" fill="#E7D3B5"/>
+  <rect x="132" y="318" width="136" height="92" rx="16" fill="#AD7052"/>
+  <rect x="154" y="300" width="92" height="28" rx="8" fill="#6C3B28"/>
+  <ellipse cx="200" cy="410" rx="48" ry="14" fill="#30211B" opacity="0.18"/>
+  <rect x="28" y="488" width="164" height="120" rx="8" fill="#263D35"/>
+  <rect x="208" y="488" width="164" height="120" rx="8" fill="#ED7543"/>
+  <text x="48" y="556" fill="#F4EAD8" font-family="Arial, sans-serif" font-size="16" font-weight="700">SEONGSU</text>
+  <text x="228" y="556" fill="#30211B" font-family="Arial, sans-serif" font-size="16" font-weight="700">BLEND</text>
+</svg>
