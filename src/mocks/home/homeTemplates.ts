@@ -91,6 +91,16 @@ export const homeTemplates: HomeTemplateItem[] = [
     livePreview: true,
   },
   {
+    id: 'stillhouse',
+    title: 'STILLHOUSE 공간',
+    tags: ['#인테리어', '#포트폴리오'],
+    image: '',
+    startType: 'portfolio',
+    category: 'company',
+    previewUrl: '/template/stillhouse',
+    livePreview: true,
+  },
+  {
     id: '1',
     title: '압구정 현대',
     tags: ['#빌라', '#풀빌라'],

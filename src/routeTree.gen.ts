@@ -12,10 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as CallbackRouteImport } from './routes/callback'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TemplateStillhouseRouteImport } from './routes/template.stillhouse'
 import { Route as TemplateSolunaRouteImport } from './routes/template.soluna'
+import { Route as TemplatePaperwaveRouteImport } from './routes/template.paperwave'
 import { Route as TemplateOtherdayRouteImport } from './routes/template.otherday'
 import { Route as TemplateMonoformRouteImport } from './routes/template.monoform'
 import { Route as TemplateCrimsonRouteImport } from './routes/template.crimson'
+import { Route as TemplateAxiomRouteImport } from './routes/template.axiom'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as AuthAppCallbackRouteImport } from './routes/auth/app-callback'
 import { Route as AuthenticatedTrashRouteImport } from './routes/_authenticated/trash'
@@ -55,9 +58,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TemplateStillhouseRoute = TemplateStillhouseRouteImport.update({
+  id: '/template/stillhouse',
+  path: '/template/stillhouse',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TemplateSolunaRoute = TemplateSolunaRouteImport.update({
   id: '/template/soluna',
   path: '/template/soluna',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemplatePaperwaveRoute = TemplatePaperwaveRouteImport.update({
+  id: '/template/paperwave',
+  path: '/template/paperwave',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TemplateOtherdayRoute = TemplateOtherdayRouteImport.update({
@@ -73,6 +86,11 @@ const TemplateMonoformRoute = TemplateMonoformRouteImport.update({
 const TemplateCrimsonRoute = TemplateCrimsonRouteImport.update({
   id: '/template/crimson',
   path: '/template/crimson',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemplateAxiomRoute = TemplateAxiomRouteImport.update({
+  id: '/template/axiom',
+  path: '/template/axiom',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthCallbackRoute = AuthCallbackRouteImport.update({
@@ -223,10 +241,13 @@ export interface FileRoutesByFullPath {
   '/trash': typeof AuthenticatedTrashRoute
   '/auth/app-callback': typeof AuthAppCallbackRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/template/axiom': typeof TemplateAxiomRoute
   '/template/crimson': typeof TemplateCrimsonRoute
   '/template/monoform': typeof TemplateMonoformRoute
   '/template/otherday': typeof TemplateOtherdayRoute
+  '/template/paperwave': typeof TemplatePaperwaveRoute
   '/template/soluna': typeof TemplateSolunaRoute
+  '/template/stillhouse': typeof TemplateStillhouseRoute
   '/onboarding/cloud': typeof AuthenticatedOnboardingCloudRoute
   '/project/$slug': typeof AuthenticatedProjectSlugRouteWithChildren
   '/project/new': typeof AuthenticatedProjectNewRoute
@@ -254,10 +275,13 @@ export interface FileRoutesByTo {
   '/trash': typeof AuthenticatedTrashRoute
   '/auth/app-callback': typeof AuthAppCallbackRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/template/axiom': typeof TemplateAxiomRoute
   '/template/crimson': typeof TemplateCrimsonRoute
   '/template/monoform': typeof TemplateMonoformRoute
   '/template/otherday': typeof TemplateOtherdayRoute
+  '/template/paperwave': typeof TemplatePaperwaveRoute
   '/template/soluna': typeof TemplateSolunaRoute
+  '/template/stillhouse': typeof TemplateStillhouseRoute
   '/onboarding/cloud': typeof AuthenticatedOnboardingCloudRoute
   '/project/new': typeof AuthenticatedProjectNewRoute
   '/project': typeof AuthenticatedProjectIndexRoute
@@ -287,10 +311,13 @@ export interface FileRoutesById {
   '/_authenticated/trash': typeof AuthenticatedTrashRoute
   '/auth/app-callback': typeof AuthAppCallbackRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/template/axiom': typeof TemplateAxiomRoute
   '/template/crimson': typeof TemplateCrimsonRoute
   '/template/monoform': typeof TemplateMonoformRoute
   '/template/otherday': typeof TemplateOtherdayRoute
+  '/template/paperwave': typeof TemplatePaperwaveRoute
   '/template/soluna': typeof TemplateSolunaRoute
+  '/template/stillhouse': typeof TemplateStillhouseRoute
   '/_authenticated/onboarding/cloud': typeof AuthenticatedOnboardingCloudRoute
   '/_authenticated/project/$slug': typeof AuthenticatedProjectSlugRouteWithChildren
   '/_authenticated/project/new': typeof AuthenticatedProjectNewRoute
@@ -321,10 +348,13 @@ export interface FileRouteTypes {
     | '/trash'
     | '/auth/app-callback'
     | '/auth/callback'
+    | '/template/axiom'
     | '/template/crimson'
     | '/template/monoform'
     | '/template/otherday'
+    | '/template/paperwave'
     | '/template/soluna'
+    | '/template/stillhouse'
     | '/onboarding/cloud'
     | '/project/$slug'
     | '/project/new'
@@ -352,10 +382,13 @@ export interface FileRouteTypes {
     | '/trash'
     | '/auth/app-callback'
     | '/auth/callback'
+    | '/template/axiom'
     | '/template/crimson'
     | '/template/monoform'
     | '/template/otherday'
+    | '/template/paperwave'
     | '/template/soluna'
+    | '/template/stillhouse'
     | '/onboarding/cloud'
     | '/project/new'
     | '/project'
@@ -384,10 +417,13 @@ export interface FileRouteTypes {
     | '/_authenticated/trash'
     | '/auth/app-callback'
     | '/auth/callback'
+    | '/template/axiom'
     | '/template/crimson'
     | '/template/monoform'
     | '/template/otherday'
+    | '/template/paperwave'
     | '/template/soluna'
+    | '/template/stillhouse'
     | '/_authenticated/onboarding/cloud'
     | '/_authenticated/project/$slug'
     | '/_authenticated/project/new'
@@ -410,10 +446,13 @@ export interface RootRouteChildren {
   CallbackRoute: typeof CallbackRoute
   AuthAppCallbackRoute: typeof AuthAppCallbackRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
+  TemplateAxiomRoute: typeof TemplateAxiomRoute
   TemplateCrimsonRoute: typeof TemplateCrimsonRoute
   TemplateMonoformRoute: typeof TemplateMonoformRoute
   TemplateOtherdayRoute: typeof TemplateOtherdayRoute
+  TemplatePaperwaveRoute: typeof TemplatePaperwaveRoute
   TemplateSolunaRoute: typeof TemplateSolunaRoute
+  TemplateStillhouseRoute: typeof TemplateStillhouseRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -439,11 +478,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/template/stillhouse': {
+      id: '/template/stillhouse'
+      path: '/template/stillhouse'
+      fullPath: '/template/stillhouse'
+      preLoaderRoute: typeof TemplateStillhouseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/template/soluna': {
       id: '/template/soluna'
       path: '/template/soluna'
       fullPath: '/template/soluna'
       preLoaderRoute: typeof TemplateSolunaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/template/paperwave': {
+      id: '/template/paperwave'
+      path: '/template/paperwave'
+      fullPath: '/template/paperwave'
+      preLoaderRoute: typeof TemplatePaperwaveRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/template/otherday': {
@@ -465,6 +518,13 @@ declare module '@tanstack/react-router' {
       path: '/template/crimson'
       fullPath: '/template/crimson'
       preLoaderRoute: typeof TemplateCrimsonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/template/axiom': {
+      id: '/template/axiom'
+      path: '/template/axiom'
+      fullPath: '/template/axiom'
+      preLoaderRoute: typeof TemplateAxiomRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/callback': {
@@ -723,10 +783,13 @@ const rootRouteChildren: RootRouteChildren = {
   CallbackRoute: CallbackRoute,
   AuthAppCallbackRoute: AuthAppCallbackRoute,
   AuthCallbackRoute: AuthCallbackRoute,
+  TemplateAxiomRoute: TemplateAxiomRoute,
   TemplateCrimsonRoute: TemplateCrimsonRoute,
   TemplateMonoformRoute: TemplateMonoformRoute,
   TemplateOtherdayRoute: TemplateOtherdayRoute,
+  TemplatePaperwaveRoute: TemplatePaperwaveRoute,
   TemplateSolunaRoute: TemplateSolunaRoute,
+  TemplateStillhouseRoute: TemplateStillhouseRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
