@@ -81,6 +81,16 @@ export const homeTemplates: HomeTemplateItem[] = [
     livePreview: true,
   },
   {
+    id: 'axiom',
+    title: 'AXIOM 데이터',
+    tags: ['#SaaS', '#대시보드'],
+    image: '',
+    startType: 'landing',
+    category: 'service',
+    previewUrl: '/template/axiom',
+    livePreview: true,
+  },
+  {
     id: '1',
     title: '압구정 현대',
     tags: ['#빌라', '#풀빌라'],
