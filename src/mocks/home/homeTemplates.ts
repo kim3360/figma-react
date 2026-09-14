@@ -71,6 +71,16 @@ export const homeTemplates: HomeTemplateItem[] = [
     livePreview: true,
   },
   {
+    id: 'paperwave',
+    title: 'PAPERWAVE 서점',
+    tags: ['#북스토어', '#에디토리얼'],
+    image: '',
+    startType: 'landing',
+    category: 'company',
+    previewUrl: '/template/paperwave',
+    livePreview: true,
+  },
+  {
     id: '1',
     title: '압구정 현대',
     tags: ['#빌라', '#풀빌라'],
