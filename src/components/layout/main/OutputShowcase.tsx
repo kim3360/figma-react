@@ -57,11 +57,13 @@ function LandingTemplateCard({ template }: LandingTemplateCardProps) {
         className="block"
       >
         <div className="relative aspect-10/16 overflow-hidden rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] transition duration-300 group-hover:border-[#cbd5e1]">
-          <img
-            src={template.image}
-            alt={template.title}
-            className="size-full object-cover object-top transition duration-500 group-hover:scale-[1.02]"
-          />
+          {template.image ? (
+            <img
+              src={template.image}
+              alt={template.title}
+              className="absolute inset-0 size-full object-cover object-top transition duration-500 group-hover:scale-[1.02]"
+            />
+          ) : null}
         </div>
       </Link>
 

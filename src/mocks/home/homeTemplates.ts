@@ -6,9 +6,9 @@ import container4 from '@/assets/images/tasktemplate/container4.png';
 import container5 from '@/assets/images/tasktemplate/container5.png';
 import container6 from '@/assets/images/tasktemplate/container6.png';
 import container7 from '@/assets/images/tasktemplate/container7.png';
-import monoformThumb from '@/assets/images/tasktemplate/monoform.svg';
-import solunaThumb from '@/assets/images/tasktemplate/soluna.svg';
-import otherdayThumb from '@/assets/images/tasktemplate/otherday.svg';
+import monoformThumb from '@/assets/images/tasktemplate/monoform.png';
+import solunaThumb from '@/assets/images/tasktemplate/soluna.png';
+import otherdayThumb from '@/assets/images/tasktemplate/otherday.png';
 
 export type HomeTemplateCategory =
   | 'service'
