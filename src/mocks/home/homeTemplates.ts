@@ -110,6 +110,16 @@ export const homeTemplates: HomeTemplateItem[] = [
     livePreview: true,
   },
   {
+    id: "relay",
+    title: "RELAY 팀 워크스페이스",
+    tags: ["#협업툴", "#칸반보드"],
+    image: "",
+    startType: "landing",
+    category: "service",
+    previewUrl: "/template/relay",
+    livePreview: true,
+  },
+  {
     id: "1",
     title: "압구정 현대",
     tags: ["#빌라", "#풀빌라"],

@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TemplateStillhouseRouteImport } from './routes/template.stillhouse'
 import { Route as TemplateSolunaRouteImport } from './routes/template.soluna'
+import { Route as TemplateRelayRouteImport } from './routes/template.relay'
 import { Route as TemplatePaperwaveRouteImport } from './routes/template.paperwave'
 import { Route as TemplateOtherdayRouteImport } from './routes/template.otherday'
 import { Route as TemplateOffgridRouteImport } from './routes/template.offgrid'
@@ -68,6 +69,11 @@ const TemplateStillhouseRoute = TemplateStillhouseRouteImport.update({
 const TemplateSolunaRoute = TemplateSolunaRouteImport.update({
   id: '/template/soluna',
   path: '/template/soluna',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemplateRelayRoute = TemplateRelayRouteImport.update({
+  id: '/template/relay',
+  path: '/template/relay',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TemplatePaperwaveRoute = TemplatePaperwaveRouteImport.update({
@@ -260,6 +266,7 @@ export interface FileRoutesByFullPath {
   '/template/offgrid': typeof TemplateOffgridRoute
   '/template/otherday': typeof TemplateOtherdayRoute
   '/template/paperwave': typeof TemplatePaperwaveRoute
+  '/template/relay': typeof TemplateRelayRoute
   '/template/soluna': typeof TemplateSolunaRoute
   '/template/stillhouse': typeof TemplateStillhouseRoute
   '/onboarding/cloud': typeof AuthenticatedOnboardingCloudRoute
@@ -296,6 +303,7 @@ export interface FileRoutesByTo {
   '/template/offgrid': typeof TemplateOffgridRoute
   '/template/otherday': typeof TemplateOtherdayRoute
   '/template/paperwave': typeof TemplatePaperwaveRoute
+  '/template/relay': typeof TemplateRelayRoute
   '/template/soluna': typeof TemplateSolunaRoute
   '/template/stillhouse': typeof TemplateStillhouseRoute
   '/onboarding/cloud': typeof AuthenticatedOnboardingCloudRoute
@@ -334,6 +342,7 @@ export interface FileRoutesById {
   '/template/offgrid': typeof TemplateOffgridRoute
   '/template/otherday': typeof TemplateOtherdayRoute
   '/template/paperwave': typeof TemplatePaperwaveRoute
+  '/template/relay': typeof TemplateRelayRoute
   '/template/soluna': typeof TemplateSolunaRoute
   '/template/stillhouse': typeof TemplateStillhouseRoute
   '/_authenticated/onboarding/cloud': typeof AuthenticatedOnboardingCloudRoute
@@ -373,6 +382,7 @@ export interface FileRouteTypes {
     | '/template/offgrid'
     | '/template/otherday'
     | '/template/paperwave'
+    | '/template/relay'
     | '/template/soluna'
     | '/template/stillhouse'
     | '/onboarding/cloud'
@@ -409,6 +419,7 @@ export interface FileRouteTypes {
     | '/template/offgrid'
     | '/template/otherday'
     | '/template/paperwave'
+    | '/template/relay'
     | '/template/soluna'
     | '/template/stillhouse'
     | '/onboarding/cloud'
@@ -446,6 +457,7 @@ export interface FileRouteTypes {
     | '/template/offgrid'
     | '/template/otherday'
     | '/template/paperwave'
+    | '/template/relay'
     | '/template/soluna'
     | '/template/stillhouse'
     | '/_authenticated/onboarding/cloud'
@@ -477,6 +489,7 @@ export interface RootRouteChildren {
   TemplateOffgridRoute: typeof TemplateOffgridRoute
   TemplateOtherdayRoute: typeof TemplateOtherdayRoute
   TemplatePaperwaveRoute: typeof TemplatePaperwaveRoute
+  TemplateRelayRoute: typeof TemplateRelayRoute
   TemplateSolunaRoute: typeof TemplateSolunaRoute
   TemplateStillhouseRoute: typeof TemplateStillhouseRoute
 }
@@ -516,6 +529,13 @@ declare module '@tanstack/react-router' {
       path: '/template/soluna'
       fullPath: '/template/soluna'
       preLoaderRoute: typeof TemplateSolunaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/template/relay': {
+      id: '/template/relay'
+      path: '/template/relay'
+      fullPath: '/template/relay'
+      preLoaderRoute: typeof TemplateRelayRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/template/paperwave': {
@@ -830,6 +850,7 @@ const rootRouteChildren: RootRouteChildren = {
   TemplateOffgridRoute: TemplateOffgridRoute,
   TemplateOtherdayRoute: TemplateOtherdayRoute,
   TemplatePaperwaveRoute: TemplatePaperwaveRoute,
+  TemplateRelayRoute: TemplateRelayRoute,
   TemplateSolunaRoute: TemplateSolunaRoute,
   TemplateStillhouseRoute: TemplateStillhouseRoute,
 }
