@@ -18,6 +18,7 @@ import { Route as TemplatePaperwaveRouteImport } from './routes/template.paperwa
 import { Route as TemplateOtherdayRouteImport } from './routes/template.otherday'
 import { Route as TemplateOffgridRouteImport } from './routes/template.offgrid'
 import { Route as TemplateMonoformRouteImport } from './routes/template.monoform'
+import { Route as TemplateIndexfolioRouteImport } from './routes/template.indexfolio'
 import { Route as TemplateCrimsonRouteImport } from './routes/template.crimson'
 import { Route as TemplateAxiomRouteImport } from './routes/template.axiom'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
@@ -87,6 +88,11 @@ const TemplateOffgridRoute = TemplateOffgridRouteImport.update({
 const TemplateMonoformRoute = TemplateMonoformRouteImport.update({
   id: '/template/monoform',
   path: '/template/monoform',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemplateIndexfolioRoute = TemplateIndexfolioRouteImport.update({
+  id: '/template/indexfolio',
+  path: '/template/indexfolio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TemplateCrimsonRoute = TemplateCrimsonRouteImport.update({
@@ -249,6 +255,7 @@ export interface FileRoutesByFullPath {
   '/auth/callback': typeof AuthCallbackRoute
   '/template/axiom': typeof TemplateAxiomRoute
   '/template/crimson': typeof TemplateCrimsonRoute
+  '/template/indexfolio': typeof TemplateIndexfolioRoute
   '/template/monoform': typeof TemplateMonoformRoute
   '/template/offgrid': typeof TemplateOffgridRoute
   '/template/otherday': typeof TemplateOtherdayRoute
@@ -284,6 +291,7 @@ export interface FileRoutesByTo {
   '/auth/callback': typeof AuthCallbackRoute
   '/template/axiom': typeof TemplateAxiomRoute
   '/template/crimson': typeof TemplateCrimsonRoute
+  '/template/indexfolio': typeof TemplateIndexfolioRoute
   '/template/monoform': typeof TemplateMonoformRoute
   '/template/offgrid': typeof TemplateOffgridRoute
   '/template/otherday': typeof TemplateOtherdayRoute
@@ -321,6 +329,7 @@ export interface FileRoutesById {
   '/auth/callback': typeof AuthCallbackRoute
   '/template/axiom': typeof TemplateAxiomRoute
   '/template/crimson': typeof TemplateCrimsonRoute
+  '/template/indexfolio': typeof TemplateIndexfolioRoute
   '/template/monoform': typeof TemplateMonoformRoute
   '/template/offgrid': typeof TemplateOffgridRoute
   '/template/otherday': typeof TemplateOtherdayRoute
@@ -359,6 +368,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/template/axiom'
     | '/template/crimson'
+    | '/template/indexfolio'
     | '/template/monoform'
     | '/template/offgrid'
     | '/template/otherday'
@@ -394,6 +404,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/template/axiom'
     | '/template/crimson'
+    | '/template/indexfolio'
     | '/template/monoform'
     | '/template/offgrid'
     | '/template/otherday'
@@ -430,6 +441,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/template/axiom'
     | '/template/crimson'
+    | '/template/indexfolio'
     | '/template/monoform'
     | '/template/offgrid'
     | '/template/otherday'
@@ -460,6 +472,7 @@ export interface RootRouteChildren {
   AuthCallbackRoute: typeof AuthCallbackRoute
   TemplateAxiomRoute: typeof TemplateAxiomRoute
   TemplateCrimsonRoute: typeof TemplateCrimsonRoute
+  TemplateIndexfolioRoute: typeof TemplateIndexfolioRoute
   TemplateMonoformRoute: typeof TemplateMonoformRoute
   TemplateOffgridRoute: typeof TemplateOffgridRoute
   TemplateOtherdayRoute: typeof TemplateOtherdayRoute
@@ -531,6 +544,13 @@ declare module '@tanstack/react-router' {
       path: '/template/monoform'
       fullPath: '/template/monoform'
       preLoaderRoute: typeof TemplateMonoformRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/template/indexfolio': {
+      id: '/template/indexfolio'
+      path: '/template/indexfolio'
+      fullPath: '/template/indexfolio'
+      preLoaderRoute: typeof TemplateIndexfolioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/template/crimson': {
@@ -805,6 +825,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthCallbackRoute: AuthCallbackRoute,
   TemplateAxiomRoute: TemplateAxiomRoute,
   TemplateCrimsonRoute: TemplateCrimsonRoute,
+  TemplateIndexfolioRoute: TemplateIndexfolioRoute,
   TemplateMonoformRoute: TemplateMonoformRoute,
   TemplateOffgridRoute: TemplateOffgridRoute,
   TemplateOtherdayRoute: TemplateOtherdayRoute,
