@@ -90,6 +90,16 @@ export const homeTemplates: HomeTemplateItem[] = [
     livePreview: true,
   },
   {
+    id: "offgrid",
+    title: "OFFGRID 페스티벌",
+    tags: ["#페스티벌", "#타이포그래피"],
+    image: "",
+    startType: "landing",
+    category: "service",
+    previewUrl: "/template/offgrid",
+    livePreview: true,
+  },
+  {
     id: "1",
     title: "압구정 현대",
     tags: ["#빌라", "#풀빌라"],

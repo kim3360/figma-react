@@ -16,6 +16,7 @@ import { Route as TemplateStillhouseRouteImport } from './routes/template.stillh
 import { Route as TemplateSolunaRouteImport } from './routes/template.soluna'
 import { Route as TemplatePaperwaveRouteImport } from './routes/template.paperwave'
 import { Route as TemplateOtherdayRouteImport } from './routes/template.otherday'
+import { Route as TemplateOffgridRouteImport } from './routes/template.offgrid'
 import { Route as TemplateMonoformRouteImport } from './routes/template.monoform'
 import { Route as TemplateCrimsonRouteImport } from './routes/template.crimson'
 import { Route as TemplateAxiomRouteImport } from './routes/template.axiom'
@@ -76,6 +77,11 @@ const TemplatePaperwaveRoute = TemplatePaperwaveRouteImport.update({
 const TemplateOtherdayRoute = TemplateOtherdayRouteImport.update({
   id: '/template/otherday',
   path: '/template/otherday',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemplateOffgridRoute = TemplateOffgridRouteImport.update({
+  id: '/template/offgrid',
+  path: '/template/offgrid',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TemplateMonoformRoute = TemplateMonoformRouteImport.update({
@@ -244,6 +250,7 @@ export interface FileRoutesByFullPath {
   '/template/axiom': typeof TemplateAxiomRoute
   '/template/crimson': typeof TemplateCrimsonRoute
   '/template/monoform': typeof TemplateMonoformRoute
+  '/template/offgrid': typeof TemplateOffgridRoute
   '/template/otherday': typeof TemplateOtherdayRoute
   '/template/paperwave': typeof TemplatePaperwaveRoute
   '/template/soluna': typeof TemplateSolunaRoute
@@ -278,6 +285,7 @@ export interface FileRoutesByTo {
   '/template/axiom': typeof TemplateAxiomRoute
   '/template/crimson': typeof TemplateCrimsonRoute
   '/template/monoform': typeof TemplateMonoformRoute
+  '/template/offgrid': typeof TemplateOffgridRoute
   '/template/otherday': typeof TemplateOtherdayRoute
   '/template/paperwave': typeof TemplatePaperwaveRoute
   '/template/soluna': typeof TemplateSolunaRoute
@@ -314,6 +322,7 @@ export interface FileRoutesById {
   '/template/axiom': typeof TemplateAxiomRoute
   '/template/crimson': typeof TemplateCrimsonRoute
   '/template/monoform': typeof TemplateMonoformRoute
+  '/template/offgrid': typeof TemplateOffgridRoute
   '/template/otherday': typeof TemplateOtherdayRoute
   '/template/paperwave': typeof TemplatePaperwaveRoute
   '/template/soluna': typeof TemplateSolunaRoute
@@ -351,6 +360,7 @@ export interface FileRouteTypes {
     | '/template/axiom'
     | '/template/crimson'
     | '/template/monoform'
+    | '/template/offgrid'
     | '/template/otherday'
     | '/template/paperwave'
     | '/template/soluna'
@@ -385,6 +395,7 @@ export interface FileRouteTypes {
     | '/template/axiom'
     | '/template/crimson'
     | '/template/monoform'
+    | '/template/offgrid'
     | '/template/otherday'
     | '/template/paperwave'
     | '/template/soluna'
@@ -420,6 +431,7 @@ export interface FileRouteTypes {
     | '/template/axiom'
     | '/template/crimson'
     | '/template/monoform'
+    | '/template/offgrid'
     | '/template/otherday'
     | '/template/paperwave'
     | '/template/soluna'
@@ -449,6 +461,7 @@ export interface RootRouteChildren {
   TemplateAxiomRoute: typeof TemplateAxiomRoute
   TemplateCrimsonRoute: typeof TemplateCrimsonRoute
   TemplateMonoformRoute: typeof TemplateMonoformRoute
+  TemplateOffgridRoute: typeof TemplateOffgridRoute
   TemplateOtherdayRoute: typeof TemplateOtherdayRoute
   TemplatePaperwaveRoute: typeof TemplatePaperwaveRoute
   TemplateSolunaRoute: typeof TemplateSolunaRoute
@@ -504,6 +517,13 @@ declare module '@tanstack/react-router' {
       path: '/template/otherday'
       fullPath: '/template/otherday'
       preLoaderRoute: typeof TemplateOtherdayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/template/offgrid': {
+      id: '/template/offgrid'
+      path: '/template/offgrid'
+      fullPath: '/template/offgrid'
+      preLoaderRoute: typeof TemplateOffgridRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/template/monoform': {
@@ -786,6 +806,7 @@ const rootRouteChildren: RootRouteChildren = {
   TemplateAxiomRoute: TemplateAxiomRoute,
   TemplateCrimsonRoute: TemplateCrimsonRoute,
   TemplateMonoformRoute: TemplateMonoformRoute,
+  TemplateOffgridRoute: TemplateOffgridRoute,
   TemplateOtherdayRoute: TemplateOtherdayRoute,
   TemplatePaperwaveRoute: TemplatePaperwaveRoute,
   TemplateSolunaRoute: TemplateSolunaRoute,
